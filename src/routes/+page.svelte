@@ -341,7 +341,7 @@
 			{/if}
 			{#if !data.shabbat.shouldSayTzidkatcha}
 				<div class="tzidkatcha-notice">
-					We do NOT say צדקתך - {data.shabbat.tzidkatchaReason}
+					No צדקתך ({data.shabbat.tzidkatchaReason})
 				</div>
 			{/if}
 			<div class="time-item">

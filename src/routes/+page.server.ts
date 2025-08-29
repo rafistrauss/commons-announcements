@@ -200,11 +200,11 @@ function getZmanim(date: Date) {
   const monthNum = jewishCal.getJewishMonth();
   const month = jewishMonthNames[monthNum];
   const year = jewishCal.getJewishYear();
-  
+
   // Convert day to Hebrew numerals
   const hebrewNumerals = ['', 'א\'', 'ב\'', 'ג\'', 'ד\'', 'ה\'', 'ו\'', 'ז\'', 'ח\'', 'ט\'', 'י\'', 
-    'יא\'', 'יב\'', 'יג\'', 'יד\'', 'טו\'', 'טז\'', 'יז\'', 'יח\'', 'יט\'', 'כ\'', 
-    'כא\'', 'כב\'', 'כג\'', 'כד\'', 'כה\'', 'כו\'', 'כז\'', 'כח\'', 'כט\'', 'ל\''];
+    'י"א', 'י"ב', 'י"ג', 'י"ד', 'ט"ו', 'ט"ז', 'י"ז', 'י"ח', 'י"ט', 'כ\'', 
+    'כ"א', 'כ"ב', 'כ"ג', 'כ"ד', 'כ"ה', 'כ"ו', 'כ"ז', 'כ"ח', 'כ"ט', 'ל\''];
   const hebrewDay = hebrewNumerals[day] || day.toString();
   
   const hebrewDate = `${hebrewDay} ${month} ${year}`;
@@ -244,6 +244,16 @@ export async function load({ url }) {
   const nextShabbatJewishCal = new JewishCalendar(nextShabbat);
   const nextParshaNum = nextShabbatJewishCal.getParsha();
   let nextWeekParsha = nextParshaNum >= 0 && nextParshaNum < parshaNames.length ? parshaNames[nextParshaNum] : 'לא ידוע';
+  
+  // Special cases for V'zos Habracha at Mincha
+  // On Shabbat Haazinu (parsha 53) and Shabbat Chol Hamoed Sukkot, we read V'zos Habracha
+  if (parshaNum === 53 || // Shabbat Haazinu
+      (shabbatJewishCal.getJewishMonth() === 7 && 
+       shabbatJewishCal.getJewishDayOfMonth() >= 15 && 
+       shabbatJewishCal.getJewishDayOfMonth() <= 21 && 
+       shabbat.getDay() === 6)) { // Shabbat during Sukkot (15-21 Tishrei)
+    nextWeekParsha = 'וזאת הברכה';
+  }
   
   // Check if it's a holiday and modify the parsha display
   const holidayName = getHolidayName(shabbat);
