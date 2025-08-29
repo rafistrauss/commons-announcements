@@ -167,10 +167,10 @@ function getZmanim(date: Date) {
   };
   const zmanim = getZmanimJson(options);
   
-  // Debug: log zmanim keys to understand the output structure
-  console.log('Zmanim keys:', Object.keys(zmanim));
-  console.log('BasicZmanim structure:', zmanim.BasicZmanim);
-  console.log('All BasicZmanim keys:', zmanim.BasicZmanim ? Object.keys(zmanim.BasicZmanim) : 'BasicZmanim is undefined');
+  // // Debug: log zmanim keys to understand the output structure
+  // console.log('Zmanim keys:', Object.keys(zmanim));
+  // console.log('BasicZmanim structure:', zmanim.BasicZmanim);
+  // console.log('All BasicZmanim keys:', zmanim.BasicZmanim ? Object.keys(zmanim.BasicZmanim) : 'BasicZmanim is undefined');
 
   // Jewish calendar for parsha, Hebrew date, Rosh Chodesh
   const jewishCal = new JewishCalendar(date);
@@ -238,6 +238,13 @@ export async function load({ url }) {
   const parshaNum = shabbatJewishCal.getParsha();
   let weeklyParsha = parshaNum >= 0 && parshaNum < parshaNames.length ? parshaNames[parshaNum] : 'לא ידוע';
   
+  // Calculate next week's parsha for Mincha reading
+  const nextShabbat = new Date(shabbat);
+  nextShabbat.setDate(shabbat.getDate() + 7);
+  const nextShabbatJewishCal = new JewishCalendar(nextShabbat);
+  const nextParshaNum = nextShabbatJewishCal.getParsha();
+  let nextWeekParsha = nextParshaNum >= 0 && nextParshaNum < parshaNames.length ? parshaNames[nextParshaNum] : 'לא ידוע';
+  
   // Check if it's a holiday and modify the parsha display
   const holidayName = getHolidayName(shabbat);
   if (holidayName) {
@@ -289,7 +296,8 @@ export async function load({ url }) {
       minchaNotices: shabbatMinchaNotices,
       maarivNotices: shabbatMaarivNotices,
       shouldSayTzidkatcha: !shabbatTzidkatchaStatus.isSpecial,
-      tzidkatchaReason: shabbatTzidkatchaStatus.reason
+      tzidkatchaReason: shabbatTzidkatchaStatus.reason,
+      minchaParsha: nextWeekParsha
     },
     maariv: '8:15 PM',
     weekOffset,

@@ -86,6 +86,24 @@
 		font-size: 20px;
 	}
 	
+	.mincha-reading {
+		display: flex;
+		justify-content: space-between;
+		margin: 8px 0;
+		font-size: 18px;
+		color: #555;
+		font-style: italic;
+	}
+	
+	.reading-label {
+		font-weight: 600;
+	}
+	
+	.reading-value {
+		font-weight: 400;
+		direction: rtl;
+	}
+	
 	.time-label {
 		font-weight: 600;
 	}
@@ -308,6 +326,10 @@
 			<div class="time-item">
 				<span class="time-label">Mincha:</span>
 				<span class="time-value">{data.shabbat.mincha}</span>
+			</div>
+			<div class="mincha-reading">
+				<span class="reading-label">Torah Reading:</span>
+				<span class="reading-value">פרשת {data.shabbat.minchaParsha}</span>
 			</div>
 			{#if data.shabbat.minchaNotices && data.shabbat.minchaNotices.length > 0}
 				<div class="liturgical-notice">
