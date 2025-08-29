@@ -218,7 +218,14 @@ function getZmanim(date: Date) {
 
 export async function load({ url }) {
   // Get the week offset from URL parameter (default to 0 for current week)
-  const weekOffset = parseInt(url.searchParams.get('week') || '0');
+  // Handle prerendering case where searchParams might not be available
+  let weekOffset = 0;
+  try {
+    weekOffset = parseInt(url.searchParams?.get('week') || '0');
+  } catch {
+    // If searchParams is not available (e.g., during prerendering), use default
+    weekOffset = 0;
+  }
   
   // Get Friday and Shabbat dates for the specified week
   const today = new Date();
