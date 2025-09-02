@@ -281,7 +281,6 @@ export async function load({ url }) {
 
   // Add English dates
   const englishDateOptions: Intl.DateTimeFormatOptions = { 
-    weekday: 'long', 
     year: 'numeric', 
     month: 'long', 
     day: 'numeric' 
@@ -296,6 +295,11 @@ export async function load({ url }) {
 
   // Check Tzidkatcha only for Shabbat Mincha service (not Friday)
   const shabbatTzidkatchaStatus = isSpecialDay(shabbat);
+
+  // General announcements for this week
+  const generalAnnouncements = [
+    'Rabbi Katz will be giving a shiur after Shabbos Mincha at the Lefkowitz home'
+  ];
 
   return {
     friday: { 
@@ -318,5 +322,6 @@ export async function load({ url }) {
     },
     maariv: '8:15 PM',
     weekOffset,
+    generalAnnouncements,
   };
 }

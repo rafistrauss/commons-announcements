@@ -62,12 +62,15 @@
 		grid-template-columns: 1fr 1fr;
 		gap: 30px;
 		margin: 30px 0;
+		align-items: stretch;
 	}
 	
 	.day-section {
 		border: 1px solid #ccc;
 		padding: 20px;
 		background: #fafafa;
+		display: flex;
+		flex-direction: column;
 	}
 	
 	.day-title {
@@ -124,15 +127,18 @@
 		font-size: 22px;
 		color: #666;
 		text-align: center;
-		margin-top: 10px;
+		margin-bottom: 10px;
         font-weight: bold;
+	}
+
+	.bottom-section {
+		margin-top: auto;
 	}
 	
 	.shkia-section {
 		background: #f5f5f5;
 		border: 1px solid #ddd;
 		padding: 10px;
-		margin-top: 15px;
 		font-size: 16px;
 		color: #777;
 		text-align: center;
@@ -255,6 +261,29 @@
 			max-width: none;
 		}
 	}
+
+	.announcements-section {
+		margin-top: 30px;
+		padding: 20px;
+		border-top: 2px solid #333;
+	}
+
+	.announcements-title {
+		font-size: 24px;
+		font-weight: 700;
+		margin-bottom: 15px;
+		text-align: center;
+		color: #333;
+	}
+
+	.announcement-item {
+		font-size: 18px;
+		margin-bottom: 10px;
+		padding: 10px;
+		background: #f5f5f5;
+		border-left: 4px solid #d32f2f;
+		border-radius: 4px;
+	}
 </style>
 
 <div class="announcement-sheet">
@@ -300,6 +329,7 @@
 	<div class="times-grid">
 		<div class="day-section">
 			<h3 class="day-title">Friday</h3>
+			<div class="hebrew-date">{data.friday.hebrewDate}</div>
 			<div class="english-date">{data.friday.englishDate}</div>
 			<div class="time-item">
 				<span class="time-label">Mincha:</span>
@@ -313,15 +343,17 @@
 					{/each}
 				</div>
 			{/if}
-			<div class="hebrew-date">{data.friday.hebrewDate}</div>
-			<div class="shkia-section">
-				<div class="shkia-title">Shkia</div>
-				<div>{data.friday.shkia?.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) || 'N/A'}</div>
+			<div class="bottom-section">
+				<div class="shkia-section">
+					<div class="shkia-title">Shkia</div>
+					<div>{data.friday.shkia?.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) || 'N/A'}</div>
+				</div>
 			</div>
 		</div>
 
 		<div class="day-section">
 			<h3 class="day-title">Shabbat</h3>
+			<div class="hebrew-date">{data.shabbat.hebrewDate}</div>
 			<div class="english-date">{data.shabbat.englishDate}</div>
 			<div class="time-item">
 				<span class="time-label">Mincha:</span>
@@ -356,11 +388,22 @@
 					{/each}
 				</div>
 			{/if}
-			<div class="hebrew-date">{data.shabbat.hebrewDate}</div>
-			<div class="shkia-section">
-				<div class="shkia-title">Shkia</div>
-				<div>{data.shabbat.shkia?.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) || 'N/A'}</div>
+			<div class="bottom-section">
+				<div class="shkia-section">
+					<div class="shkia-title">Shkia</div>
+					<div>{data.shabbat.shkia?.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) || 'N/A'}</div>
+				</div>
 			</div>
 		</div>
 	</div>
+
+	<!-- General Announcements Section -->
+	{#if data.generalAnnouncements && data.generalAnnouncements.length > 0}
+		<div class="announcements-section">
+			<h3 class="announcements-title">Announcements</h3>
+			{#each data.generalAnnouncements as announcement}
+				<div class="announcement-item">{announcement}</div>
+			{/each}
+		</div>
+	{/if}
 </div>
