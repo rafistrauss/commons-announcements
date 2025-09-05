@@ -290,6 +290,7 @@ export async function load({ url }) {
 
   // Get liturgical notices
   const fridayMinchaNotices = getLiturgicalNotices(friday, 'mincha');
+  const fridayMaarivNotices = getLiturgicalNotices(friday, 'maariv');
   const shabbatMinchaNotices = getLiturgicalNotices(shabbat, 'mincha');
   const shabbatMaarivNotices = getLiturgicalNotices(shabbat, 'maariv');
 
@@ -298,7 +299,9 @@ export async function load({ url }) {
 
   // General announcements for this week
   const generalAnnouncements = [
-    'Rabbi Katz will be giving a shiur after Shabbos Mincha at the Lefkowitz home'
+    'Welcome to Ora Friedman who is visiting the Commons for Shabbos! She already lives in Fair Lawn but is checking out the Commons to potentially join us.',
+    'Seudah Shlishit at the Clubhouse at 4:45 PM; see the flyer for details.',
+    'Rabbi Katz will be giving a shiur after Shabbos Mincha at the Lefkowitz home. The topic will be Check it out! Inspecting Tefillin, Mezuzos, and Ourselves in Elul',
   ];
 
   return {
@@ -306,21 +309,22 @@ export async function load({ url }) {
       ...fridayZmanim, 
       parsha: weeklyParsha,
       englishDate: fridayEnglishDate,
-      mincha: '7:19 PM',
-      minchaNotices: fridayMinchaNotices
+      mincha: '7:07 PM',
+      minchaNotices: fridayMinchaNotices,
+      maarivNotices: fridayMaarivNotices
     },
     shabbat: { 
       ...shabbatZmanim, 
       parsha: weeklyParsha,
       englishDate: shabbatEnglishDate,
-      mincha: '7:05 PM',
+      mincha: '6:55 PM',
       minchaNotices: shabbatMinchaNotices,
       maarivNotices: shabbatMaarivNotices,
       shouldSayTzidkatcha: !shabbatTzidkatchaStatus.isSpecial,
       tzidkatchaReason: shabbatTzidkatchaStatus.reason,
       minchaParsha: nextWeekParsha
     },
-    maariv: '8:15 PM',
+    maariv: '8:00 PM',
     weekOffset,
     generalAnnouncements,
   };

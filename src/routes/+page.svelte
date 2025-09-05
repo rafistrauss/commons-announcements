@@ -344,6 +344,14 @@
 				</div>
 			{/if}
 			<div class="bottom-section">
+				{#if data.friday.maarivNotices && data.friday.maarivNotices.length > 0}
+					<div class="liturgical-notice">
+						<div class="liturgical-title">Maariv:</div>
+						{#each data.friday.maarivNotices as notice}
+							<div>{notice}</div>
+						{/each}
+					</div>
+				{/if}
 				<div class="shkia-section">
 					<div class="shkia-title">Shkia</div>
 					<div>{data.friday.shkia?.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) || 'N/A'}</div>
