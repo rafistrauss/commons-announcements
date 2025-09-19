@@ -1,5 +1,13 @@
 <script lang="ts">
 	export let data;
+
+	function weekHref(offset) {
+		if (offset === 0) return '/';
+		return `?week=${offset}`;
+	}
+	function jumpToToday() {
+		window.location.href = '/';
+	}
 </script>
 
 <svelte:head>
@@ -300,8 +308,12 @@
 </style>
 
 <div class="announcement-sheet">
+	<div style="display: flex; justify-content: center; margin-bottom: 10px;">
+		<button class="nav-button" on:click={jumpToToday}>Jump to Today</button>
+	</div>
+
 	<div class="week-navigation">
-		<a href="?week={data.weekOffset - 1}" class="nav-button">← Previous Week</a>
+		<a href={weekHref(data.weekOffset - 1)} class="nav-button">← Previous Week</a>
 		<span class="current-week">
 			{#if data.weekOffset === 0}
 				This Week
@@ -315,7 +327,7 @@
 				{Math.abs(data.weekOffset)} weeks ago
 			{/if}
 		</span>
-		<a href="?week={data.weekOffset + 1}" class="nav-button">Next Week →</a>
+		<a href={weekHref(data.weekOffset + 1)} class="nav-button">Next Week →</a>
 	</div>
 
 	<header class="header">
