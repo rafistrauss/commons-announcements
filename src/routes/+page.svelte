@@ -1,7 +1,10 @@
-
 <script lang="ts">
 	export let data;
 </script>
+
+<svelte:head>
+  <title>Commons Minyan Announcements - {data.friday.parsha} {data.friday.hebrewDate.split(' ').pop()}</title>
+</svelte:head>
 
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700&display=swap');
@@ -9,7 +12,7 @@
 	:global(body) {
 		font-family: 'Frank Ruhl Libre', serif;
 		margin: 0;
-		padding: 20px;
+		padding: 15px;
 		background: white;
 		color: black;
 	}
@@ -17,41 +20,41 @@
 	.announcement-sheet {
 		max-width: 8.5in;
 		margin: 0 auto;
-		padding: 40px;
+		padding: 20px;
 		border: 2px solid #333;
 		background: white;
 	}
 	
 	.header {
 		text-align: center;
-		margin-bottom: 30px;
+		margin-bottom: 15px;
 		border-bottom: 3px double #333;
-		padding-bottom: 20px;
+		padding-bottom: 12px;
 	}
 	
 	.title {
-		font-size: 36px;
+		font-size: 32px;
 		font-weight: 700;
 		margin: 0;
 		letter-spacing: 1px;
 	}
 	
 	.subtitle {
-		font-size: 24px;
-		margin: 10px 0 0 0;
+		font-size: 20px;
+		margin: 8px 0 0 0;
 		color: #666;
 	}
 	
 	.parsha-section {
 		text-align: center;
-		margin: 25px 0;
-		padding: 15px;
+		margin: 12px 0;
+		padding: 10px;
 		background: #f9f9f9;
 		border: 1px solid #ddd;
 	}
 	
 	.parsha-title {
-		font-size: 28px;
+		font-size: 24px;
 		font-weight: 700;
 		margin: 0;
 		direction: rtl;
@@ -60,33 +63,33 @@
 	.times-grid {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: 30px;
-		margin: 30px 0;
+		gap: 15px;
+		margin: 15px 0;
 		align-items: stretch;
 	}
 	
 	.day-section {
 		border: 1px solid #ccc;
-		padding: 20px;
+		padding: 12px;
 		background: #fafafa;
 		display: flex;
 		flex-direction: column;
 	}
 	
 	.day-title {
-		font-size: 26px;
+		font-size: 20px;
 		font-weight: 700;
-		margin: 0 0 15px 0;
+		margin: 0 0 8px 0;
 		text-align: center;
 		border-bottom: 1px solid #ccc;
-		padding-bottom: 10px;
+		padding-bottom: 6px;
 	}
 	
 	.time-item {
 		display: flex;
 		justify-content: space-between;
-		margin: 10px 0;
-		font-size: 20px;
+		margin: 6px 0;
+		font-size: 17px;
 	}
 	
 	.mincha-reading {
@@ -188,16 +191,26 @@
 	}
 	
 	.liturgical-notice {
-		background: #e3f2fd;
-		border: 1px solid #2196f3;
+		border: 1px solid #b3d9e6;
 		padding: 8px;
 		margin: 8px 0;
 		font-size: 18px;
-		color: #1565c0;
 		border-radius: 4px;
 	}
 	
-	.liturgical-title {
+	.liturgical-notice.additions {
+		background: #e8f4f8;
+		border-color: #4a90e2;
+		font-weight: 600;
+	}
+	
+	.liturgical-notice.omissions {
+		background: #fff3e0;
+		border: 1px solid #ff9800;
+		color: black;
+		font-weight: 600;
+		border-radius: 4px;
+	}	.liturgical-title {
 		font-weight: 600;
 		margin-bottom: 4px;
 	}
@@ -208,7 +221,7 @@
 		padding: 8px;
 		margin: 8px 0;
 		font-size: 18px;
-		color: #f57c00;
+		color: black;
 		border-radius: 4px;
 		font-weight: 600;
 	}
@@ -335,22 +348,38 @@
 				<span class="time-label">Mincha:</span>
 				<span class="time-value">{data.friday.mincha}</span>
 			</div>
-			{#if data.friday.minchaNotices && data.friday.minchaNotices.length > 0}
-				<div class="liturgical-notice">
-					<div class="liturgical-title">Mincha:</div>
-					{#each data.friday.minchaNotices as notice}
-						<div>{notice}</div>
-					{/each}
-				</div>
-			{/if}
-			<div class="bottom-section">
-				{#if data.friday.maarivNotices && data.friday.maarivNotices.length > 0}
-					<div class="liturgical-notice">
-						<div class="liturgical-title">Maariv:</div>
-						{#each data.friday.maarivNotices as notice}
+			{#if data.friday.minchaNotices && (data.friday.minchaNotices.additions.length > 0 || data.friday.minchaNotices.omissions.length > 0)}
+				{#if data.friday.minchaNotices.additions.length > 0}
+					<div class="liturgical-notice additions">
+						{#each data.friday.minchaNotices.additions as notice}
 							<div>{notice}</div>
 						{/each}
 					</div>
+				{/if}
+				{#if data.friday.minchaNotices.omissions.length > 0}
+					<div class="liturgical-notice omissions">
+						{#each data.friday.minchaNotices.omissions as notice}
+							<div>No {notice}</div>
+						{/each}
+					</div>
+				{/if}
+			{/if}
+			<div class="bottom-section">
+				{#if data.friday.maarivNotices && (data.friday.maarivNotices.additions.length > 0 || data.friday.maarivNotices.omissions.length > 0)}
+					{#if data.friday.maarivNotices.additions.length > 0}
+						<div class="liturgical-notice additions">
+							{#each data.friday.maarivNotices.additions as notice}
+								<div>{notice}</div>
+							{/each}
+						</div>
+					{/if}
+					{#if data.friday.maarivNotices.omissions.length > 0}
+						<div class="liturgical-notice omissions">
+							{#each data.friday.maarivNotices.omissions as notice}
+								<div>No {notice}</div>
+							{/each}
+						</div>
+					{/if}
 				{/if}
 				<div class="shkia-section">
 					<div class="shkia-title">Shkia</div>
@@ -371,13 +400,21 @@
 				<span class="reading-label">Torah Reading:</span>
 				<span class="reading-value">פרשת {data.shabbat.minchaParsha}</span>
 			</div>
-			{#if data.shabbat.minchaNotices && data.shabbat.minchaNotices.length > 0}
-				<div class="liturgical-notice">
-					<div class="liturgical-title">Mincha:</div>
-					{#each data.shabbat.minchaNotices as notice}
-						<div>{notice}</div>
-					{/each}
-				</div>
+			{#if data.shabbat.minchaNotices && (data.shabbat.minchaNotices.additions.length > 0 || data.shabbat.minchaNotices.omissions.length > 0)}
+				{#if data.shabbat.minchaNotices.additions.length > 0}
+					<div class="liturgical-notice additions">
+						{#each data.shabbat.minchaNotices.additions as notice}
+							<div>{notice}</div>
+						{/each}
+					</div>
+				{/if}
+				{#if data.shabbat.minchaNotices.omissions.length > 0}
+					<div class="liturgical-notice omissions">
+						{#each data.shabbat.minchaNotices.omissions as notice}
+							<div>No {notice}</div>
+						{/each}
+					</div>
+				{/if}
 			{/if}
 			{#if !data.shabbat.shouldSayTzidkatcha}
 				<div class="tzidkatcha-notice">
@@ -388,13 +425,21 @@
 				<span class="time-label">Maariv:</span>
 				<span class="time-value">{data.maariv}</span>
 			</div>
-			{#if data.shabbat.maarivNotices && data.shabbat.maarivNotices.length > 0}
-				<div class="liturgical-notice">
-					<div class="liturgical-title">Maariv:</div>
-					{#each data.shabbat.maarivNotices as notice}
-						<div>{notice}</div>
-					{/each}
-				</div>
+			{#if data.shabbat.maarivNotices && (data.shabbat.maarivNotices.additions.length > 0 || data.shabbat.maarivNotices.omissions.length > 0)}
+				{#if data.shabbat.maarivNotices.additions.length > 0}
+					<div class="liturgical-notice additions">
+						{#each data.shabbat.maarivNotices.additions as notice}
+							<div>{notice}</div>
+						{/each}
+					</div>
+				{/if}
+				{#if data.shabbat.maarivNotices.omissions.length > 0}
+					<div class="liturgical-notice omissions">
+						{#each data.shabbat.maarivNotices.omissions as notice}
+							<div>No {notice}</div>
+						{/each}
+					</div>
+				{/if}
 			{/if}
 			<div class="bottom-section">
 				<div class="shkia-section">

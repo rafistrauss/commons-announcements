@@ -4,9 +4,10 @@ const { getZmanimJson } = kosherZmanimPkg;
 import { JewishCalendar } from 'kosher-zmanim';
 
 // Function to get liturgical notices for a specific date and service
-function getLiturgicalNotices(date: Date, service: 'mincha' | 'maariv' | 'shacharit'): string[] {
+function getLiturgicalNotices(date: Date, service: 'mincha' | 'maariv' | 'shacharit'): { additions: string[], omissions: string[] } {
   const jewishCal = new JewishCalendar(date);
-  const notices: string[] = [];
+  const additions: string[] = [];
+  const omissions: string[] = [];
   
   // For Maariv, we need to check the next Jewish day (since Maariv starts the next day)
   let calToCheck = jewishCal;
@@ -18,17 +19,17 @@ function getLiturgicalNotices(date: Date, service: 'mincha' | 'maariv' | 'shacha
   
   // Check for Rosh Chodesh
   if (calToCheck.isRoshChodesh()) {
-    notices.push('יעלה ויבא (Ya\'ale V\'yavo)');
+    additions.push('יעלה ויבא');
   }
   
   // Check for Yom Tov
   if (calToCheck.isYomTov()) {
-    notices.push('יעלה ויבא (Ya\'ale V\'yavo)');
+    additions.push('יעלה ויבא');
   }
   
   // Check for Chanukah
   if (calToCheck.isChanukah()) {
-    notices.push('על הניסים (Al HaNissim)');
+    additions.push('על הניסים');
   }
   
   // Check for L'david season (1 Elul through Hoshanah Rabbah - 21 Tishrei)
@@ -40,7 +41,7 @@ function getLiturgicalNotices(date: Date, service: 'mincha' | 'maariv' | 'shacha
     // Elul is month 6, Tishrei is month 7
     if (jewishMonth === 6 || // All of Elul
         (jewishMonth === 7 && jewishDay <= 21)) { // Tishrei through Hoshanah Rabbah (21st)
-      notices.push('לדוד');
+      additions.push('לדוד');
     }
   }
 
@@ -51,7 +52,7 @@ function getLiturgicalNotices(date: Date, service: 'mincha' | 'maariv' | 'shacha
     // Add logic for fast days if needed
   }
   
-  return notices;
+  return { additions, omissions };
 }
 
 // Function to check if it's a special day when Tachanun (and thus Tzidkatcha) is omitted
@@ -97,6 +98,22 @@ function isSpecialDay(date: Date): { isSpecial: boolean; reason?: string } {
   }
   
   return { isSpecial: false };
+}
+
+// Function to check if there's a Yom Tov in the upcoming week (excluding next Shabbat)
+function hasYomTovInUpcomingWeekExcludingNextShabbat(shabbatDate: Date): boolean {
+  // Check each day from Sunday to Friday of the upcoming week (not including next Shabbat)
+  for (let i = 1; i <= 6; i++) {
+    const dayToCheck = new Date(shabbatDate);
+    dayToCheck.setDate(shabbatDate.getDate() + i);
+    // Only check up to Friday
+    if (dayToCheck.getDay() === 6) break;
+    const jewishCal = new JewishCalendar(dayToCheck);
+    if (jewishCal.isAssurBemelacha()) {
+      return true;
+    }
+  }
+  return false;
 }
 
 // Function to get the holiday name if it's a Yom Tov
@@ -161,8 +178,8 @@ function getZmanim(date: Date) {
   const options = {
     date,
     locationName: 'Fair Lawn, NJ',
-    latitude: 40.9402,
-    longitude: -74.1165,
+    latitude: 40.940866,
+    longitude: -74.126082,
     timeZoneId: 'America/New_York',
   };
   const zmanim = getZmanimJson(options);
@@ -293,15 +310,17 @@ export async function load({ url }) {
   const fridayMaarivNotices = getLiturgicalNotices(friday, 'maariv');
   const shabbatMinchaNotices = getLiturgicalNotices(shabbat, 'mincha');
   const shabbatMaarivNotices = getLiturgicalNotices(shabbat, 'maariv');
+  
+  // Check for Yom Tov in upcoming week (excluding next Shabbat) and add Veyhi Noam notice if needed
+  if (hasYomTovInUpcomingWeekExcludingNextShabbat(shabbat)) {
+    shabbatMaarivNotices.omissions.push('ויהי נועם (Yom Tov this week)');
+  }
 
   // Check Tzidkatcha only for Shabbat Mincha service (not Friday)
   const shabbatTzidkatchaStatus = isSpecialDay(shabbat);
 
   // General announcements for this week
-  const generalAnnouncements = [
-    'Welcome to Ora Friedman who is visiting the Commons for Shabbos! She already lives in Fair Lawn but is checking out the Commons to potentially join us.',
-    'Seudah Shlishit at the Clubhouse at 4:45 PM; see the flyer for details.',
-    'Rabbi Katz will be giving a shiur after Shabbos Mincha at the Lefkowitz home. The topic will be Check it out! Inspecting Tefillin, Mezuzos, and Ourselves in Elul',
+  const generalAnnouncements: string[] = [
   ];
 
   return {
@@ -309,7 +328,7 @@ export async function load({ url }) {
       ...fridayZmanim, 
       parsha: weeklyParsha,
       englishDate: fridayEnglishDate,
-      mincha: '7:07 PM',
+      mincha: '6:44 PM',
       minchaNotices: fridayMinchaNotices,
       maarivNotices: fridayMaarivNotices
     },
@@ -317,14 +336,14 @@ export async function load({ url }) {
       ...shabbatZmanim, 
       parsha: weeklyParsha,
       englishDate: shabbatEnglishDate,
-      mincha: '6:55 PM',
+      mincha: '6:30 PM',
       minchaNotices: shabbatMinchaNotices,
       maarivNotices: shabbatMaarivNotices,
       shouldSayTzidkatcha: !shabbatTzidkatchaStatus.isSpecial,
       tzidkatchaReason: shabbatTzidkatchaStatus.reason,
       minchaParsha: nextWeekParsha
     },
-    maariv: '8:00 PM',
+    maariv: '7:40 PM',
     weekOffset,
     generalAnnouncements,
   };
