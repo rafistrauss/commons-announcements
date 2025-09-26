@@ -266,8 +266,9 @@
 	}
 	
 	@media print {
-		.week-navigation {
-			display: none;
+		.week-navigation,
+		.jump-to-today {
+			display: none !important;
 		}
 	}
 	
@@ -308,7 +309,7 @@
 </style>
 
 <div class="announcement-sheet">
-	<div style="display: flex; justify-content: center; margin-bottom: 10px;">
+	<div class="jump-to-today" style="display: flex; justify-content: center; margin-bottom: 10px;">
 		<button class="nav-button" on:click={jumpToToday}>Jump to Today</button>
 	</div>
 

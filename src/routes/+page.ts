@@ -174,7 +174,7 @@ export const load: PageLoad = async ({ url }) => {
       ...fridayZmanim, 
       parsha: weeklyParsha,
       englishDate: fridayEnglishDate,
-      mincha: '6:44 PM',
+      mincha: '6:31 PM',
       minchaNotices: fridayMinchaNotices,
       maarivNotices: fridayMaarivNotices
     },
@@ -182,14 +182,14 @@ export const load: PageLoad = async ({ url }) => {
       ...shabbatZmanim, 
       parsha: weeklyParsha,
       englishDate: shabbatEnglishDate,
-      mincha: '6:30 PM',
+      mincha: '6:15 PM',
       minchaNotices: shabbatMinchaNotices,
       maarivNotices: shabbatMaarivNotices,
       shouldSayTzidkatcha: !shabbatTzidkatchaStatus.isSpecial,
       tzidkatchaReason: shabbatTzidkatchaStatus.reason,
       minchaParsha: nextWeekParsha
     },
-    maariv: '7:40 PM',
+    maariv: '7:25 PM',
     weekOffset,
     generalAnnouncements,
   };
