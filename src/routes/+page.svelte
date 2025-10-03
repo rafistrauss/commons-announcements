@@ -127,6 +127,10 @@
 	.time-value {
 		font-weight: 400;
 	}
+
+	[contenteditable] {
+		cursor: pointer;
+	}
 	
 	.english-date {
 		font-size: 18px;
@@ -372,7 +376,7 @@
 			<div class="english-date">{data.friday.englishDate}</div>
 			<div class="time-item">
 				<span class="time-label">Mincha:</span>
-				<span class="time-value">{data.friday.mincha}</span>
+				<span class="time-value" contenteditable="true">{data.friday.mincha}</span>
 			</div>
 			{#if data.friday.minchaNotices && (data.friday.minchaNotices.additions.length > 0 || data.friday.minchaNotices.omissions.length > 0)}
 				{#if data.friday.minchaNotices.additions.length > 0}
@@ -420,7 +424,7 @@
 			<div class="english-date">{data.shabbat.englishDate}</div>
 			<div class="time-item">
 				<span class="time-label">Mincha:</span>
-				<span class="time-value">{data.shabbat.mincha}</span>
+				<span class="time-value" contenteditable="true">{data.shabbat.mincha}</span>
 			</div>
 			<div class="mincha-reading">
 				<span class="reading-label">Torah Reading:</span>
@@ -449,7 +453,7 @@
 			{/if}
 			<div class="time-item">
 				<span class="time-label">Maariv:</span>
-				<span class="time-value">{data.maariv}</span>
+				<span class="time-value" contenteditable="true">{data.maariv}</span>
 			</div>
 			{#if data.shabbat.maarivNotices && (data.shabbat.maarivNotices.additions.length > 0 || data.shabbat.maarivNotices.omissions.length > 0)}
 				{#if data.shabbat.maarivNotices.additions.length > 0}
