@@ -1,37 +1,36 @@
 import type { PageLoad } from './$types';
 import { getZmanimJson, JewishCalendar } from 'kosher-zmanim';
+import minyanTimesData from '$lib/minyan-times.json';
+type MinyanTimesJson = {
+  times: {
+    [date: string]: {
+      fridayMincha: string;
+      shabbatMincha: string;
+      shabbatMaariv: string;
+    };
+  };
+};
+
+const minyanTimesDataTyped = minyanTimesData as MinyanTimesJson;
 
 // Function to get minyan times from static JSON file
-async function getMinyanTimes(fridayDate: Date, fetchFn: typeof fetch): Promise<{
+async function getMinyanTimes(fridayDate: Date): Promise<{
   fridayMincha: string | null;
   shabbatMincha: string | null;
   shabbatMaariv: string | null;
 }> {
-  try {
-    const response = await fetchFn('/minyan-times.json');
-    if (!response.ok) {
-      console.warn('Could not fetch minyan times JSON');
-      return { fridayMincha: null, shabbatMincha: null, shabbatMaariv: null };
-    }
-    
-    const data = await response.json();
-    const fridayKey = fridayDate.toISOString().slice(0, 10);
-    const times = data.times[fridayKey];
-    
-    if (!times) {
-      console.warn(`No minyan times found for ${fridayKey}`);
-      return { fridayMincha: null, shabbatMincha: null, shabbatMaariv: null };
-    }
-    
-    return {
-      fridayMincha: times.fridayMincha || null,
-      shabbatMincha: times.shabbatMincha || null,
-      shabbatMaariv: times.shabbatMaariv || null,
-    };
-  } catch (error) {
-    console.error('Error fetching minyan times:', error);
+  // Directly import minyan times data at build time
+  const fridayKey = fridayDate.toISOString().slice(0, 10);
+  const times = minyanTimesDataTyped.times[fridayKey];
+  if (!times) {
+    console.warn(`No minyan times found for ${fridayKey}`);
     return { fridayMincha: null, shabbatMincha: null, shabbatMaariv: null };
   }
+  return {
+    fridayMincha: times.fridayMincha || null,
+    shabbatMincha: times.shabbatMincha || null,
+    shabbatMaariv: times.shabbatMaariv || null,
+  };
 }
 
 // --- Helper functions copied from +page.server.ts ---
@@ -282,7 +281,7 @@ export const load: PageLoad = async ({ url, fetch }) => {
     ...(generalAnnouncementsByDate[shabbatDateKey] || []),
   ]
 
-  const { fridayMincha, shabbatMincha, shabbatMaariv } = await getMinyanTimes(friday, fetch);
+  const { fridayMincha, shabbatMincha, shabbatMaariv } = await getMinyanTimes(friday);
 
   return {
     friday: { 

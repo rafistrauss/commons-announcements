@@ -23,13 +23,13 @@ jobs:
         run: bun install
         
       - name: Update minyan times
-        run: bun run scripts/update-minyan-times.js
-        
+        run: bun run scripts/update-minyan-times.js src/lib/minyan-times.json
+
       - name: Commit and push changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add static/minyan-times.json
+          git add src/lib/minyan-times.json
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else

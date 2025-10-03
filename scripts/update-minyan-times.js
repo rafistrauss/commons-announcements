@@ -15,7 +15,7 @@ async function updateMinyanTimes() {
   console.log('Starting minyan times update...');
   
   // Load existing data - go up one directory from scripts/ to project root
-  const jsonPath = join(__dirname, '..', 'static', 'minyan-times.json');
+  const jsonPath = process.argv[2] || join(__dirname, '..', 'src', 'lib', 'minyan-times.json');
   let data;
   try {
     const existing = readFileSync(jsonPath, 'utf8');
