@@ -15,6 +15,16 @@ function getLiturgicalNotices(date: Date, service: 'mincha' | 'maariv' | 'shacha
     nextDay.setDate(date.getDate() + 1);
     calToCheck = new JewishCalendar(nextDay);
   }
+
+  // --- Aseret Yemei Teshuva insertions (3–9 Tishrei) ---
+  // 3–9 Tishrei: highlight Hamelech Hakadosh, mention other insertions
+  const tishrei = 7;
+  const day = calToCheck.getJewishDayOfMonth();
+  const month = calToCheck.getJewishMonth();
+  if (month === tishrei && day >= 3 && day <= 9) {
+    additions.push('המלך הקדוש (Aseret Yemei Teshuva)');
+    additions.push('Other Aseret Yemei Teshuva insertions: זכרנו לחיים, מי כמוך, וכתוב לחיים, בספר חיים');
+  }
   
   // Check for Rosh Chodesh
   if (calToCheck.isRoshChodesh()) {

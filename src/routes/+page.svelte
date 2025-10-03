@@ -172,7 +172,7 @@
 		font-size: 22px;
 	}
 	
-	.rosh-chodesh-notice-main {
+	.special-liturgical-notice, .rosh-chodesh-notice-main {
 		background: #e8f5e8;
 		color: #2e7d32;
 		border: 2px solid #4caf50;
@@ -182,6 +182,9 @@
 		text-align: center;
 		font-weight: 700;
 		font-size: 26px;
+	}
+
+	.rosh-chodesh-notice-main {
 		direction: rtl;
 	}
 	
@@ -336,6 +339,7 @@
 		<p class="subtitle">Commons Minyan</p>
 	</header>
 
+
 	<div class="parsha-section">
 		<h2 class="parsha-title">{data.friday.parsha}</h2>
 	</div>
@@ -349,6 +353,13 @@
 			{:else}
 				ראש חודש - Shabbat
 			{/if}
+		</div>
+	{/if}
+
+	<!-- Special Aseret Yemei Teshuva notice styled like Rosh Chodesh box, if present -->
+	{#if data.aseretYemeiTeshuvaActive}
+		<div class="special-liturgical-notice" style="margin-bottom: 16px;">
+			Remember to say המלך הקדוש and all the special insertions for עשרת ימי תשובה.
 		</div>
 	{/if}
 

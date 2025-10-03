@@ -1,13 +1,46 @@
 import type { PageLoad } from './$types';
 import { getZmanimJson, JewishCalendar } from 'kosher-zmanim';
 
+// Function to get minyan times from static JSON file
+async function getMinyanTimes(fridayDate: Date, fetchFn: typeof fetch): Promise<{
+  fridayMincha: string | null;
+  shabbatMincha: string | null;
+  shabbatMaariv: string | null;
+}> {
+  try {
+    const response = await fetchFn('/minyan-times.json');
+    if (!response.ok) {
+      console.warn('Could not fetch minyan times JSON');
+      return { fridayMincha: null, shabbatMincha: null, shabbatMaariv: null };
+    }
+    
+    const data = await response.json();
+    const fridayKey = fridayDate.toISOString().slice(0, 10);
+    const times = data.times[fridayKey];
+    
+    if (!times) {
+      console.warn(`No minyan times found for ${fridayKey}`);
+      return { fridayMincha: null, shabbatMincha: null, shabbatMaariv: null };
+    }
+    
+    return {
+      fridayMincha: times.fridayMincha || null,
+      shabbatMincha: times.shabbatMincha || null,
+      shabbatMaariv: times.shabbatMaariv || null,
+    };
+  } catch (error) {
+    console.error('Error fetching minyan times:', error);
+    return { fridayMincha: null, shabbatMincha: null, shabbatMaariv: null };
+  }
+}
+
 // --- Helper functions copied from +page.server.ts ---
 
 // Function to get liturgical notices for a specific date and service
 function getLiturgicalNotices(date: Date, service: 'mincha' | 'maariv' | 'shacharit'): { additions: string[], omissions: string[] } {
   const jewishCal = new JewishCalendar(date);
-  const additions: string[] = [];
-  const omissions: string[] = [];
+  const additions = new Set<string>();
+  const omissions = new Set<string>();
   // For Maariv, we need to check the next Jewish day (since Maariv starts the next day)
   let calToCheck = jewishCal;
   if (service === 'maariv') {
@@ -15,29 +48,84 @@ function getLiturgicalNotices(date: Date, service: 'mincha' | 'maariv' | 'shacha
     nextDay.setDate(date.getDate() + 1);
     calToCheck = new JewishCalendar(nextDay);
   }
-  if (calToCheck.isRoshChodesh()) additions.push('יעלה ויבא');
-  if (calToCheck.isYomTov()) additions.push('יעלה ויבא');
-  if (calToCheck.isChanukah()) additions.push('על הניסים');
+
+
+  if (calToCheck.isRoshChodesh()) additions.add('יעלה ויבא');
+  if (calToCheck.isYomTovAssurBemelacha()) additions.add('יעלה ויבא');
+  if (calToCheck.isChanukah()) additions.add('על הניסים');
   if (service === 'maariv') {
     const jewishMonth = calToCheck.getJewishMonth();
     const jewishDay = calToCheck.getJewishDayOfMonth();
-    if (jewishMonth === 6 || (jewishMonth === 7 && jewishDay <= 21)) additions.push('לדוד');
+    if (jewishMonth === 6 || (jewishMonth === 7 && jewishDay <= 21)) additions.add('לדוד');
   }
-  return { additions, omissions };
+  return { additions: Array.from(additions), omissions: Array.from(omissions) };
 }
 
+/**
+ * Determine if Tzidkatcha should be said on this date. 
+ *
+ * @param date 
+ * @returns 
+ */
 function isSpecialDay(date: Date): { isSpecial: boolean; reason?: string } {
   const jewishCal = new JewishCalendar(date);
+  const m = jewishCal.getJewishMonth();
+  const d = jewishCal.getJewishDayOfMonth();
+
+  // Rosh Chodesh
   if (jewishCal.isRoshChodesh()) return { isSpecial: true, reason: 'Rosh Chodesh' };
+  // Erev Rosh Chodesh
   const tomorrow = new Date(date);
   tomorrow.setDate(date.getDate() + 1);
   const tomorrowJewishCal = new JewishCalendar(tomorrow);
   if (tomorrowJewishCal.isRoshChodesh()) return { isSpecial: true, reason: 'Erev Rosh Chodesh' };
+
+  // Erev Rosh Hashana (29 Elul)
+  if (m === 6 && d === 29) return { isSpecial: true, reason: 'Erev Rosh Hashana' };
+  // Rosh Hashana (1-2 Tishrei)
+  if (m === 7 && (d === 1 || d === 2)) return { isSpecial: true, reason: 'Rosh Hashana' };
+  // Erev Yom Kippur (9 Tishrei)
+  if (m === 7 && d === 9) return { isSpecial: true, reason: 'Erev Yom Kippur' };
+  // Yom Kippur (10 Tishrei)
+  if (m === 7 && d === 10) return { isSpecial: true, reason: 'Yom Kippur' };
+  // Between Yom Kippur and Succos (11-14 Tishrei)
+  if (m === 7 && d >= 11 && d <= 14) return { isSpecial: true, reason: 'Between Yom Kippur and Succos' };
+  // Succos (15-21 Tishrei)
+  if (m === 7 && d >= 15 && d <= 21) return { isSpecial: true, reason: 'Succos' };
+  // Shemini Atzeres (22 Tishrei)
+  if (m === 7 && d === 22) return { isSpecial: true, reason: 'Shemini Atzeres' };
+  // Simchas Torah (23 Tishrei)
+  if (m === 7 && d === 23) return { isSpecial: true, reason: 'Simchas Torah' };
+  // Isru Chag (24 Tishrei)
+  if (m === 7 && d === 24) return { isSpecial: true, reason: 'Isru Chag' };
+  // Some do not recite it the rest of the days from Isru Chag until Rosh Chodesh Marcheshvan (25-29 Tishrei)
+  if (m === 7 && d >= 25 && d <= 29) return { isSpecial: true, reason: 'Post-Isru Chag (Tishrei)' };
+  // Chanukah (25 Kislev-2 or 3 Teves)
+  if ((m === 9 && d >= 25) || (m === 10 && d <= 2) || (m === 10 && d === 3 && jewishCal.getDaysInJewishMonth() === 30)) return { isSpecial: true, reason: 'Chanukah' };
+  // Tu b’Shevat (15 Shevat)
+  if (m === 11 && d === 15) return { isSpecial: true, reason: 'Tu b’Shevat' };
+  // Purim Katan (14-15 I Adar)
+  if (m === 13 && (d === 14 || d === 15)) return { isSpecial: true, reason: 'Purim Katan' };
+  // Purim (14 Adar)
+  if ((m === 12 || m === 14) && d === 14) return { isSpecial: true, reason: 'Purim' };
+  // Shushan Purim (15 Adar)
+  if ((m === 12 || m === 14) && d === 15) return { isSpecial: true, reason: 'Shushan Purim' };
+  // The entire month of Nisan
+  if (m === 1) return { isSpecial: true, reason: 'Month of Nisan' };
+  // Pesach Sheini (14 Iyar)
+  if (m === 2 && d === 14) return { isSpecial: true, reason: 'Pesach Sheini' };
+  // Lag b'Omer (18 Iyar)
+  if (m === 2 && d === 18) return { isSpecial: true, reason: 'Lag b\'Omer' };
+  // From Rosh Chodesh Sivan through the day after Shavuos (1-7 Sivan)
+  if (m === 3 && d >= 1 && d <= 7) return { isSpecial: true, reason: 'Rosh Chodesh Sivan through Shavuos' };
+  // Tisha b'Av (9 Av)
+  if (m === 5 && d === 9) return { isSpecial: true, reason: 'Tisha b\'Av' };
+  // Tu b’Av (15 Av)
+  if (m === 5 && d === 15) return { isSpecial: true, reason: 'Tu b\'Av' };
+
+  // Fallback: kosher-zmanim built-ins
   if (jewishCal.isYomTov()) return { isSpecial: true, reason: 'Yom Tov' };
   if (jewishCal.isChanukah()) return { isSpecial: true, reason: 'Chanukah' };
-  if (jewishCal.getJewishMonth() === 1) return { isSpecial: true, reason: 'Month of Nissan' };
-  if (jewishCal.getJewishMonth() === 2 && jewishCal.getJewishDayOfMonth() === 18) return { isSpecial: true, reason: "Lag B'Omer" };
-  if (jewishCal.getJewishMonth() === 5 && jewishCal.getJewishDayOfMonth() === 15) return { isSpecial: true, reason: "Tu B'Av" };
   return { isSpecial: false };
 }
 
@@ -112,7 +200,7 @@ function getZmanim(date: Date) {
 
 // --- PageLoad function ---
 
-export const load: PageLoad = async ({ url }) => {
+export const load: PageLoad = async ({ url, fetch }) => {
   let weekOffset = 0;
   try {
     weekOffset = parseInt(url.searchParams?.get('week') || '0');
@@ -164,17 +252,44 @@ export const load: PageLoad = async ({ url }) => {
   const fridayMaarivNotices = getLiturgicalNotices(friday, 'maariv');
   const shabbatMinchaNotices = getLiturgicalNotices(shabbat, 'mincha');
   const shabbatMaarivNotices = getLiturgicalNotices(shabbat, 'maariv');
+
+  // Check if either Friday or Shabbat is Aseret Yemei Teshuva
+  let aseretYemeiTeshuvaActive = false;
+  const tishrei = 7;
+  const checkAseret = (date: Date) => {
+    const cal = new JewishCalendar(date);
+    return cal.getJewishMonth() === tishrei && cal.getJewishDayOfMonth() >= 3 && cal.getJewishDayOfMonth() <= 9;
+  };
+  if (checkAseret(friday) || checkAseret(shabbat)) {
+    aseretYemeiTeshuvaActive = true;
+  }
   if (hasYomTovInUpcomingWeekExcludingNextShabbat(shabbat)) {
     shabbatMaarivNotices.omissions.push('ויהי נועם (Yom Tov this week)');
   }
   const shabbatTzidkatchaStatus = isSpecialDay(shabbat);
-  const generalAnnouncements: string[] = [];
+
+  // Per-Shabbat general announcements
+  const generalAnnouncementsByDate: Record<string, string[]> = {
+    // Example: '2025-10-11': ['Special guest speaker this Shabbat!', 'Kiddush sponsored by the Strauss family'],
+    '2025-10-04': ['Rabbi Markowitz will be speaking between Mincha and Maariv on the topic of Sukkot'],
+    // Add more dates and announcements as needed
+  };
+  // Format shabbat date as YYYY-MM-DD
+  const fridayDateKey = friday.toISOString().slice(0, 10);
+  const shabbatDateKey = shabbat.toISOString().slice(0, 10);
+  const generalAnnouncements = [
+    ...(generalAnnouncementsByDate[fridayDateKey] || []),
+    ...(generalAnnouncementsByDate[shabbatDateKey] || []),
+  ]
+
+  const { fridayMincha, shabbatMincha, shabbatMaariv } = await getMinyanTimes(friday, fetch);
+
   return {
     friday: { 
       ...fridayZmanim, 
       parsha: weeklyParsha,
       englishDate: fridayEnglishDate,
-      mincha: '6:31 PM',
+      mincha: fridayMincha || "No data available for this date",
       minchaNotices: fridayMinchaNotices,
       maarivNotices: fridayMaarivNotices
     },
@@ -182,15 +297,16 @@ export const load: PageLoad = async ({ url }) => {
       ...shabbatZmanim, 
       parsha: weeklyParsha,
       englishDate: shabbatEnglishDate,
-      mincha: '6:15 PM',
+      mincha: shabbatMincha || "No data available for this date",
       minchaNotices: shabbatMinchaNotices,
       maarivNotices: shabbatMaarivNotices,
       shouldSayTzidkatcha: !shabbatTzidkatchaStatus.isSpecial,
       tzidkatchaReason: shabbatTzidkatchaStatus.reason,
       minchaParsha: nextWeekParsha
     },
-    maariv: '7:25 PM',
+    maariv: shabbatMaariv || "No data available for this date",
     weekOffset,
     generalAnnouncements,
+    aseretYemeiTeshuvaActive,
   };
 }
