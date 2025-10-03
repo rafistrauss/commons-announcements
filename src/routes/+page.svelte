@@ -1,8 +1,10 @@
 <script lang="ts">
+  import { resolve } from '$app/paths';
+
 	export let data;
 
-	function weekHref(offset) {
-		if (offset === 0) return '/';
+	function weekHref(offset: number) {
+		if (offset === 0) return resolve('/');
 		return `?week=${offset}`;
 	}
 	function jumpToToday() {
@@ -313,7 +315,7 @@
 
 <div class="announcement-sheet">
 	<div class="jump-to-today" style="display: flex; justify-content: center; margin-bottom: 10px;">
-		<button class="nav-button" on:click={jumpToToday}>Jump to Today</button>
+		<a href={resolve('/')} class="nav-button">Jump to Today</a>
 	</div>
 
 	<div class="week-navigation">
