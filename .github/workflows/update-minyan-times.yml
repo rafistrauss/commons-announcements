@@ -25,14 +25,8 @@ jobs:
       - name: Update minyan times
         run: bun run scripts/update-minyan-times.js src/lib/minyan-times.json
 
-      - name: Commit and push changes
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add src/lib/minyan-times.json
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "Update minyan times - $(date)"
-            git push
-          fi
+      - name: Commit & Push changes
+        uses: actions-js/push@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          message: "Update minyan times - $(date)"
