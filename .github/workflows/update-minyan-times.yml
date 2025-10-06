@@ -1,5 +1,8 @@
 name: Update Minyan Times
 
+permissions:
+  contents: write
+
 on:
   schedule:
     # Run every Sunday at 9:00 AM UTC (updates for the upcoming week)
