@@ -51,6 +51,7 @@ function getLiturgicalNotices(date: Date, service: 'mincha' | 'maariv' | 'shacha
 
   if (calToCheck.isRoshChodesh()) additions.add('יעלה ויבא');
   if (calToCheck.isYomTovAssurBemelacha()) additions.add('יעלה ויבא');
+  if (calToCheck.isCholHamoed()) additions.add('יעלה ויבא');
   if (calToCheck.isChanukah()) additions.add('על הניסים');
   if (service === 'maariv') {
     const jewishMonth = calToCheck.getJewishMonth();
