@@ -315,7 +315,29 @@
 		border-left: 4px solid #d32f2f;
 		border-radius: 4px;
 	}
+
+	/* This style sets the correct print dimensions for some reason */
+	#print-area-display {
+		position: absolute;
+		width: 8.5in;
+		height: 11in;
+		margin: auto;
+		/* outline: 2px dashed red; */
+		box-sizing: border-box;
+	}
+
+	@media print {
+		#print-area-display {
+			outline: none;
+		}
+	}
+	
+
 </style>
+
+<div id="print-area-display">
+
+</div>
 
 <div class="announcement-sheet">
 	<div class="jump-to-today" style="display: flex; justify-content: center; margin-bottom: 10px;">
