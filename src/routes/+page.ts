@@ -58,6 +58,29 @@ function getLiturgicalNotices(date: Date, service: 'mincha' | 'maariv' | 'shacha
     const jewishDay = calToCheck.getJewishDayOfMonth();
     if (jewishMonth === 6 || (jewishMonth === 7 && jewishDay <= 21)) additions.add('לדוד');
   }
+  // Mashiv Haruach logic (outside Israel: starts 23 Tishrei, Simchat Torah)
+  // Show notice for 30 days after status changes
+  const mashivStartMonth = 7; // Tishrei
+  const mashivStartDay = 23; // Simchat Torah
+  const mashivDuration = 30;
+  // Calculate current Jewish date
+  const currentMonth = calToCheck.getJewishMonth();
+  const currentDay = calToCheck.getJewishDayOfMonth();
+  const currentYear = calToCheck.getJewishYear();
+  // Find the start date for Mashiv Haruach
+  let mashivStartDate = new JewishCalendar(currentYear, mashivStartMonth, mashivStartDay);
+  // If current date is before Simchat Torah, use previous year
+  if (
+    currentMonth < mashivStartMonth ||
+    (currentMonth === mashivStartMonth && currentDay < mashivStartDay)
+  ) {
+    mashivStartDate = new JewishCalendar(currentYear - 1, mashivStartMonth, mashivStartDay);
+  }
+  // Calculate difference in days
+  const daysSinceMashivStart = calToCheck.getAbsDate() - mashivStartDate.getAbsDate();
+  if (daysSinceMashivStart >= 0 && daysSinceMashivStart < mashivDuration) {
+    additions.add('משיב הרוח');
+  }
   return { additions: Array.from(additions), omissions: Array.from(omissions) };
 }
 

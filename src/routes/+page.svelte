@@ -326,6 +326,12 @@
 		box-sizing: border-box;
 	}
 
+	@media screen {
+		#print-area-display {
+			display: none;
+		}
+	}
+
 	@media print {
 		#print-area-display {
 			outline: none;
