@@ -1,7 +1,20 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
+	import { onMount } from 'svelte';
 
 	export let data;
+
+	let html2canvas: any = null;
+
+	onMount(async () => {
+		// Dynamically import html2canvas from CDN
+		const script = document.createElement('script');
+		script.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+		script.onload = () => {
+			html2canvas = (window as any).html2canvas;
+		};
+		document.head.appendChild(script);
+	});
 
 	function weekHref(offset: number) {
 		if (offset === 0) return resolve('/');
@@ -9,6 +22,87 @@
 	}
 	function jumpToToday() {
 		window.location.href = '/';
+	}
+
+	async function saveAsImage() {
+		if (!html2canvas) {
+			alert('Image capture library is still loading. Please try again in a moment.');
+			return;
+		}
+
+		const element = document.querySelector('.announcement-sheet') as HTMLElement;
+		if (!element) {
+			alert('Could not find announcement sheet to capture.');
+			return;
+		}
+
+		try {
+			// Show a loading message
+			const originalCursor = document.body.style.cursor;
+			document.body.style.cursor = 'wait';
+
+			// Temporarily hide navigation elements for screenshot
+			const navigationElements = document.querySelectorAll('.week-navigation, .jump-to-today');
+			const originalDisplayStyles: string[] = [];
+			navigationElements.forEach((el, index) => {
+				const htmlEl = el as HTMLElement;
+				originalDisplayStyles[index] = htmlEl.style.display;
+				htmlEl.style.display = 'none';
+			});
+
+			// Temporarily apply print-friendly styles to the announcement sheet
+			const originalPadding = element.style.padding;
+			const originalBorder = element.style.border;
+			const originalMaxWidth = element.style.maxWidth;
+			const originalWidth = element.style.width;
+			element.style.padding = '20px';
+			element.style.border = 'none';
+			element.style.maxWidth = '8.5in';
+			element.style.width = 'auto';
+
+			// Capture the element as a canvas
+			const canvas = await html2canvas(element, {
+				scale: 2, // Higher quality
+				useCORS: true,
+				logging: false,
+				backgroundColor: '#ffffff'
+			});
+
+			// Restore original styles
+			element.style.padding = originalPadding;
+			element.style.border = originalBorder;
+			element.style.maxWidth = originalMaxWidth;
+			element.style.width = originalWidth;
+			navigationElements.forEach((el, index) => {
+				(el as HTMLElement).style.display = originalDisplayStyles[index];
+			});
+
+			// Convert canvas to blob
+			canvas.toBlob((blob) => {
+				if (!blob) {
+					alert('Failed to create image.');
+					document.body.style.cursor = originalCursor;
+					return;
+				}
+
+				// Create download link
+				const url = URL.createObjectURL(blob);
+				const link = document.createElement('a');
+				const parshaText = data.friday.parsha.replace(/[^\u0590-\u05FF\w\s]/g, '').trim();
+				const dateText = data.friday.hebrewDate.split(' ').pop();
+				link.download = `shabbat-announcements-${parshaText}-${dateText}.jpg`;
+				link.href = url;
+				link.click();
+
+				// Cleanup
+				URL.revokeObjectURL(url);
+				document.body.style.cursor = originalCursor;
+			}, 'image/jpeg', 0.95);
+		} catch (error) {
+			console.error('Error capturing image:', error);
+			alert('Failed to save image. Please try again.');
+			document.body.style.cursor = 'default';
+		}
 	}
 </script>
 
@@ -267,6 +361,14 @@
 	.nav-button:hover {
 		background: #1976d2;
 	}
+
+	.nav-button.save-image {
+		background: #4caf50;
+	}
+
+	.nav-button.save-image:hover {
+		background: #388e3c;
+	}
 	
 	.current-week {
 		font-weight: 600;
@@ -376,8 +478,9 @@
 </div>
 
 <div class="announcement-sheet">
-	<div class="jump-to-today" style="display: flex; justify-content: center; margin-bottom: 10px;">
+	<div class="jump-to-today" style="display: flex; justify-content: center; gap: 10px; margin-bottom: 10px;">
 		<a href={resolve('/')} class="nav-button">Jump to Today</a>
+		<button onclick={saveAsImage} class="nav-button save-image">Save as Image</button>
 	</div>
 
 	<div class="week-navigation">
