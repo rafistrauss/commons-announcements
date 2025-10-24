@@ -316,6 +316,36 @@
 		border-radius: 4px;
 	}
 
+	.kiddush-levana-notice {
+		background: #e3f2fd;
+		border: 2px solid #2196f3;
+		padding: 15px;
+		margin: 20px 0;
+		border-radius: 6px;
+	}
+
+	.kiddush-levana-notice.last-chance {
+		background: #fff3e0;
+		border-color: #ff9800;
+	}
+
+	.kiddush-levana-title {
+		font-size: 22px;
+		font-weight: 700;
+		margin-bottom: 8px;
+		color: #1976d2;
+		text-align: center;
+	}
+
+	.kiddush-levana-notice.last-chance .kiddush-levana-title {
+		color: #f57c00;
+	}
+
+	.kiddush-levana-details {
+		font-size: 18px;
+		text-align: center;
+	}
+
 	/* This style sets the correct print dimensions for some reason */
 	#print-area-display {
 		position: absolute;
@@ -507,6 +537,30 @@
 			</div>
 		</div>
 	</div>
+
+	<!-- Kiddush Levana Notice -->
+	{#if data.kiddushLevanaInfo && data.kiddushLevanaInfo.canSayTonight}
+		<div class="kiddush-levana-notice" class:last-chance={data.kiddushLevanaInfo.lastChance}>
+			<div class="kiddush-levana-title">
+				{#if data.kiddushLevanaInfo.lastChance}
+					⚠️ Kiddush Levana - Last Chance! ⚠️
+				{:else if data.kiddushLevanaInfo.isIdealTime}
+					🌙 Kiddush Levana - Ideal Time 🌙
+				{:else}
+					🌙 Kiddush Levana 🌙
+				{/if}
+			</div>
+			<div class="kiddush-levana-details">
+				{#if data.kiddushLevanaInfo.reason}
+					{data.kiddushLevanaInfo.reason}
+				{:else if data.kiddushLevanaInfo.isIdealTime}
+					Can be said Motzei Shabbat (after 7 days from molad)
+				{:else}
+					Can be said Motzei Shabbat
+				{/if}
+			</div>
+		</div>
+	{/if}
 
 	<!-- General Announcements Section -->
 	{#if data.generalAnnouncements && data.generalAnnouncements.length > 0}
