@@ -55,17 +55,26 @@
 			const originalBorder = element.style.border;
 			const originalMaxWidth = element.style.maxWidth;
 			const originalWidth = element.style.width;
+			const originalBoxSizing = element.style.boxSizing;
+			
+			// Force full page size (8.5in = 816px at 96 DPI)
 			element.style.padding = '20px';
 			element.style.border = 'none';
-			element.style.maxWidth = '8.5in';
-			element.style.width = 'auto';
+			element.style.maxWidth = 'none';
+			element.style.width = '816px';
+			element.style.boxSizing = 'border-box';
+
+			// Wait a moment for layout to settle
+			await new Promise(resolve => setTimeout(resolve, 100));
 
 			// Capture the element as a canvas
 			const canvas = await html2canvas(element, {
 				scale: 2, // Higher quality
 				useCORS: true,
 				logging: false,
-				backgroundColor: '#ffffff'
+				backgroundColor: '#ffffff',
+				windowWidth: 816,
+				windowHeight: element.scrollHeight
 			});
 
 			// Restore original styles
@@ -73,6 +82,7 @@
 			element.style.border = originalBorder;
 			element.style.maxWidth = originalMaxWidth;
 			element.style.width = originalWidth;
+			element.style.boxSizing = originalBoxSizing;
 			navigationElements.forEach((el, index) => {
 				(el as HTMLElement).style.display = originalDisplayStyles[index];
 			});
