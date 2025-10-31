@@ -172,6 +172,8 @@ function getKiddushLevanaInfo(shabbatDate: Date): {
   reason?: string;
   isIdealTime?: boolean;
   lastChance?: boolean;
+  lastMotzeiShabbos?: boolean;
+  lastTimeToSay?: Date;
 } {
   // Calculate nightfall on Motzei Shabbat (Saturday night)
   // We need to get zmanim for the Shabbat day to get shkia, then calculate tzeis
@@ -199,6 +201,8 @@ function getKiddushLevanaInfo(shabbatDate: Date): {
   const MIN_HOURS = 72;
   const IDEAL_HOURS = 168;
   const MAX_HOURS = 14 * 24 + 18; // 354 hours
+
+  const lastTimeToSay = new Date(moladDate.getTime() + MAX_HOURS * 60 * 60 * 1000);
   
   // Check if we're in the valid window
   if (hoursSinceMolad < MIN_HOURS) {
@@ -226,23 +230,33 @@ function getKiddushLevanaInfo(shabbatDate: Date): {
     return { 
       canSayTonight: true, 
       reason: 'Yom Tov tonight - say blessing only (no Psalms)', 
-      isIdealTime: hoursSinceMolad >= IDEAL_HOURS 
+      isIdealTime: hoursSinceMolad >= IDEAL_HOURS,
+      lastTimeToSay: lastTimeToSay
     };
   }
   
   // Check if it's during first 10 days of Tishrei (many have this custom)
   if (jewishMonth === 7 && jewishDay <= 10) {
-    // Calculate how many days until the end of the window
-    const hoursRemaining = MAX_HOURS - hoursSinceMolad;
-    const daysRemaining = hoursRemaining / 24;
+    // Calculate when the next Motzei Shabbos will be (7 days from now)
+    const nextMotzeiShabbos = new Date(motzeiShabbatNightfall);
+    nextMotzeiShabbos.setDate(nextMotzeiShabbos.getDate() + 7);
     
-    // If this might be the last chance (less than 3 days remaining), mention it
-    if (daysRemaining < 3) {
+    // If this is the last Motzei Shabbos before the window closes, mention it
+    const isLastMotzeiShabbos = nextMotzeiShabbos.getTime() > lastTimeToSay.getTime();
+    
+    // Check if tonight is actually the very last night (deadline is before tomorrow night)
+    const tomorrowNight = new Date(motzeiShabbatNightfall);
+    tomorrowNight.setDate(tomorrowNight.getDate() + 1);
+    const isLastNight = tomorrowNight.getTime() > lastTimeToSay.getTime();
+    
+    if (isLastMotzeiShabbos || isLastNight) {
       return { 
         canSayTonight: true, 
         reason: 'During first 10 days of Tishrei (many wait, but say it if this is your last chance)',
-        lastChance: true,
-        isIdealTime: hoursSinceMolad >= IDEAL_HOURS
+        lastChance: isLastNight,
+        lastMotzeiShabbos: isLastMotzeiShabbos && !isLastNight,
+        isIdealTime: hoursSinceMolad >= IDEAL_HOURS,
+        lastTimeToSay: lastTimeToSay
       };
     }
     
@@ -252,10 +266,18 @@ function getKiddushLevanaInfo(shabbatDate: Date): {
     };
   }
   
-  // Check if we're approaching the end of the window (last 3 days)
-  const hoursRemaining = MAX_HOURS - hoursSinceMolad;
-  const daysRemaining = hoursRemaining / 24;
-  const lastChance = daysRemaining < 3;
+  // Check if this is the last Motzei Shabbos before the window closes
+  // Calculate when the next Motzei Shabbos will be (7 days from now)
+  const nextMotzeiShabbos = new Date(motzeiShabbatNightfall);
+  nextMotzeiShabbos.setDate(nextMotzeiShabbos.getDate() + 7);
+  
+  // Check if the next Motzei Shabbos is after the last time to say Kiddush Levana
+  const isLastMotzeiShabbos = nextMotzeiShabbos.getTime() > lastTimeToSay.getTime();
+  
+  // Check if tonight is actually the very last night (deadline is before tomorrow night)
+  const tomorrowNight = new Date(motzeiShabbatNightfall);
+  tomorrowNight.setDate(tomorrowNight.getDate() + 1);
+  const isLastNight = tomorrowNight.getTime() > lastTimeToSay.getTime();
   
   // We're in the valid window!
   const isIdeal = hoursSinceMolad >= IDEAL_HOURS;
@@ -263,7 +285,9 @@ function getKiddushLevanaInfo(shabbatDate: Date): {
   return { 
     canSayTonight: true, 
     isIdealTime: isIdeal,
-    lastChance: lastChance
+    lastChance: isLastNight,
+    lastMotzeiShabbos: isLastMotzeiShabbos && !isLastNight,
+    lastTimeToSay: lastTimeToSay
   };
 }
 

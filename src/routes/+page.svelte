@@ -441,6 +441,11 @@
 		border-color: #ff9800;
 	}
 
+	.kiddush-levana-notice.last-motzei-shabbos {
+		background: #fff9c4;
+		border-color: #fbc02d;
+	}
+
 	.kiddush-levana-title {
 		font-size: 22px;
 		font-weight: 700;
@@ -451,6 +456,10 @@
 
 	.kiddush-levana-notice.last-chance .kiddush-levana-title {
 		color: #f57c00;
+	}
+
+	.kiddush-levana-notice.last-motzei-shabbos .kiddush-levana-title {
+		color: #f9a825;
 	}
 
 	.kiddush-levana-details {
@@ -653,12 +662,14 @@
 
 	<!-- Kiddush Levana Notice -->
 	{#if data.kiddushLevanaInfo && data.kiddushLevanaInfo.canSayTonight}
-		<div class="kiddush-levana-notice" class:last-chance={data.kiddushLevanaInfo.lastChance}>
+		<div class="kiddush-levana-notice" class:last-chance={data.kiddushLevanaInfo.lastChance} class:last-motzei-shabbos={data.kiddushLevanaInfo.lastMotzeiShabbos}>
 			<div class="kiddush-levana-title">
 				{#if data.kiddushLevanaInfo.lastChance}
 					⚠️ Kiddush Levana - Last Chance! ⚠️
+				{:else if data.kiddushLevanaInfo.lastMotzeiShabbos}
+					🌙 Kiddush Levana - Last Motzei Shabbos 🌙
 				{:else if data.kiddushLevanaInfo.isIdealTime}
-					🌙 Kiddush Levana - Ideal Time 🌙
+					🌙 Kiddush Levana - Ideal Time (7 days after molad) 🌙
 				{:else}
 					🌙 Kiddush Levana 🌙
 				{/if}
@@ -666,10 +677,9 @@
 			<div class="kiddush-levana-details">
 				{#if data.kiddushLevanaInfo.reason}
 					{data.kiddushLevanaInfo.reason}
-				{:else if data.kiddushLevanaInfo.isIdealTime}
-					Can be said Motzei Shabbat (after 7 days from molad)
-				{:else}
-					Can be said Motzei Shabbat
+				{/if}
+				{#if data.kiddushLevanaInfo.lastTimeToSay}
+					Last time to say: {data.kiddushLevanaInfo.lastTimeToSay.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
 				{/if}
 			</div>
 		</div>
