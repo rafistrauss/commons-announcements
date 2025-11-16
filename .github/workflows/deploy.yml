@@ -81,11 +81,28 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Checkout gh-pages
+      - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: gh-pages
-          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check and setup gh-pages branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Check if gh-pages branch exists
+          if git ls-remote --exit-code --heads origin gh-pages > /dev/null 2>&1; then
+            echo "gh-pages branch exists, checking it out"
+            git fetch origin gh-pages
+            git checkout gh-pages
+          else
+            echo "gh-pages branch doesn't exist, creating it"
+            git checkout --orphan gh-pages
+            git rm -rf . || true
+            echo "# GitHub Pages" > README.md
+            git add README.md
+            git commit -m "Initialize gh-pages branch"
+            git push origin gh-pages
+          fi
 
       - name: Download PR preview artifact
         uses: actions/download-artifact@v4
@@ -103,10 +120,6 @@ jobs:
           
           # Clean up temp directory
           rm -rf pr-preview-temp
-          
-          # Configure git
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
           
           # Commit and push
           git add pr-${{ github.event.number }}
@@ -160,25 +173,36 @@ jobs:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout gh-pages
+      - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: gh-pages
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Remove PR preview
         run: |
-          # Remove PR preview directory
-          rm -rf pr-${{ github.event.number }}
+          # Check if gh-pages branch exists
+          if ! git ls-remote --exit-code --heads origin gh-pages > /dev/null 2>&1; then
+            echo "gh-pages branch doesn't exist, nothing to clean up"
+            exit 0
+          fi
           
-          # Configure git
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Fetch and checkout gh-pages
+          git fetch origin gh-pages
+          git checkout gh-pages
           
-          # Commit and push
-          git add .
-          git commit -m "Remove preview for closed PR #${{ github.event.number }}" || echo "No changes to commit"
-          git push origin gh-pages
+          # Remove PR preview directory if it exists
+          if [ -d "pr-${{ github.event.number }}" ]; then
+            rm -rf pr-${{ github.event.number }}
+            
+            # Configure git
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            
+            # Commit and push
+            git add .
+            git commit -m "Remove preview for closed PR #${{ github.event.number }}"
+            git push origin gh-pages
+          else
+            echo "PR preview directory doesn't exist, nothing to clean up"
+          fi
 
       - name: Comment on closed PR
         uses: actions/github-script@v7
