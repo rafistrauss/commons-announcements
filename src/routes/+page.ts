@@ -85,7 +85,8 @@ function getLiturgicalNotices(date: Date, service: 'mincha' | 'maariv' | 'shacha
 }
 
 /**
- * Determine if Tzidkatcha should be said on this date. 
+ * Determine if Tzidkatcha (and El Maleh Rachamim) should be said on this date. 
+ * El Maleh Rachamim follows the same rules as Tachanun omission.
  *
  * @param date 
  * @returns 
@@ -161,6 +162,132 @@ function hasYomTovInUpcomingWeekExcludingNextShabbat(shabbatDate: Date): boolean
     if (jewishCal.isAssurBemelacha()) return true;
   }
   return false;
+}
+
+/**
+ * Get El Maleh Rachamim status and warnings
+ * El Maleh Rachamim is not recited on Shabbos when either Friday or Shabbos is a special day
+ * (follows Tachanun omission rules)
+ * 
+ * @param shabbatDate The current Shabbat date (Saturday)
+ * @returns Information about El Maleh Rachamim status
+ */
+function getElMalehRachamimInfo(shabbatDate: Date): {
+  shouldSay: boolean;
+  reason?: string;
+  isLastShabbosBeforeOmission?: boolean;
+  nextAllowedDate?: Date;
+  nextAllowedDateString?: string;
+} {
+  // Check if El Maleh Rachamim should be said this Shabbos
+  // It's not said if either Friday OR Shabbos is a special day
+  const fridayDate = new Date(shabbatDate);
+  fridayDate.setDate(shabbatDate.getDate() - 1);
+  
+  const fridayStatus = isSpecialDay(fridayDate);
+  const shabbatStatus = isSpecialDay(shabbatDate);
+  
+  const shouldSayToday = !fridayStatus.isSpecial && !shabbatStatus.isSpecial;
+  const todayReason = fridayStatus.isSpecial ? fridayStatus.reason : shabbatStatus.reason;
+  
+  // If we can say it today, check if next Shabbos is the start of a period when we can't
+  if (shouldSayToday) {
+    const nextFriday = new Date(shabbatDate);
+    nextFriday.setDate(shabbatDate.getDate() + 6);
+    const nextShabbat = new Date(shabbatDate);
+    nextShabbat.setDate(shabbatDate.getDate() + 7);
+    
+    const nextFridayStatus = isSpecialDay(nextFriday);
+    const nextShabbatStatus = isSpecialDay(nextShabbat);
+    
+    if (nextFridayStatus.isSpecial || nextShabbatStatus.isSpecial) {
+      const nextWeekReason = nextFridayStatus.isSpecial ? nextFridayStatus.reason : nextShabbatStatus.reason;
+      // Next Shabbos is a special day, find when El Maleh Rachamim will be allowed again
+      let searchDate = new Date(nextShabbat);
+      let foundDate: Date | undefined;
+      
+      // Search up to 60 days ahead
+      for (let i = 7; i <= 60; i += 7) {
+        searchDate = new Date(nextShabbat);
+        searchDate.setDate(nextShabbat.getDate() + i);
+        
+        // Only check on Shabbat
+        if (searchDate.getDay() === 6) {
+          const searchStatus = isSpecialDay(searchDate);
+          if (!searchStatus.isSpecial) {
+            foundDate = searchDate;
+            break;
+          }
+        }
+      }
+      
+      if (foundDate) {
+        const options: Intl.DateTimeFormatOptions = { 
+          weekday: 'long',
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        };
+        const nextAllowedDateString = foundDate.toLocaleDateString('en-US', options);
+        
+        return {
+          shouldSay: true,
+          isLastShabbosBeforeOmission: true,
+          nextAllowedDate: foundDate,
+          nextAllowedDateString: nextAllowedDateString,
+          reason: nextWeekReason
+        };
+      }
+    }
+  }
+  
+  // If we can't say it today, find when it will be allowed again
+  if (!shouldSayToday) {
+    let foundDate: Date | undefined;
+    
+    // Search up to 60 days ahead (checking each Shabbos)
+    for (let i = 7; i <= 60; i += 7) {
+      const searchShabbat = new Date(shabbatDate);
+      searchShabbat.setDate(shabbatDate.getDate() + i);
+      const searchFriday = new Date(searchShabbat);
+      searchFriday.setDate(searchShabbat.getDate() - 1);
+      
+      // Check if either Friday or Shabbat is special
+      const searchFridayStatus = isSpecialDay(searchFriday);
+      const searchShabbatStatus = isSpecialDay(searchShabbat);
+      
+      if (!searchFridayStatus.isSpecial && !searchShabbatStatus.isSpecial) {
+        foundDate = searchShabbat;
+        break;
+      }
+    }
+    
+    if (foundDate) {
+      const options: Intl.DateTimeFormatOptions = { 
+        weekday: 'long',
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      };
+      const nextAllowedDateString = foundDate.toLocaleDateString('en-US', options);
+      
+      return {
+        shouldSay: false,
+        reason: todayReason,
+        nextAllowedDate: foundDate,
+        nextAllowedDateString: nextAllowedDateString
+      };
+    }
+    
+    return {
+      shouldSay: false,
+      reason: todayReason
+    };
+  }
+  
+  return {
+    shouldSay: true
+  };
 }
 
 /**
@@ -438,6 +565,9 @@ export const load: PageLoad = async ({ url, fetch }) => {
   // Check if Kiddush Levana can be said on Motzei Shabbat
   const kiddushLevanaInfo = getKiddushLevanaInfo(shabbat);
 
+  // Check El Maleh Rachamim status
+  const elMalehRachamimInfo = getElMalehRachamimInfo(shabbat);
+
   return {
     friday: { 
       ...fridayZmanim, 
@@ -463,5 +593,6 @@ export const load: PageLoad = async ({ url, fetch }) => {
     generalAnnouncements,
     aseretYemeiTeshuvaActive,
     kiddushLevanaInfo,
+    elMalehRachamimInfo,
   };
 }

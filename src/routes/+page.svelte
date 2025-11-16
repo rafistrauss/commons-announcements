@@ -467,6 +467,44 @@
 		text-align: center;
 	}
 
+	.el-maleh-rachamim-notice {
+		padding: 15px;
+		margin: 20px 0;
+		border-radius: 6px;
+		border: 2px solid;
+	}
+
+	.el-maleh-rachamim-notice.omission {
+		background: #fff3e0;
+		border-color: #ff9800;
+	}
+
+	.el-maleh-rachamim-notice.warning {
+		background: #fff9c4;
+		border-color: #fbc02d;
+	}
+
+	.el-maleh-rachamim-title {
+		font-size: 22px;
+		font-weight: 700;
+		margin-bottom: 8px;
+		text-align: center;
+	}
+
+	.el-maleh-rachamim-notice.omission .el-maleh-rachamim-title {
+		color: #f57c00;
+	}
+
+	.el-maleh-rachamim-notice.warning .el-maleh-rachamim-title {
+		color: #f9a825;
+	}
+
+	.el-maleh-rachamim-details {
+		font-size: 18px;
+		text-align: center;
+		color: #333;
+	}
+
 	/* This style sets the correct print dimensions for some reason */
 	#print-area-display {
 		position: absolute;
@@ -683,6 +721,35 @@
 				{/if}
 			</div>
 		</div>
+	{/if}
+
+	<!-- El Maleh Rachamim Notice -->
+	{#if data.elMalehRachamimInfo}
+		{#if !data.elMalehRachamimInfo.shouldSay}
+			<div class="el-maleh-rachamim-notice omission">
+				<div class="el-maleh-rachamim-title">
+					⚠️ El Maleh Rachamim is NOT recited today ⚠️
+				</div>
+				<div class="el-maleh-rachamim-details">
+					Reason: {data.elMalehRachamimInfo.reason || 'Special day'}
+					{#if data.elMalehRachamimInfo.nextAllowedDateString}
+						<br/>Next time to recite: {data.elMalehRachamimInfo.nextAllowedDateString}
+					{/if}
+				</div>
+			</div>
+		{:else if data.elMalehRachamimInfo.isLastShabbosBeforeOmission}
+			<div class="el-maleh-rachamim-notice warning">
+				<div class="el-maleh-rachamim-title">
+					⚠️ Last Shabbos for El Maleh Rachamim ⚠️
+				</div>
+				<div class="el-maleh-rachamim-details">
+					Next week ({data.elMalehRachamimInfo.reason || 'special day'}), El Maleh Rachamim will NOT be recited.
+					{#if data.elMalehRachamimInfo.nextAllowedDateString}
+						<br/>Next time to recite: {data.elMalehRachamimInfo.nextAllowedDateString}
+					{/if}
+				</div>
+			</div>
+		{/if}
 	{/if}
 
 	<!-- General Announcements Section -->
