@@ -5,19 +5,22 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+    types: [opened, synchronize, reopened, closed]
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
+  pull-requests: write
 
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || 'pages' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: github.event.action != 'closed'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,18 +38,34 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Build
+      - name: Build for PR preview
+        if: github.event_name == 'pull_request'
+        run: |
+          export PUBLIC_BASE_PATH="/commons-announcements/pr-${{ github.event.number }}"
+          bun run build
+        env:
+          NODE_ENV: production
+
+      - name: Build for production
+        if: github.event_name == 'push'
         run: bun run build
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload artifact
+      - name: Upload artifact for production
+        if: github.event_name == 'push'
         uses: actions/upload-pages-artifact@v3
         with:
           path: build
 
-  deploy:
+      - name: Upload PR preview artifact
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-preview-${{ github.event.number }}
+          path: build
+          retention-days: 7
+
+  deploy-production:
+    if: github.event_name == 'push'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -56,3 +75,120 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  deploy-pr-preview:
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download PR preview artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pr-preview-${{ github.event.number }}
+          path: pr-preview-temp
+
+      - name: Deploy PR preview
+        run: |
+          # Create PR preview directory
+          mkdir -p pr-${{ github.event.number }}
+          
+          # Copy built files to PR preview directory
+          cp -r pr-preview-temp/* pr-${{ github.event.number }}/
+          
+          # Clean up temp directory
+          rm -rf pr-preview-temp
+          
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Commit and push
+          git add pr-${{ github.event.number }}
+          git commit -m "Deploy preview for PR #${{ github.event.number }}" || echo "No changes to commit"
+          git push origin gh-pages
+
+      - name: Comment PR with preview URL
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const previewUrl = `https://${{ github.repository_owner }}.github.io/commons-announcements/pr-${prNumber}/`;
+            
+            // Find existing comment
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+            
+            const botComment = comments.data.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('PR Preview')
+            );
+            
+            const commentBody = `## 🚀 PR Preview
+            
+            Your preview is ready! 
+            
+            **Preview URL:** ${previewUrl}
+            
+            The preview will be updated automatically when you push new commits to this PR.`;
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: commentBody
+              });
+            }
+
+  cleanup-pr-preview:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Remove PR preview
+        run: |
+          # Remove PR preview directory
+          rm -rf pr-${{ github.event.number }}
+          
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Commit and push
+          git add .
+          git commit -m "Remove preview for closed PR #${{ github.event.number }}" || echo "No changes to commit"
+          git push origin gh-pages
+
+      - name: Comment on closed PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: '🧹 PR preview has been cleaned up.'
+            });
