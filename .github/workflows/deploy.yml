@@ -99,9 +99,18 @@ jobs:
             git checkout --orphan gh-pages
             git rm -rf . || true
             echo "# GitHub Pages" > README.md
-            git add README.md
+            touch .nojekyll
+            git add README.md .nojekyll
             git commit -m "Initialize gh-pages branch"
             git push origin gh-pages
+          fi
+          
+          # Ensure .nojekyll exists (in case branch was created without it)
+          if [ ! -f ".nojekyll" ]; then
+            touch .nojekyll
+            git add .nojekyll
+            git commit -m "Add .nojekyll file" || true
+            git push origin gh-pages || true
           fi
 
       - name: Download PR preview artifact
