@@ -166,8 +166,8 @@ function hasYomTovInUpcomingWeekExcludingNextShabbat(shabbatDate: Date): boolean
 
 /**
  * Get El Maleh Rachamim status and warnings
- * El Maleh Rachamim is not recited on Shabbos when either Friday or Shabbos is a special day
- * (follows Tachanun omission rules)
+ * El Maleh Rachamim is recited after Leining on Shabbat Mincha
+ * It is not recited on Shabbos when Shabbos is a special day (follows Tachanun omission rules)
  * 
  * @param shabbatDate The current Shabbat date (Saturday)
  * @returns Information about El Maleh Rachamim status
@@ -180,28 +180,21 @@ function getElMalehRachamimInfo(shabbatDate: Date): {
   nextAllowedDateString?: string;
 } {
   // Check if El Maleh Rachamim should be said this Shabbos
-  // It's not said if either Friday OR Shabbos is a special day
-  const fridayDate = new Date(shabbatDate);
-  fridayDate.setDate(shabbatDate.getDate() - 1);
-  
-  const fridayStatus = isSpecialDay(fridayDate);
+  // It's not said if Shabbos is a special day
   const shabbatStatus = isSpecialDay(shabbatDate);
   
-  const shouldSayToday = !fridayStatus.isSpecial && !shabbatStatus.isSpecial;
-  const todayReason = fridayStatus.isSpecial ? fridayStatus.reason : shabbatStatus.reason;
+  const shouldSayToday = !shabbatStatus.isSpecial;
+  const todayReason = shabbatStatus.reason;
   
   // If we can say it today, check if next Shabbos is the start of a period when we can't
   if (shouldSayToday) {
-    const nextFriday = new Date(shabbatDate);
-    nextFriday.setDate(shabbatDate.getDate() + 6);
     const nextShabbat = new Date(shabbatDate);
     nextShabbat.setDate(shabbatDate.getDate() + 7);
     
-    const nextFridayStatus = isSpecialDay(nextFriday);
     const nextShabbatStatus = isSpecialDay(nextShabbat);
     
-    if (nextFridayStatus.isSpecial || nextShabbatStatus.isSpecial) {
-      const nextWeekReason = nextFridayStatus.isSpecial ? nextFridayStatus.reason : nextShabbatStatus.reason;
+    if (nextShabbatStatus.isSpecial) {
+      const nextWeekReason = nextShabbatStatus.reason;
       // Next Shabbos is a special day, find when El Maleh Rachamim will be allowed again
       let searchDate = new Date(nextShabbat);
       let foundDate: Date | undefined;
@@ -249,14 +242,11 @@ function getElMalehRachamimInfo(shabbatDate: Date): {
     for (let i = 7; i <= 60; i += 7) {
       const searchShabbat = new Date(shabbatDate);
       searchShabbat.setDate(shabbatDate.getDate() + i);
-      const searchFriday = new Date(searchShabbat);
-      searchFriday.setDate(searchShabbat.getDate() - 1);
       
-      // Check if either Friday or Shabbat is special
-      const searchFridayStatus = isSpecialDay(searchFriday);
+      // Check if Shabbat is special
       const searchShabbatStatus = isSpecialDay(searchShabbat);
       
-      if (!searchFridayStatus.isSpecial && !searchShabbatStatus.isSpecial) {
+      if (!searchShabbatStatus.isSpecial) {
         foundDate = searchShabbat;
         break;
       }
