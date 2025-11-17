@@ -728,7 +728,7 @@
 		{#if !data.elMalehRachamimInfo.shouldSay}
 			<div class="el-maleh-rachamim-notice omission">
 				<div class="el-maleh-rachamim-title">
-					⚠️ El Maleh Rachamim is NOT recited today ⚠️
+					⚠️ Maleh Rachamim is NOT recited today ⚠️
 				</div>
 				<div class="el-maleh-rachamim-details">
 					Reason: {data.elMalehRachamimInfo.reason || 'Special day'}
@@ -740,10 +740,10 @@
 		{:else if data.elMalehRachamimInfo.isLastShabbosBeforeOmission}
 			<div class="el-maleh-rachamim-notice warning">
 				<div class="el-maleh-rachamim-title">
-					⚠️ Last Shabbos for El Maleh Rachamim ⚠️
+					⚠️ Last Shabbos for Maleh Rachamim ⚠️
 				</div>
 				<div class="el-maleh-rachamim-details">
-					Next week ({data.elMalehRachamimInfo.reason || 'special day'}), El Maleh Rachamim will NOT be recited.
+					Next week ({data.elMalehRachamimInfo.reason || 'special day'}), Maleh Rachamim will NOT be recited.
 					{#if data.elMalehRachamimInfo.nextAllowedDateString}
 						<br/>Next time to recite: {data.elMalehRachamimInfo.nextAllowedDateString}
 					{/if}

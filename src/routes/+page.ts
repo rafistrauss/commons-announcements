@@ -221,7 +221,7 @@ function getElMalehRachamimInfo(shabbatDate: Date): {
           month: 'long', 
           day: 'numeric' 
         };
-        const nextAllowedDateString = foundDate.toLocaleDateString('en-US', options);
+        const nextAllowedDateString = foundDate.toLocaleDateString('en-US', options).replace('Saturday', 'Shabbat');
         
         return {
           shouldSay: true,
@@ -259,7 +259,7 @@ function getElMalehRachamimInfo(shabbatDate: Date): {
         month: 'long', 
         day: 'numeric' 
       };
-      const nextAllowedDateString = foundDate.toLocaleDateString('en-US', options);
+      const nextAllowedDateString = foundDate.toLocaleDateString('en-US', options).replace('Saturday', 'Shabbat');
       
       return {
         shouldSay: false,
