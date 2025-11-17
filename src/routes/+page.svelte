@@ -467,6 +467,44 @@
 		text-align: center;
 	}
 
+	.el-maleh-rachamim-notice {
+		padding: 15px;
+		margin: 20px 0;
+		border-radius: 6px;
+		border: 2px solid;
+	}
+
+	.el-maleh-rachamim-notice.omission {
+		background: #fff3e0;
+		border-color: #ff9800;
+	}
+
+	.el-maleh-rachamim-notice.warning {
+		background: #fff9c4;
+		border-color: #fbc02d;
+	}
+
+	.el-maleh-rachamim-title {
+		font-size: 22px;
+		font-weight: 700;
+		margin-bottom: 8px;
+		text-align: center;
+	}
+
+	.el-maleh-rachamim-notice.omission .el-maleh-rachamim-title {
+		color: #f57c00;
+	}
+
+	.el-maleh-rachamim-notice.warning .el-maleh-rachamim-title {
+		color: #f9a825;
+	}
+
+	.el-maleh-rachamim-details {
+		font-size: 18px;
+		text-align: center;
+		color: #333;
+	}
+
 	/* This style sets the correct print dimensions for some reason */
 	#print-area-display {
 		position: absolute;
@@ -629,6 +667,15 @@
 			{#if !data.shabbat.shouldSayTzidkatcha}
 				<div class="tzidkatcha-notice">
 					No צדקתך ({data.shabbat.tzidkatchaReason})
+				</div>
+			{/if}
+			{#if data.elMalehRachamimInfo && !data.elMalehRachamimInfo.shouldSay}
+				<div class="tzidkatcha-notice">
+					No א-ל מלא רחמים ({data.elMalehRachamimInfo.reason || 'Special day'})
+				</div>
+			{:else if data.elMalehRachamimInfo && data.elMalehRachamimInfo.isLastShabbosBeforeOmission}
+				<div class="tzidkatcha-notice" style="background: #fff9c4; border-color: #fbc02d;">
+					⚠️ Last chance to say א-ל מלא רחמים until {data.elMalehRachamimInfo.nextAllowedDateString || 'TBD'} (due to {data.elMalehRachamimInfo.reason || 'special day'})
 				</div>
 			{/if}
 			<div class="time-item">
