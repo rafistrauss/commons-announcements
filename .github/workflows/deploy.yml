@@ -48,7 +48,11 @@ jobs:
 
       - name: Build for production
         if: github.event_name == 'push'
-        run: bun run build
+        run: |
+          export PUBLIC_BASE_PATH=""
+          bun run build
+        env:
+          NODE_ENV: production
 
       - name: Upload artifact for production
         if: github.event_name == 'push'
