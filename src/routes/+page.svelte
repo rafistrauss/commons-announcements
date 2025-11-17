@@ -673,6 +673,10 @@
 				<div class="tzidkatcha-notice">
 					No א-ל מלא רחמים ({data.elMalehRachamimInfo.reason || 'Special day'})
 				</div>
+			{:else if data.elMalehRachamimInfo && data.elMalehRachamimInfo.isLastShabbosBeforeOmission}
+				<div class="tzidkatcha-notice" style="background: #fff9c4; border-color: #fbc02d;">
+					⚠️ Last week for א-ל מלא רחמים - Next week: {data.elMalehRachamimInfo.reason || 'special day'}
+				</div>
 			{/if}
 			<div class="time-item">
 				<span class="time-label">Maariv:</span>
