@@ -43,9 +43,21 @@ bun run build
 
 This project is configured for automatic deployment to GitHub Pages:
 
+### Production Deployment
 1. Push to `main` branch
 2. GitHub Actions will automatically build and deploy
-3. Site will be available at `https://yourusername.github.io/shabbat-announcements`
+3. Site will be available at `https://yourusername.github.io/commons-announcements`
+
+### PR Preview Deployments
+Pull requests automatically get preview deployments:
+
+1. Open a pull request against `main`
+2. GitHub Actions will build a preview with a unique URL
+3. A comment will be posted on the PR with the preview link (e.g., `https://yourusername.github.io/commons-announcements/pr-123/`)
+4. The preview updates automatically when you push new commits
+5. When the PR is closed, the preview is automatically cleaned up
+
+This allows you to preview changes before merging to production!
 
 ## Configuration
 
