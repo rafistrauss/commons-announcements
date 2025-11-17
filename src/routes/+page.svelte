@@ -669,6 +669,11 @@
 					No צדקתך ({data.shabbat.tzidkatchaReason})
 				</div>
 			{/if}
+			{#if data.elMalehRachamimInfo && !data.elMalehRachamimInfo.shouldSay}
+				<div class="tzidkatcha-notice">
+					No א-ל מלא רחמים ({data.elMalehRachamimInfo.reason || 'Special day'})
+				</div>
+			{/if}
 			<div class="time-item">
 				<span class="time-label">Maariv:</span>
 				<span class="time-value" contenteditable="true">{data.maariv}</span>
@@ -721,35 +726,6 @@
 				{/if}
 			</div>
 		</div>
-	{/if}
-
-	<!-- El Maleh Rachamim Notice -->
-	{#if data.elMalehRachamimInfo}
-		{#if !data.elMalehRachamimInfo.shouldSay}
-			<div class="el-maleh-rachamim-notice omission">
-				<div class="el-maleh-rachamim-title">
-					⚠️ Maleh Rachamim is NOT recited today ⚠️
-				</div>
-				<div class="el-maleh-rachamim-details">
-					Reason: {data.elMalehRachamimInfo.reason || 'Special day'}
-					{#if data.elMalehRachamimInfo.nextAllowedDateString}
-						<br/>Next time to recite: {data.elMalehRachamimInfo.nextAllowedDateString}
-					{/if}
-				</div>
-			</div>
-		{:else if data.elMalehRachamimInfo.isLastShabbosBeforeOmission}
-			<div class="el-maleh-rachamim-notice warning">
-				<div class="el-maleh-rachamim-title">
-					⚠️ Last Shabbos for Maleh Rachamim ⚠️
-				</div>
-				<div class="el-maleh-rachamim-details">
-					Next week ({data.elMalehRachamimInfo.reason || 'special day'}), Maleh Rachamim will NOT be recited.
-					{#if data.elMalehRachamimInfo.nextAllowedDateString}
-						<br/>Next time to recite: {data.elMalehRachamimInfo.nextAllowedDateString}
-					{/if}
-				</div>
-			</div>
-		{/if}
 	{/if}
 
 	<!-- General Announcements Section -->
