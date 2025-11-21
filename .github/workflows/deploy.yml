@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [ main ]
     types: [opened, synchronize, reopened, closed]
+  workflow_dispatch: # Allow manual triggering
+  workflow_run:
+    workflows: ["Update Minyan Times"]
+    types:
+      - completed
+    branches: [ main ]
 
 permissions:
   contents: write
@@ -20,7 +26,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: github.event.action != 'closed'
+    if: github.event.action != 'closed' && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -47,7 +53,7 @@ jobs:
           NODE_ENV: production
 
       - name: Build for production
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_run'
         run: |
           export PUBLIC_BASE_PATH=""
           bun run build
@@ -55,7 +61,7 @@ jobs:
           NODE_ENV: production
 
       - name: Upload artifact for production
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_run'
         uses: actions/upload-pages-artifact@v3
         with:
           path: build
@@ -69,7 +75,7 @@ jobs:
           retention-days: 7
 
   deploy-production:
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_run'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
