@@ -44,9 +44,14 @@ bun run build
 This project is configured for automatic deployment to GitHub Pages:
 
 ### Production Deployment
-1. Push to `main` branch
-2. GitHub Actions will automatically build and deploy
-3. Site will be available at `https://yourusername.github.io/commons-announcements`
+
+Production deployments can be triggered in multiple ways:
+
+1. **Automatic on push**: Push to `main` branch and GitHub Actions will automatically build and deploy
+2. **Manual trigger**: Use the "Run workflow" button in the Actions tab to manually trigger a deployment
+3. **After minyan times update**: Automatically deploys when the "Update Minyan Times" workflow completes successfully
+
+The site will be available at `https://yourusername.github.io/commons-announcements`
 
 ### PR Preview Deployments
 Pull requests automatically get preview deployments:
