@@ -53,7 +53,7 @@ jobs:
           NODE_ENV: production
 
       - name: Build for production
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_run'
+        if: github.event_name != 'pull_request'
         run: |
           export PUBLIC_BASE_PATH=""
           bun run build
@@ -61,7 +61,7 @@ jobs:
           NODE_ENV: production
 
       - name: Upload artifact for production
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_run'
+        if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:
           path: build
@@ -75,7 +75,7 @@ jobs:
           retention-days: 7
 
   deploy-production:
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_run'
+    if: github.event_name != 'pull_request'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
