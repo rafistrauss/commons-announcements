@@ -35,8 +35,16 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           message: "Update minyan times - $(date)"
       
+      - name: Wait for push to complete
+        run: sleep 5
+      
       - name: Trigger deployment
         run: |
-          gh workflow run deploy.yml
+          if gh workflow run deploy.yml; then
+            echo "✓ Deployment workflow triggered successfully"
+          else
+            echo "✗ Failed to trigger deployment workflow"
+            exit 1
+          fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
