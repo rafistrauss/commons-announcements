@@ -8,6 +8,7 @@ on:
     types: [opened, synchronize, reopened, closed]
   workflow_dispatch: # Allow manual triggering
   workflow_run:
+    # Deploy after minyan times are updated (workflow name must match update-minyan-times.yml)
     workflows: ["Update Minyan Times"]
     types:
       - completed
@@ -26,6 +27,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Skip if: PR is being closed, or if workflow_run triggered but didn't succeed
     if: github.event.action != 'closed' && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
     steps:
       - name: Checkout
