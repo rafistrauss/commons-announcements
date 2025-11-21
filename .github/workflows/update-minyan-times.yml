@@ -2,6 +2,7 @@ name: Update Minyan Times
 
 permissions:
   contents: write
+  actions: write
 
 on:
   schedule:
@@ -33,3 +34,17 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           message: "Update minyan times - $(date)"
+      
+      - name: Wait for push to complete
+        run: sleep 5
+      
+      - name: Trigger deployment
+        run: |
+          if gh workflow run deploy.yml --ref main; then
+            echo "✓ Deployment workflow triggered successfully on main branch"
+          else
+            echo "✗ Failed to trigger deployment workflow"
+            exit 1
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

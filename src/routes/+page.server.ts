@@ -1,6 +1,38 @@
 import kosherZmanimPkg from 'kosher-zmanim';
 const { getZmanimJson } = kosherZmanimPkg;
 import { JewishCalendar } from 'kosher-zmanim';
+import minyanTimesData from '$lib/minyan-times.json';
+
+type MinyanTimesJson = {
+  times: {
+    [date: string]: {
+      fridayMincha: string;
+      shabbatMincha: string;
+      shabbatMaariv: string;
+    };
+  };
+};
+
+const minyanTimesDataTyped = minyanTimesData as MinyanTimesJson;
+
+// Function to get minyan times from JSON data
+function getMinyanTimes(fridayDate: Date): {
+  fridayMincha: string | null;
+  shabbatMincha: string | null;
+  shabbatMaariv: string | null;
+} {
+  const fridayKey = fridayDate.toISOString().slice(0, 10);
+  const times = minyanTimesDataTyped.times[fridayKey];
+  if (!times) {
+    console.warn(`No minyan times found for ${fridayKey}`);
+    return { fridayMincha: null, shabbatMincha: null, shabbatMaariv: null };
+  }
+  return {
+    fridayMincha: times.fridayMincha || null,
+    shabbatMincha: times.shabbatMincha || null,
+    shabbatMaariv: times.shabbatMaariv || null,
+  };
+}
 
 // Function to get liturgical notices for a specific date and service
 function getLiturgicalNotices(date: Date, service: 'mincha' | 'maariv' | 'shacharit'): { additions: string[], omissions: string[] } {
@@ -328,6 +360,9 @@ export async function load({ url }) {
   // Check Tzidkatcha only for Shabbat Mincha service (not Friday)
   const shabbatTzidkatchaStatus = isSpecialDay(shabbat);
 
+  // Get minyan times from JSON
+  const { fridayMincha, shabbatMincha, shabbatMaariv } = getMinyanTimes(friday);
+
   // General announcements for this week
   const generalAnnouncements: string[] = [
   ];
@@ -337,7 +372,7 @@ export async function load({ url }) {
       ...fridayZmanim, 
       parsha: weeklyParsha,
       englishDate: fridayEnglishDate,
-      mincha: '6:31 PM',
+      mincha: fridayMincha || "No data available for this date",
       minchaNotices: fridayMinchaNotices,
       maarivNotices: fridayMaarivNotices
     },
@@ -345,14 +380,14 @@ export async function load({ url }) {
       ...shabbatZmanim, 
       parsha: weeklyParsha,
       englishDate: shabbatEnglishDate,
-      mincha: '6:15 PM',
+      mincha: shabbatMincha || "No data available for this date",
       minchaNotices: shabbatMinchaNotices,
       maarivNotices: shabbatMaarivNotices,
       shouldSayTzidkatcha: !shabbatTzidkatchaStatus.isSpecial,
       tzidkatchaReason: shabbatTzidkatchaStatus.reason,
       minchaParsha: nextWeekParsha
     },
-    maariv: '7:25 PM',
+    maariv: shabbatMaariv || "No data available for this date",
     weekOffset,
     generalAnnouncements,
   };
