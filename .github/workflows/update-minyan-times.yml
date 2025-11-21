@@ -40,8 +40,8 @@ jobs:
       
       - name: Trigger deployment
         run: |
-          if gh workflow run deploy.yml; then
-            echo "✓ Deployment workflow triggered successfully"
+          if gh workflow run deploy.yml --ref main; then
+            echo "✓ Deployment workflow triggered successfully on main branch"
           else
             echo "✗ Failed to trigger deployment workflow"
             exit 1
