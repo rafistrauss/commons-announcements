@@ -15,7 +15,7 @@ type MinyanTimesJson = {
 
 const minyanTimesDataTyped = minyanTimesData as MinyanTimesJson;
 
-// Function to get minyan times from static JSON file
+// Function to get minyan times from JSON data
 function getMinyanTimes(fridayDate: Date): {
   fridayMincha: string | null;
   shabbatMincha: string | null;
