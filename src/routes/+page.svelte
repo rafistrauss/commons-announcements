@@ -18,10 +18,10 @@
 
 	function weekHref(offset: number) {
 		if (offset === 0) return resolve('/');
-		return `?week=${offset}`;
+		return resolve('/') + `?week=${offset}`;
 	}
 	function jumpToToday() {
-		window.location.href = '/';
+		window.location.href = resolve('/');
 	}
 
 	async function saveAsImage() {
