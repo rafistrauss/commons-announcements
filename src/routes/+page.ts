@@ -361,6 +361,77 @@ export async function load({ url }) {
   // Get minyan times from JSON
   const { fridayMincha, shabbatMincha, shabbatMaariv } = getMinyanTimes(friday);
 
+  // Calculate Kiddush Levana information
+  function getKiddushLevanaInfo(shabbatDate: Date) {
+    const shabbatJewishCal = new JewishCalendar(shabbatDate);
+    const moladDate = shabbatJewishCal.getMoladAsDate();
+    
+    if (!moladDate) {
+      return null;
+    }
+    
+    const molad = moladDate.toJSDate();
+    const now = shabbatDate; // Use shabbat date as reference
+    
+    // Kiddush Levana can be said from 3 days (72 hours) after molad until 15 days after molad
+    const earliestTime = new Date(molad.getTime() + 3 * 24 * 60 * 60 * 1000); // 3 days after molad
+    const latestTime = new Date(molad.getTime() + 15 * 24 * 60 * 60 * 1000); // 15 days after molad
+    const idealTime = new Date(molad.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days after molad
+    
+    // Check if we can say Kiddush Levana on this motzei shabbos
+    const motzeiShabbos = new Date(shabbatDate);
+    motzeiShabbos.setDate(shabbatDate.getDate() + 1);
+    motzeiShabbos.setHours(0, 0, 0, 0); // Start of Sunday
+    
+    const canSayTonight = motzeiShabbos >= earliestTime && motzeiShabbos <= latestTime;
+    
+    if (!canSayTonight) {
+      return null;
+    }
+    
+    // Check if it's the ideal time (within 7 days window)
+    const isIdealTime = motzeiShabbos >= idealTime && motzeiShabbos < new Date(idealTime.getTime() + 24 * 60 * 60 * 1000);
+    
+    // Check if it's the last chance (last day)
+    const daysUntilDeadline = Math.floor((latestTime.getTime() - motzeiShabbos.getTime()) / (24 * 60 * 60 * 1000));
+    const lastChance = daysUntilDeadline === 0;
+    
+    // Check if it's the last motzei shabbos before deadline
+    const nextShabbat = new Date(shabbatDate);
+    nextShabbat.setDate(shabbatDate.getDate() + 7);
+    const nextMotzeiShabbos = new Date(nextShabbat);
+    nextMotzeiShabbos.setDate(nextShabbat.getDate() + 1);
+    nextMotzeiShabbos.setHours(0, 0, 0, 0);
+    
+    const lastMotzeiShabbos = nextMotzeiShabbos > latestTime && !lastChance;
+    
+    let reason = '';
+    if (isIdealTime) {
+      reason = 'This is the ideal time to say Kiddush Levana (7 days after the molad).';
+    } else if (lastChance) {
+      reason = 'This is the last day to say Kiddush Levana for this month!';
+    } else if (lastMotzeiShabbos) {
+      reason = 'This is the last Motzei Shabbos to say Kiddush Levana for this month.';
+    } else {
+      const daysAfterMolad = Math.floor((motzeiShabbos.getTime() - molad.getTime()) / (24 * 60 * 60 * 1000));
+      reason = `Kiddush Levana can be said (${daysAfterMolad} days after the molad).`;
+    }
+    
+    return {
+      canSayTonight: true,
+      isIdealTime,
+      lastChance,
+      lastMotzeiShabbos,
+      reason,
+      lastTimeToSay: latestTime
+    };
+  }
+  
+  const kiddushLevanaInfo = getKiddushLevanaInfo(shabbat);
+  
+  // Calculate El Maleh Rachamim information (placeholder - would need full implementation)
+  const elMalehRachamimInfo = null; // TODO: Implement if needed
+
   // General announcements for this week
   const generalAnnouncements: string[] = [
   ];
@@ -388,5 +459,8 @@ export async function load({ url }) {
     maariv: shabbatMaariv || "No data available for this date",
     weekOffset,
     generalAnnouncements,
+    kiddushLevanaInfo,
+    elMalehRachamimInfo,
+    aseretYemeiTeshuvaActive: false, // TODO: Implement if needed
   };
 }
