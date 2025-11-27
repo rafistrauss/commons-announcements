@@ -1,6 +1,4 @@
-import kosherZmanimPkg from 'kosher-zmanim';
-const { getZmanimJson } = kosherZmanimPkg;
-import { JewishCalendar } from 'kosher-zmanim';
+import { getZmanimJson, JewishCalendar } from 'kosher-zmanim';
 import minyanTimesData from '$lib/minyan-times.json';
 
 type MinyanTimesJson = {
