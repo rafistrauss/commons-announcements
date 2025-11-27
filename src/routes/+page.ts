@@ -277,7 +277,7 @@ export async function load({ url }) {
   // Handle prerendering case where searchParams might not be available
   let weekOffset = 0;
   try {
-    weekOffset = parseInt(url.searchParams?.get('week') || '0');
+    weekOffset = parseInt(url.searchParams?.get('week') || '0', 10);
   } catch {
     // If searchParams is not available (e.g., during prerendering), use default
     weekOffset = 0;
