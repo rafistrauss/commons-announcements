@@ -510,26 +510,30 @@ export async function load({ url }) {
       };
     }
     
-    // Only check next week if we can say it this week
-    const nextShabbat = new Date(shabbatDate);
-    nextShabbat.setDate(shabbatDate.getDate() + 7);
-    const specialDayStatus = isSpecialDay(nextShabbat);
-    
-    // If next Shabbat is special, this is the last chance to say it
-    if (specialDayStatus.isSpecial) {
-      // Calculate when it will be allowed again (after the special period)
-      let nextAllowedDate = new Date(nextShabbat);
-      nextAllowedDate.setDate(nextAllowedDate.getDate() + 7); // At least next week
-      
-      return {
-        shouldSay: true,
-        isLastShabbosBeforeOmission: true,
-        reason: specialDayStatus.reason,
-        nextAllowedDateString: nextAllowedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
-      };
+    // Now check next Shabbat
+    let isLastShabbosBeforeOmission = false;
+    let nextShabbatWithElMaleh = new Date(shabbatDate);
+    let elMalehReasonSet = new Set<string>();
+    nextShabbatWithElMaleh.setDate(shabbatDate.getDate() + 7);
+
+
+    while (isSpecialDay(nextShabbatWithElMaleh).isSpecial) {
+      console.log(`Next Shabbat on ${nextShabbatWithElMaleh.toDateString()} is special (${isSpecialDay(nextShabbatWithElMaleh).reason}), checking following week.`);
+      isLastShabbosBeforeOmission = true;
+      // @ts-ignore The reason is guaranteed to be defined if isSpecial is true
+      elMalehReasonSet.add(isSpecialDay(nextShabbatWithElMaleh).reason);
+      nextShabbatWithElMaleh.setDate(nextShabbatWithElMaleh.getDate() + 7);
     }
+
+    const reasons = Array.from(elMalehReasonSet).join(', ');
+
     
-    return null;
+    return {
+      shouldSay: true,
+      isLastShabbosBeforeOmission: isLastShabbosBeforeOmission,
+      reason: reasons,
+      nextAllowedDateString: nextShabbatWithElMaleh.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
+    };
   }
   
   const elMalehRachamimInfo = getElMalehRachamimInfo(shabbat);
