@@ -39,7 +39,7 @@ function getMinyanTimes(fridayDate: Date): {
 // Function to get liturgical notices for a specific date and service
 function getLiturgicalNotices(date: Date, service: 'mincha' | 'maariv' | 'shacharit'): { additions: string[], omissions: string[] } {
   const jewishCal = new JewishCalendar(date);
-  const additions: string[] = [];
+  const additionsSet = new Set<string>();
   const omissions: string[] = [];
   
   // For Maariv, we need to check the next Jewish day (since Maariv starts the next day)
@@ -56,23 +56,23 @@ function getLiturgicalNotices(date: Date, service: 'mincha' | 'maariv' | 'shacha
   const day = calToCheck.getJewishDayOfMonth();
   const month = calToCheck.getJewishMonth();
   if (month === tishrei && day >= 3 && day <= 9) {
-    additions.push('המלך הקדוש (Aseret Yemei Teshuva)');
-    additions.push('Other Aseret Yemei Teshuva insertions: זכרנו לחיים, מי כמוך, וכתוב לחיים, בספר חיים');
+    additionsSet.add('המלך הקדוש (Aseret Yemei Teshuva)');
+    additionsSet.add('Other Aseret Yemei Teshuva insertions: זכרנו לחיים, מי כמוך, וכתוב לחיים, בספר חיים');
   }
   
   // Check for Rosh Chodesh
   if (calToCheck.isRoshChodesh()) {
-    additions.push('יעלה ויבא');
+    additionsSet.add('יעלה ויבא');
   }
   
   // Check for Yom Tov
-  if (calToCheck.isYomTov()) {
-    additions.push('יעלה ויבא');
+  if (calToCheck.isYomTovAssurBemelacha()) {
+    additionsSet.add('יעלה ויבא');
   }
   
   // Check for Chanukah
   if (calToCheck.isChanukah()) {
-    additions.push('על הניסים');
+    additionsSet.add('על הניסים');
   }
   
   // Check for L'david season (1 Elul through Hoshanah Rabbah - 21 Tishrei)
@@ -84,7 +84,7 @@ function getLiturgicalNotices(date: Date, service: 'mincha' | 'maariv' | 'shacha
     // Elul is month 6, Tishrei is month 7
     if (jewishMonth === 6 || // All of Elul
         (jewishMonth === 7 && jewishDay <= 21)) { // Tishrei through Hoshanah Rabbah (21st)
-      additions.push('לדוד');
+      additionsSet.add('לדוד');
     }
   }
 
@@ -95,7 +95,7 @@ function getLiturgicalNotices(date: Date, service: 'mincha' | 'maariv' | 'shacha
     // Add logic for fast days if needed
   }
   
-  return { additions, omissions };
+  return { additions: Array.from(additionsSet), omissions };
 }
 
 // Function to check if it's a special day when Tachanun (and thus Tzidkatcha) is omitted
@@ -499,6 +499,16 @@ export async function load({ url }) {
   // El Maleh Rachamim is omitted on special days (same as Tzidkatcha generally)
   // We'll check if next Shabbat has a special day that would cause omission
   function getElMalehRachamimInfo(shabbatDate: Date) {
+    // Check if this Shabbat itself has a special day first
+    const thisSpecialDay = isSpecialDay(shabbatDate);
+    if (thisSpecialDay.isSpecial) {
+      return {
+        shouldSay: false,
+        reason: thisSpecialDay.reason
+      };
+    }
+    
+    // Only check next week if we can say it this week
     const nextShabbat = new Date(shabbatDate);
     nextShabbat.setDate(shabbatDate.getDate() + 7);
     const specialDayStatus = isSpecialDay(nextShabbat);
@@ -514,15 +524,6 @@ export async function load({ url }) {
         isLastShabbosBeforeOmission: true,
         reason: specialDayStatus.reason,
         nextAllowedDateString: nextAllowedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
-      };
-    }
-    
-    // Check if this Shabbat itself has a special day
-    const thisSpecialDay = isSpecialDay(shabbatDate);
-    if (thisSpecialDay.isSpecial) {
-      return {
-        shouldSay: false,
-        reason: thisSpecialDay.reason
       };
     }
     
