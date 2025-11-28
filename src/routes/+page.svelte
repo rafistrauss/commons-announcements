@@ -726,7 +726,7 @@
 					{data.kiddushLevanaInfo.reason}
 				{/if}
 				{#if data.kiddushLevanaInfo.lastTimeToSay}
-					Last time to say: {data.kiddushLevanaInfo.lastTimeToSay.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+					Last time to say: {data.kiddushLevanaInfo.lastTimeToSay.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York', timeZoneName: 'short' })}
 				{/if}
 			</div>
 		</div>
