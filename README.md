@@ -45,7 +45,7 @@ This project is configured for automatic deployment to GitHub Pages:
 
 ### Production Deployment
 1. Push to `main` branch
-2. GitHub Actions will automatically build and deploy
+2. GitHub Actions will automatically build and deploy to the root of the `gh-pages` branch
 3. Site will be available at `https://yourusername.github.io/commons-announcements`
 
 ### PR Preview Deployments
@@ -58,6 +58,8 @@ Pull requests automatically get preview deployments:
 5. When the PR is closed, the preview is automatically cleaned up
 
 This allows you to preview changes before merging to production!
+
+**Technical Note:** Both production and PR preview deployments are committed to the `gh-pages` branch. The production site lives at the root, while PR previews are in `pr-{number}/` subdirectories. This ensures that the main site remains accessible even when PR previews are active.
 
 ## Configuration
 
