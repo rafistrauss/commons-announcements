@@ -19,7 +19,11 @@ function getMinyanTimes(fridayDate: Date): {
   shabbatMincha: string | null;
   shabbatMaariv: string | null;
 } {
-  const fridayKey = fridayDate.toISOString().slice(0, 10);
+  // Use local date components to avoid timezone issues with toISOString()
+  const year = fridayDate.getFullYear();
+  const month = String(fridayDate.getMonth() + 1).padStart(2, '0');
+  const day = String(fridayDate.getDate()).padStart(2, '0');
+  const fridayKey = `${year}-${month}-${day}`;
   const times = minyanTimesDataTyped.times[fridayKey];
   if (!times) {
     console.warn(`No minyan times found for ${fridayKey}`);
