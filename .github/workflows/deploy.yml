@@ -118,7 +118,7 @@ jobs:
         run: |
           # Remove all files except PR previews and gh-pages metadata
           find . -maxdepth 1 -type f -not -name '.nojekyll' -not -name 'README.md' -delete
-          find . -maxdepth 1 -type d -not -name '.' -not -name '..' -not -name '.git' -not -name 'pr-*' -not -name 'production-build-temp' -exec rm -rf {} +
+          find . -maxdepth 1 -type d -not -name '.' -not -name '..' -not -name '.git' -not -name 'pr-*' -not -name 'production-build-temp' -exec rm -rf {} + || true
           
           # Copy built files to root
           cp -r production-build-temp/* .
