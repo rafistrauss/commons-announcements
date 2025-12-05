@@ -631,7 +631,7 @@
 				{/if}
 				<div class="shkia-section">
 					<div class="shkia-title">Shkia</div>
-					<div>{data.friday.shkia?.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) || 'N/A'}</div>
+					<div>{data.friday.shkia?.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' }) || 'N/A'}</div>
 				</div>
 			</div>
 		</div>
@@ -701,7 +701,7 @@
 			<div class="bottom-section">
 				<div class="shkia-section">
 					<div class="shkia-title">Shkia</div>
-					<div>{data.shabbat.shkia?.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) || 'N/A'}</div>
+					<div>{data.shabbat.shkia?.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' }) || 'N/A'}</div>
 				</div>
 			</div>
 		</div>
