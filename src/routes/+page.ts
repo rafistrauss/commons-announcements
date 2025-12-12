@@ -538,9 +538,33 @@ export async function load({ url }) {
   
   const elMalehRachamimInfo = getElMalehRachamimInfo(shabbat);
 
-  // General announcements for this week
-  const generalAnnouncements: string[] = [
-  ];
+
+  // General announcements by Friday or Shabbat date (YYYY-MM-DD)
+  // Add entries as needed. Example:
+  // {
+  //   '2025-12-12': ["Special event this Friday!"],
+  //   '2025-12-13': ["Shabbat guest speaker!"]
+  // }
+  const announcementsByDate: Record<string, string[]> = {
+    '2025-12-12': [
+      "Everyone is invited to a special shiur and Seudat Shlishit with Rabbi Mandelstam in the Lefkowitzes' apartment between Mincha and Maariv.",
+    ],
+    // Add more date-specific announcements here
+  };
+
+  // Format Friday and Shabbat dates as YYYY-MM-DD
+  function formatDateKey(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  const fridayKey = formatDateKey(friday);
+  const shabbatKey = formatDateKey(shabbat);
+
+  // Prefer Friday, then Shabbat, else blank
+  const generalAnnouncements: string[] = announcementsByDate[fridayKey] || announcementsByDate[shabbatKey] || [];
 
   return {
     friday: { 
