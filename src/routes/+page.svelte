@@ -580,6 +580,12 @@
 		</div>
 	{/if}
 
+	{#if data.shabbat.isShabbatMevorchim}
+		<div class="rosh-chodesh-notice-main">
+			שבת מברכים
+		</div>
+	{/if}
+
 	<!-- Special Aseret Yemei Teshuva notice styled like Rosh Chodesh box, if present -->
 	{#if data.aseretYemeiTeshuvaActive}
 		<div class="special-liturgical-notice" style="margin-bottom: 16px;">

@@ -273,7 +273,24 @@ function getZmanim(date: Date) {
     shkia,
     hebrewDate,
     isRoshChodesh: jewishCal.isRoshChodesh(),
+    isShabbatMevorchim: isShabbatMevorchim(jewishCal),
   };
+}
+
+// Function to check if this Shabbat is Shabbat Mevorchim
+function isShabbatMevorchim(jewishCal: JewishCalendar): boolean {
+  // Shabbat Mevorchim is the Shabbat before Rosh Chodesh, except before Tishrei
+  // (no Shabbat Mevorchim for Tishrei)
+  // JewishCalendar: 1=Nissan, ..., 7=Tishrei, 12/13=Adar/Adar II
+  if (jewishCal.getDayOfWeek() !== 7) return false; // Only Shabbat
+  const nextDay = new Date(jewishCal.getDate());
+  nextDay.setDate(nextDay.getDate() + 7); // Next Shabbat
+  const nextShabbatCal = new JewishCalendar(nextDay);
+  // If next week is Rosh Chodesh (but not Tishrei)
+  return (
+    nextShabbatCal.isRoshChodesh() &&
+    nextShabbatCal.getJewishMonth() !== 7
+  );
 }
 
 export async function load({ url }) {
@@ -585,6 +602,7 @@ export async function load({ url }) {
       shouldSayTzidkatcha: !shabbatTzidkatchaStatus.isSpecial,
       tzidkatchaReason: shabbatTzidkatchaStatus.reason,
       minchaParsha: nextWeekParsha
+      ,isShabbatMevorchim: shabbatZmanim.isShabbatMevorchim
     },
     maariv: shabbatMaariv || "No data available for this date",
     weekOffset,
