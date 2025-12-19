@@ -209,6 +209,10 @@ function getHolidayName(date: Date): string | null {
   if (jewishMonth === 3 && jewishDay === 7) {
     return 'שבועות - יום שני';
   }
+
+  if (jewishCal.isChanukah()) {
+    return 'חנוכה';
+  }
   
   return 'יום טוב';
 }
