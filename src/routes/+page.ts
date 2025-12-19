@@ -382,7 +382,15 @@ export async function load({ url }) {
   const shabbatTzidkatchaStatus = isSpecialDay(shabbat);
 
   // Get minyan times from JSON
+
   const { fridayMincha, shabbatMincha, shabbatMaariv } = getMinyanTimes(friday);
+
+  // Alert logic: if any minyan time is missing, set a flag and message
+  let minyanAlert: { show: boolean; messages: string[] } = { show: false, messages: [] };
+  if (!fridayMincha) minyanAlert.messages.push('No Friday Mincha minyan this week.');
+  if (!shabbatMincha) minyanAlert.messages.push('No Shabbat Mincha minyan this week.');
+  if (!shabbatMaariv) minyanAlert.messages.push('No Shabbat Maariv minyan this week.');
+  if (minyanAlert.messages.length > 0) minyanAlert.show = true;
 
   /**
    * Calculate if Kiddush Levana can/should be said on Motzei Shabbat
@@ -610,5 +618,6 @@ export async function load({ url }) {
     kiddushLevanaInfo,
     elMalehRachamimInfo,
     aseretYemeiTeshuvaActive: false, // TODO: Implement if needed
+    minyanAlert,
   };
 }

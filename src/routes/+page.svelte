@@ -564,9 +564,53 @@
 	</header>
 
 
+
 	<div class="parsha-section">
 		<h2 class="parsha-title">{data.friday.parsha}</h2>
 	</div>
+
+	{#if data.minyanAlert && data.minyanAlert.show}
+		<div class="minyan-alert">
+			<div class="minyan-alert-title">Minyan Alert</div>
+			<ul class="minyan-alert-list">
+				{#each data.minyanAlert.messages as msg}
+					<li>{msg}</li>
+				{/each}
+			</ul>
+		</div>
+	{/if}
+<style>
+	.minyan-alert {
+		background: #fff3e0;
+		border: 2px solid #ff9800;
+		color: #b26a00;
+		padding: 18px 20px;
+		border-radius: 8px;
+		margin: 20px 0 24px 0;
+		font-size: 20px;
+		font-weight: 600;
+		box-shadow: 0 2px 8px rgba(255, 152, 0, 0.08);
+		text-align: center;
+	}
+	.minyan-alert-title {
+		font-size: 22px;
+		font-weight: 700;
+		margin-bottom: 8px;
+		color: #d84315;
+	}
+	.minyan-alert-list {
+		list-style: disc inside;
+		margin: 0;
+		padding: 0;
+		text-align: left;
+		display: inline-block;
+	}
+	.minyan-alert-list li {
+		font-size: 18px;
+		margin-bottom: 4px;
+		color: #b26a00;
+	}
+</style>
 
 	{#if data.friday.isRoshChodesh || data.shabbat.isRoshChodesh}
 		<div class="rosh-chodesh-notice-main">
