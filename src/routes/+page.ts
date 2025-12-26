@@ -616,8 +616,8 @@ export async function load({ url }) {
       maarivNotices: shabbatMaarivNotices,
       shouldSayTzidkatcha: !shabbatTzidkatchaStatus.isSpecial,
       tzidkatchaReason: shabbatTzidkatchaStatus.reason,
-      minchaParsha: nextWeekParsha
-      ,isShabbatMevorchim: shabbatZmanim.isShabbatMevorchim,
+      minchaParsha: nextWeekParsha,
+      isShabbatMevorchim: shabbatZmanim.isShabbatMevorchim,
       shacharis: shabbatShacharis
     },
     maariv: shabbatMaariv || "No data available for this date",
