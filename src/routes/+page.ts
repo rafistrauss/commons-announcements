@@ -618,7 +618,7 @@ export async function load({ url }) {
       tzidkatchaReason: shabbatTzidkatchaStatus.reason,
       minchaParsha: nextWeekParsha,
       isShabbatMevorchim: shabbatZmanim.isShabbatMevorchim,
-      shacharis: shabbatShacharis
+      shabbatShacharis: shabbatShacharis
     },
     maariv: shabbatMaariv || "No data available for this date",
     weekOffset,

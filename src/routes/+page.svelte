@@ -690,10 +690,10 @@
 			<h3 class="day-title">Shabbat</h3>
 			<div class="hebrew-date">{data.shabbat.hebrewDate}</div>
 			<div class="english-date">{data.shabbat.englishDate}</div>
-			{#if data.shabbat.shacharis}
+			{#if data.shabbat.shabbatShacharis}
 			<div class="time-item">
 				<span class="time-label">Shacharis:</span>
-				<span class="time-value" contenteditable="true">{data.shabbat.shacharis}</span>
+				<span class="time-value" contenteditable="true">{data.shabbat.shabbatShacharis}</span>
 			</div>
 			{/if}
 			<div class="time-item">
