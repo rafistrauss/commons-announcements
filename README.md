@@ -64,10 +64,7 @@ This allows you to preview changes before merging to production!
 ## Configuration
 
 - **Location**: Fair Lawn, NJ (zip code 07410)
-- **Mincha times**: Friday 7:30 PM, Shabbat 7:15 PM
-- **Maariv time**: 8:25 PM
 
-Times can be adjusted in `src/routes/+page.server.ts`.
 
 ## License
 
