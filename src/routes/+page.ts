@@ -7,6 +7,7 @@ type MinyanTimesJson = {
       fridayMincha: string;
       shabbatMincha: string;
       shabbatMaariv: string;
+      shabbatShacharis?: string;
     };
   };
 };
@@ -18,6 +19,7 @@ function getMinyanTimes(fridayDate: Date): {
   fridayMincha: string | null;
   shabbatMincha: string | null;
   shabbatMaariv: string | null;
+  shabbatShacharis: string | null;
 } {
   // Use local date components to avoid timezone issues with toISOString()
   const year = fridayDate.getFullYear();
@@ -27,12 +29,13 @@ function getMinyanTimes(fridayDate: Date): {
   const times = minyanTimesDataTyped.times[fridayKey];
   if (!times) {
     console.warn(`No minyan times found for ${fridayKey}`);
-    return { fridayMincha: null, shabbatMincha: null, shabbatMaariv: null };
+    return { fridayMincha: null, shabbatMincha: null, shabbatMaariv: null, shabbatShacharis: null };
   }
   return {
     fridayMincha: times.fridayMincha || null,
     shabbatMincha: times.shabbatMincha || null,
     shabbatMaariv: times.shabbatMaariv || null,
+    shabbatShacharis: times.shabbatShacharis || null,
   };
 }
 
@@ -387,7 +390,7 @@ export async function load({ url }) {
 
   // Get minyan times from JSON
 
-  const { fridayMincha, shabbatMincha, shabbatMaariv } = getMinyanTimes(friday);
+  const { fridayMincha, shabbatMincha, shabbatMaariv, shabbatShacharis } = getMinyanTimes(friday);
 
   // Alert logic: if any minyan time is missing, set a flag and message
   let minyanAlert: { show: boolean; messages: string[] } = { show: false, messages: [] };
@@ -613,8 +616,9 @@ export async function load({ url }) {
       maarivNotices: shabbatMaarivNotices,
       shouldSayTzidkatcha: !shabbatTzidkatchaStatus.isSpecial,
       tzidkatchaReason: shabbatTzidkatchaStatus.reason,
-      minchaParsha: nextWeekParsha
-      ,isShabbatMevorchim: shabbatZmanim.isShabbatMevorchim
+      minchaParsha: nextWeekParsha,
+      isShabbatMevorchim: shabbatZmanim.isShabbatMevorchim,
+      shabbatShacharis: shabbatShacharis
     },
     maariv: shabbatMaariv || "No data available for this date",
     weekOffset,
