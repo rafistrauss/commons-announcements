@@ -88,7 +88,7 @@
 			});
 
 			// Convert canvas to blob
-			canvas.toBlob((blob) => {
+			canvas.toBlob((blob: Blob | null) => {
 				if (!blob) {
 					alert('Failed to create image.');
 					document.body.style.cursor = originalCursor;
@@ -690,6 +690,12 @@
 			<h3 class="day-title">Shabbat</h3>
 			<div class="hebrew-date">{data.shabbat.hebrewDate}</div>
 			<div class="english-date">{data.shabbat.englishDate}</div>
+			{#if data.shabbat.shacharis}
+			<div class="time-item">
+				<span class="time-label">Shacharis:</span>
+				<span class="time-value" contenteditable="true">{data.shabbat.shacharis}</span>
+			</div>
+			{/if}
 			<div class="time-item">
 				<span class="time-label">Mincha:</span>
 				<span class="time-value" contenteditable="true">{data.shabbat.mincha}</span>
