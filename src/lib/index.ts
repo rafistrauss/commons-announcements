@@ -10,10 +10,13 @@ async function fetchWithRetry(url: string, options: RequestInit = {}, maxRetries
     try {
       const response = await fetch(url, options);
       
-      // If we get a server error (5xx), retry
-      if (response.status >= 500 && attempt < maxRetries - 1) {
-        console.debug(`Attempt ${attempt + 1} failed with status ${response.status}, retrying...`);
-        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt)));
+      // Retry on server errors (5xx) or rate limiting (429)
+      const shouldRetry = (response.status >= 500 || response.status === 429) && attempt < maxRetries - 1;
+      
+      if (shouldRetry) {
+        const delay = 1000 * Math.pow(2, attempt);
+        console.debug(`Attempt ${attempt + 1} failed with status ${response.status}, retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
         continue;
       }
       
@@ -22,9 +25,11 @@ async function fetchWithRetry(url: string, options: RequestInit = {}, maxRetries
       lastError = error instanceof Error ? error : new Error(String(error));
       console.debug(`Attempt ${attempt + 1} failed with error: ${lastError.message}`);
       
-      // Don't retry on last attempt
+      // Retry on network errors (but not on last attempt)
       if (attempt < maxRetries - 1) {
-        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt)));
+        const delay = 1000 * Math.pow(2, attempt);
+        console.debug(`Retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
   }
