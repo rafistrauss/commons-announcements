@@ -1,6 +1,43 @@
 // place files you want to import through the `$lib` alias in this folder.
 
 /**
+ * Helper function to retry a fetch operation with exponential backoff
+ */
+async function fetchWithRetry(url: string, options: RequestInit = {}, maxRetries = 3): Promise<Response> {
+  let lastError: Error | null = null;
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, options);
+      
+      // Retry on server errors (5xx) or rate limiting (429)
+      const shouldRetry = (response.status >= 500 || response.status === 429) && attempt < maxRetries - 1;
+      
+      if (shouldRetry) {
+        const delay = 1000 * Math.pow(2, attempt);
+        console.debug(`Attempt ${attempt + 1} failed with status ${response.status}, retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+      
+      return response;
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      console.debug(`Attempt ${attempt + 1} failed with error: ${lastError.message}`);
+      
+      // Retry on network errors (but not on last attempt)
+      if (attempt < maxRetries - 1) {
+        const delay = 1000 * Math.pow(2, attempt);
+        console.debug(`Retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+  
+  throw lastError || new Error('Fetch failed after retries');
+}
+
+/**
  * Fetches Friday Mincha and Shabbat Mincha/Maariv times from Shomrei Torah calendar for specified dates.
  * @param fridayDate - JS Date object for Friday
  * @param shabbatDate - JS Date object for Shabbat
@@ -22,9 +59,24 @@ export async function fetchShomreiTorahTimes(fridayDate: Date, shabbatDate: Date
   // Build the URL with the specified date pattern
   const url = `https://shomreitorah.shulcloud.com/calendar?advanced=Y&calendar=&date_start=specific+date&date_start_x=0&date_start_date=${fridayStr}&has_second_date=Y&date_end=specific+date&date_end_x=0&date_end_date=${shabbatStr}&view=week&day_view_horizontal=N`;
 
- 
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Failed to fetch calendar');
+  console.debug('Fetching URL:', url);
+  
+  let res;
+  try {
+    res = await fetchWithRetry(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+      }
+    });
+  } catch (error) {
+    throw new Error(`Failed to fetch calendar: ${error instanceof Error ? error.message : String(error)}`);
+  }
+  
+  if (!res.ok) {
+    throw new Error(`Failed to fetch calendar: HTTP ${res.status} ${res.statusText}`);
+  }
   const html = await res.text();
   
   console.debug('Fetched HTML length:', html.length);
