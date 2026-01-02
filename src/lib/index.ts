@@ -22,9 +22,18 @@ export async function fetchShomreiTorahTimes(fridayDate: Date, shabbatDate: Date
   // Build the URL with the specified date pattern
   const url = `https://shomreitorah.shulcloud.com/calendar?advanced=Y&calendar=&date_start=specific+date&date_start_x=0&date_start_date=${fridayStr}&has_second_date=Y&date_end=specific+date&date_end_x=0&date_end_date=${shabbatStr}&view=week&day_view_horizontal=N`;
 
- 
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Failed to fetch calendar');
+  console.debug('Fetching URL:', url);
+  
+  let res;
+  try {
+    res = await fetch(url);
+  } catch (error) {
+    throw new Error(`Failed to fetch calendar: ${error instanceof Error ? error.message : String(error)}`);
+  }
+  
+  if (!res.ok) {
+    throw new Error(`Failed to fetch calendar: HTTP ${res.status} ${res.statusText}`);
+  }
   const html = await res.text();
   
   console.debug('Fetched HTML length:', html.length);
