@@ -1,6 +1,38 @@
 // place files you want to import through the `$lib` alias in this folder.
 
 /**
+ * Helper function to retry a fetch operation with exponential backoff
+ */
+async function fetchWithRetry(url: string, options: RequestInit = {}, maxRetries = 3): Promise<Response> {
+  let lastError: Error | null = null;
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, options);
+      
+      // If we get a server error (5xx), retry
+      if (response.status >= 500 && attempt < maxRetries - 1) {
+        console.debug(`Attempt ${attempt + 1} failed with status ${response.status}, retrying...`);
+        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt)));
+        continue;
+      }
+      
+      return response;
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      console.debug(`Attempt ${attempt + 1} failed with error: ${lastError.message}`);
+      
+      // Don't retry on last attempt
+      if (attempt < maxRetries - 1) {
+        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt)));
+      }
+    }
+  }
+  
+  throw lastError || new Error('Fetch failed after retries');
+}
+
+/**
  * Fetches Friday Mincha and Shabbat Mincha/Maariv times from Shomrei Torah calendar for specified dates.
  * @param fridayDate - JS Date object for Friday
  * @param shabbatDate - JS Date object for Shabbat
@@ -26,7 +58,13 @@ export async function fetchShomreiTorahTimes(fridayDate: Date, shabbatDate: Date
   
   let res;
   try {
-    res = await fetch(url);
+    res = await fetchWithRetry(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+      }
+    });
   } catch (error) {
     throw new Error(`Failed to fetch calendar: ${error instanceof Error ? error.message : String(error)}`);
   }
