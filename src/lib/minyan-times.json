@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-01-02T14:53:10.851Z",
+  "lastUpdated": "2026-01-02T15:17:09.234Z",
   "times": {
     "2025-10-03": {
       "fridayMincha": "6:20pm",
@@ -66,6 +66,26 @@
       "shabbatMincha": "4:10pm",
       "shabbatMaariv": "5:15pm",
       "shabbatShacharis": "9:00am"
+    },
+    "2026-01-02": {
+      "fridayMincha": "4:25pm",
+      "shabbatMincha": "4:15pm",
+      "shabbatMaariv": "5:20pm"
+    },
+    "2026-01-09": {
+      "fridayMincha": "4:31pm",
+      "shabbatMincha": "4:20pm",
+      "shabbatMaariv": "5:30pm"
+    },
+    "2026-01-16": {
+      "fridayMincha": "4:39pm",
+      "shabbatMincha": "4:30pm",
+      "shabbatMaariv": "5:35pm"
+    },
+    "2026-01-23": {
+      "fridayMincha": "4:47pm",
+      "shabbatMincha": "4:35pm",
+      "shabbatMaariv": "5:45pm"
     }
   }
 }
