@@ -581,7 +581,9 @@ export async function load({ url }) {
     '2025-12-12': [
       "Everyone is invited to a special shiur and Seudat Shlishit with Rabbi Mandelstam in the Lefkowitzes' apartment between Mincha and Maariv.",
     ],
-    // Add more date-specific announcements here
+    '2026-01-16': [
+      "There will be Shalosh Seudos with Rabbi Markowitz between Mincha and Maariv at 16 Hastings court",
+    ],
   };
 
   // Format Friday and Shabbat dates as YYYY-MM-DD
