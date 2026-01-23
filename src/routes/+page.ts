@@ -584,6 +584,9 @@ export async function load({ url }) {
     '2026-01-16': [
       "There will be Shalosh Seudos with Rabbi Markowitz between Mincha and Maariv at 16 Hastings court",
     ],
+    '2026-01-23': [
+      'Mazel Tov to the Schabes family on the birth of a baby girl this past week!'
+    ]
   };
 
   // Format Friday and Shabbat dates as YYYY-MM-DD

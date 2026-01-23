@@ -1,9 +1,22 @@
 import { JewishCalendar } from 'kosher-zmanim';
+import minyanTimes from '$lib/minyan-times.json';
 
-export function getShabbatInfo(date: Date) {
+export function getShachrisShabbatInfo(date: Date) {
+  let isThereShachris = false;
   // Find the next Shabbat (Saturday)
   const shabbat = new Date(date);
   shabbat.setDate(date.getDate() + ((6 - date.getDay() + 7) % 7));
+
+  const friday = new Date(shabbat);
+  friday.setDate(shabbat.getDate() - 1);
+
+  const friday_key = friday.toISOString().slice(0, 10);
+
+  if (minyanTimes.times?.[friday_key]?.shabbatShacharis) {
+    isThereShachris = true;
+  }
+
+
   const jewishCal = new JewishCalendar(shabbat);
 
   // Parsha calculation (same as in main page)
@@ -29,5 +42,5 @@ export function getShabbatInfo(date: Date) {
   // English date
   const englishDate = shabbat.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-  return { shabbat, parsha, hebrewDate, englishDate };
+  return { shabbat, parsha, hebrewDate, englishDate, isThereShachris };
 }

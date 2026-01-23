@@ -1,17 +1,17 @@
 <script lang="ts">
 import { JewishCalendar } from 'kosher-zmanim';
-import { getShabbatInfo } from '$lib/shabbat-info';
+import { getShachrisShabbatInfo } from '$lib/shabbat-info';
 
 // Example data structure for aliyot and leiners
 let aliyot = [
-  { aliyah: 'כהן', leiner: 'Doni Goldstein' },
+  { aliyah: 'כהן', leiner: 'Ben Strachman' },
   { aliyah: 'לוי', leiner: 'Doni Goldstein' },
-  { aliyah: 'שלישי', leiner: 'Rafi Strauss' },
-  { aliyah: 'רביעי', leiner: 'Rafe' },
-  { aliyah: 'חמישי', leiner: 'Ariel Schabes' },
-  { aliyah: 'שישי', leiner: 'Daniel Blau' },
+  { aliyah: 'שלישי', leiner: 'Adam Blank' },
+  { aliyah: 'רביעי', leiner: 'Doni Goldstein' },
+  { aliyah: 'חמישי', leiner: 'Adam Blank' },
+  { aliyah: 'שישי', leiner: 'Rafi Strauss' },
   { aliyah: 'שביעי', leiner: 'Rafi Lefkowitz' },
-  { aliyah: 'הפטרה', leiner: 'Rafi Lefkowitz' },
+  { aliyah: 'הפטרה', leiner: 'Zvi Wiesenfeld' },
 ];
 
 
@@ -70,7 +70,8 @@ function getShacharisNotices(date: Date): string[] {
 }
 
 let today = new Date();
-let shabbatInfo = getShabbatInfo(today);
+let shabbatInfo = getShachrisShabbatInfo(today);
+const {isThereShachris} = shabbatInfo;
 let specialInfo = getShacharisNotices(shabbatInfo.shabbat);
 </script>
 
@@ -144,6 +145,16 @@ let specialInfo = getShacharisNotices(shabbatInfo.shabbat);
   background: #f0f0f5;
   font-weight: 600;
 }
+
+.no-shachris-warning {
+  background: #fff3cd;
+  border: 1px solid #ffeeba;
+  color: #856404;
+  padding: 12px 16px;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 600;
+}
 </style>
 
 <div class="announcement-sheet">
@@ -159,32 +170,30 @@ let specialInfo = getShacharisNotices(shabbatInfo.shabbat);
     </div>
   </header>
 
-  <!-- <div class="section-box">
-    <div class="section-title">Special Prayers / Announcements</div>
-    <ul class="special-list">
-      {#each specialInfo as info}
-        <li>{info}</li>
-      {/each}
-    </ul>
-  </div> -->
+  {#if isThereShachris}
+     <div class="section-box">
+       <div class="section-title">Leining Assignments</div>
+       <table class="leining-table">
+         <thead>
+           <tr>
+             <th>Aliyah</th>
+             <th>Leiner</th>
+           </tr>
+         </thead>
+         <tbody>
+           {#each aliyot as { aliyah, leiner }}
+             <tr>
+               <td>{aliyah}</td>
+               <td>{leiner}</td>
+             </tr>
+           {/each}
+         </tbody>
+       </table>
+     </div>
+     {:else}
+      <div class="no-shachris-warning">
+        There will be no Shacharis service this Shabbat.
+      </div>
+  {/if}
 
-  <div class="section-box">
-    <div class="section-title">Leining Assignments</div>
-    <table class="leining-table">
-      <thead>
-        <tr>
-          <th>Aliyah</th>
-          <th>Leiner</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#each aliyot as { aliyah, leiner }}
-          <tr>
-            <td>{aliyah}</td>
-            <td>{leiner}</td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
-  </div>
 </div>
