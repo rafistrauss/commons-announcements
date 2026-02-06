@@ -586,6 +586,13 @@ export async function load({ url }) {
     ],
     '2026-01-23': [
       'Mazel Tov to the Schabes family on the birth of a baby girl this past week!'
+    ],
+'2026-02-06': [
+      'Mazel Tov to Commons alums Zev & Becca Newman and Jacob & Gavriella Kelin on the births baby boys! Double Shalom Zachar at the Balkin home, 8-09 Manor Ave',
+
+"Mazal tov to Ariel and Racheli Schabes on Orly Batya. May they be zoche to raise her l’Torah, l’chuappah, u’l’maasim tovim",
+"Mazal tov to Jay and Heather Berman on the upcoming upsherin of their son, Asher"
+
     ]
   };
 
