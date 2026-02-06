@@ -5,9 +5,10 @@ const STORAGE_KEY = 'minyan-signup-status';
 const defaultPeople = [
   { name: 'Adam Blank', responded: false },
   { name: 'Adam Ramos', responded: false },
-  { name: 'Ari Spivack', responded: false },
   { name: 'Amira Herstic', responded: false },
   { name: 'Andrew Botvinik', responded: false },
+  { name: 'Ari Spivack', responded: false },
+  { name: 'Ariel Schabes', responded: false },
   { name: 'Arny Bal', responded: false },
   { name: 'Ben Kohane', responded: false },
   { name: 'Ben Strachman', responded: false },
@@ -20,6 +21,7 @@ const defaultPeople = [
   { name: 'Jeremy Tuch', responded: false },
   { name: 'Joey Silverstein', responded: false },
   { name: 'Josh Tepper', responded: false },
+  { name: 'Max Kimmel', responded: false },
   { name: 'Meir Spector', responded: false },
   { name: 'Michael Bernstein', responded: false },
   { name: 'Michael Schwartz', responded: false },
@@ -30,12 +32,10 @@ const defaultPeople = [
   { name: 'Uri Strauss', responded: false },
   { name: 'Yehonatan Haimovici', responded: false },
   { name: 'Yoel Gerstein', responded: false },
-  { name: 'Yoni Block', responded: false },
+  // { name: 'Yoni Block', responded: false },
   { name: 'Yoni Friedman', responded: false },
-  { name: 'Zev Newman', responded: false },
+  // { name: 'Zev Newman', responded: false },
   { name: 'Zvi Wiesenfeld', responded: false },
-  { name: "Ariel Schabes", responded: false },
-  { name: "Max Kimmel", responded: false },
   
   
 ].sort((a, b) => a.name.localeCompare(b.name));
