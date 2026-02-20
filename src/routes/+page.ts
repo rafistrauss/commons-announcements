@@ -44,7 +44,7 @@ function getLiturgicalNotices(date: Date, service: 'mincha' | 'maariv' | 'shacha
   const jewishCal = new JewishCalendar(date);
   const additionsSet = new Set<string>();
   const omissions: string[] = [];
-  
+
   // For Maariv, we need to check the next Jewish day (since Maariv starts the next day)
   let calToCheck = jewishCal;
   if (service === 'maariv') {
@@ -62,54 +62,54 @@ function getLiturgicalNotices(date: Date, service: 'mincha' | 'maariv' | 'shacha
     additionsSet.add('המלך הקדוש (Aseret Yemei Teshuva)');
     additionsSet.add('Other Aseret Yemei Teshuva insertions: זכרנו לחיים, מי כמוך, וכתוב לחיים, בספר חיים');
   }
-  
+
   // Check for Rosh Chodesh
   if (calToCheck.isRoshChodesh()) {
     additionsSet.add('יעלה ויבא');
   }
-  
+
   // Check for Yom Tov
   if (calToCheck.isYomTovAssurBemelacha()) {
     additionsSet.add('יעלה ויבא');
   }
-  
+
   // Check for Chanukah
   if (calToCheck.isChanukah()) {
     additionsSet.add('על הניסים');
   }
-  
+
   // Check for L'david season (1 Elul through Hoshanah Rabbah - 21 Tishrei)
   // For Nusach Ashkenaz, L'david is said at Maariv, not Mincha
   if (service === 'maariv') {
     const jewishMonth = calToCheck.getJewishMonth();
     const jewishDay = calToCheck.getJewishDayOfMonth();
-    
+
     // Elul is month 6, Tishrei is month 7
     if (jewishMonth === 6 || // All of Elul
-        (jewishMonth === 7 && jewishDay <= 21)) { // Tishrei through Hoshanah Rabbah (21st)
+      (jewishMonth === 7 && jewishDay <= 21)) { // Tishrei through Hoshanah Rabbah (21st)
       additionsSet.add('לדוד');
     }
   }
 
-  
+
   // Check for fast days (if it's a weekday)
   const dayOfWeek = date.getDay();
   if (dayOfWeek !== 0 && dayOfWeek !== 6) { // Not Shabbat
     // Add logic for fast days if needed
   }
-  
+
   return { additions: Array.from(additionsSet), omissions };
 }
 
 // Function to check if it's a special day when Tachanun (and thus Tzidkatcha) is omitted
 function isSpecialDay(date: Date): { isSpecial: boolean; reason?: string } {
   const jewishCal = new JewishCalendar(date);
-  
+
   // Check for Rosh Chodesh
   if (jewishCal.isRoshChodesh()) {
     return { isSpecial: true, reason: 'Rosh Chodesh' };
   }
-  
+
   // Check for Erev Rosh Chodesh (day before Rosh Chodesh)
   const tomorrow = new Date(date);
   tomorrow.setDate(date.getDate() + 1);
@@ -117,32 +117,32 @@ function isSpecialDay(date: Date): { isSpecial: boolean; reason?: string } {
   if (tomorrowJewishCal.isRoshChodesh()) {
     return { isSpecial: true, reason: 'Erev Rosh Chodesh' };
   }
-  
+
   // Check for major holidays (when Tachanun is omitted)
   if (jewishCal.isYomTov()) {
     return { isSpecial: true, reason: 'Yom Tov' };
   }
-  
+
   // Check for Chanukah
   if (jewishCal.isChanukah()) {
     return { isSpecial: true, reason: 'Chanukah' };
   }
-  
+
   // Check for month of Nissan
   if (jewishCal.getJewishMonth() === 1) {
     return { isSpecial: true, reason: 'Month of Nissan' };
   }
-  
+
   // Check for Lag B'Omer (18 Iyar)
   if (jewishCal.getJewishMonth() === 2 && jewishCal.getJewishDayOfMonth() === 18) {
     return { isSpecial: true, reason: 'Lag B\'Omer' };
   }
-  
+
   // Check for 15 Av (Tu B'Av)
   if (jewishCal.getJewishMonth() === 5 && jewishCal.getJewishDayOfMonth() === 15) {
     return { isSpecial: true, reason: 'Tu B\'Av' };
   }
-  
+
   return { isSpecial: false };
 }
 
@@ -165,29 +165,29 @@ function hasYomTovInUpcomingWeekExcludingNextShabbat(shabbatDate: Date): boolean
 // Function to get the holiday name if it's a Yom Tov
 function getHolidayName(date: Date): string | null {
   const jewishCal = new JewishCalendar(date);
-  
+
   if (!jewishCal.isYomTov()) return null;
-  
+
   const jewishMonth = jewishCal.getJewishMonth();
   const jewishDay = jewishCal.getJewishDayOfMonth();
-  
+
   // Rosh Hashana
   if (jewishMonth === 7 && (jewishDay === 1 || jewishDay === 2)) {
     return 'ראש השנה';
   }
-  
+
   // Yom Kippur
   if (jewishMonth === 7 && jewishDay === 10) {
     return 'יום כפור';
   }
-  
+
   // Sukkot
   if (jewishMonth === 7 && jewishDay >= 15 && jewishDay <= 21) {
     if (jewishDay === 15) return 'סוכות - יום ראשון';
     if (jewishDay === 21) return 'הושענא רבה';
     return 'חול המועד סוכות';
   }
-  
+
   // Shemini Atzeret / Simchat Torah
   if (jewishMonth === 7 && jewishDay === 22) {
     return 'שמיני עצרת';
@@ -195,7 +195,7 @@ function getHolidayName(date: Date): string | null {
   if (jewishMonth === 7 && jewishDay === 23) {
     return 'שמחת תורה';
   }
-  
+
   // Pesach
   if (jewishMonth === 1 && jewishDay >= 15 && jewishDay <= 22) {
     if (jewishDay === 15) return 'פסח - ליל הסדר';
@@ -204,7 +204,7 @@ function getHolidayName(date: Date): string | null {
     if (jewishDay === 21) return 'שביעי של פסח';
     if (jewishDay === 22) return 'אחרון של פסח';
   }
-  
+
   // Shavuot
   if (jewishMonth === 3 && jewishDay === 6) {
     return 'שבועות - יום ראשון';
@@ -216,7 +216,7 @@ function getHolidayName(date: Date): string | null {
   if (jewishCal.isChanukah()) {
     return 'חנוכה';
   }
-  
+
   return 'יום טוב';
 }
 
@@ -233,7 +233,7 @@ function getZmanim(date: Date) {
     timeZoneId: 'America/New_York',
   };
   const zmanim = getZmanimJson(options);
-  
+
   // // Debug: log zmanim keys to understand the output structure
   // console.log('Zmanim keys:', Object.keys(zmanim));
   // console.log('BasicZmanim structure:', zmanim.BasicZmanim);
@@ -241,7 +241,7 @@ function getZmanim(date: Date) {
 
   // Jewish calendar for parsha, Hebrew date, Rosh Chodesh
   const jewishCal = new JewishCalendar(date);
-  
+
   // Parse shkia from zmanim output - access BasicZmanim.Sunset
   let shkia;
   const basicZmanim = zmanim.BasicZmanim as any;
@@ -269,11 +269,11 @@ function getZmanim(date: Date) {
   const year = jewishCal.getJewishYear();
 
   // Convert day to Hebrew numerals
-  const hebrewNumerals = ['', 'א\'', 'ב\'', 'ג\'', 'ד\'', 'ה\'', 'ו\'', 'ז\'', 'ח\'', 'ט\'', 'י\'', 
-    'י"א', 'י"ב', 'י"ג', 'י"ד', 'ט"ו', 'ט"ז', 'י"ז', 'י"ח', 'י"ט', 'כ\'', 
+  const hebrewNumerals = ['', 'א\'', 'ב\'', 'ג\'', 'ד\'', 'ה\'', 'ו\'', 'ז\'', 'ח\'', 'ט\'', 'י\'',
+    'י"א', 'י"ב', 'י"ג', 'י"ד', 'ט"ו', 'ט"ז', 'י"ז', 'י"ח', 'י"ט', 'כ\'',
     'כ"א', 'כ"ב', 'כ"ג', 'כ"ד', 'כ"ה', 'כ"ו', 'כ"ז', 'כ"ח', 'כ"ט', 'ל\''];
   const hebrewDay = hebrewNumerals[day] || day.toString();
-  
+
   const hebrewDate = `${hebrewDay} ${month} ${year}`;
 
   return {
@@ -310,7 +310,7 @@ export async function load({ url }) {
     // If searchParams is not available (e.g., during prerendering), use default
     weekOffset = 0;
   }
-  
+
   // Get Friday and Shabbat dates for the specified week
   const today = new Date();
   const friday = new Date(today);
@@ -330,24 +330,24 @@ export async function load({ url }) {
   const parshaNum = shabbatJewishCal.getParsha();
 
   let weeklyParsha = parshaNum >= 0 && parshaNum < parshaNames.length ? parshaNames[parshaNum] : 'לא ידוע';
-  
+
   // Calculate next week's parsha for Mincha reading
   const nextShabbat = new Date(shabbat);
   nextShabbat.setDate(shabbat.getDate() + 7);
   const nextShabbatJewishCal = new JewishCalendar(nextShabbat);
   const nextParshaNum = nextShabbatJewishCal.getParsha();
   let nextWeekParsha = nextParshaNum >= 0 && nextParshaNum < parshaNames.length ? parshaNames[nextParshaNum] : 'לא ידוע';
-  
+
   // Special cases for V'zos Habracha at Mincha
   // On Shabbat Haazinu (parsha 53) and Shabbat Chol Hamoed Sukkot, we read V'zos Habracha
   if (parshaNum === 53 || // Shabbat Haazinu
-      (shabbatJewishCal.getJewishMonth() === 7 && 
-       shabbatJewishCal.getJewishDayOfMonth() >= 15 && 
-       shabbatJewishCal.getJewishDayOfMonth() <= 21 && 
-       shabbat.getDay() === 6)) { // Shabbat during Sukkot (15-21 Tishrei)
+    (shabbatJewishCal.getJewishMonth() === 7 &&
+      shabbatJewishCal.getJewishDayOfMonth() >= 15 &&
+      shabbatJewishCal.getJewishDayOfMonth() <= 21 &&
+      shabbat.getDay() === 6)) { // Shabbat during Sukkot (15-21 Tishrei)
     nextWeekParsha = 'וזאת הברכה';
   }
-  
+
   // Check if it's a holiday and modify the parsha display
   const holidayName = getHolidayName(shabbat);
   if (holidayName) {
@@ -366,10 +366,10 @@ export async function load({ url }) {
   const shabbatZmanim = getZmanim(shabbat);
 
   // Add English dates
-  const englishDateOptions: Intl.DateTimeFormatOptions = { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
+  const englishDateOptions: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
   };
   const fridayEnglishDate = friday.toLocaleDateString('en-US', englishDateOptions);
   const shabbatEnglishDate = shabbat.toLocaleDateString('en-US', englishDateOptions);
@@ -379,7 +379,7 @@ export async function load({ url }) {
   const fridayMaarivNotices = getLiturgicalNotices(friday, 'maariv');
   const shabbatMinchaNotices = getLiturgicalNotices(shabbat, 'mincha');
   const shabbatMaarivNotices = getLiturgicalNotices(shabbat, 'maariv');
-  
+
   // Check for Yom Tov in upcoming week (excluding next Shabbat) and add Veyhi Noam notice if needed
   if (hasYomTovInUpcomingWeekExcludingNextShabbat(shabbat)) {
     shabbatMaarivNotices.omissions.push('ויהי נועם (Yom Tov this week)');
@@ -415,23 +415,23 @@ export async function load({ url }) {
     // We need to get zmanim for the Shabbat day to get shkia, then calculate tzeis
     const shabbatZmanim = getZmanim(shabbat);
     const shkia = shabbatZmanim.shkia;
-    
+
     // Tzeis hakochavim (nightfall) is approximately 50 minutes after shkia
     // This is when Motzei Shabbat begins and when we can say Kiddush Levana
     const motzeiShabbatNightfall = new Date(shkia);
     motzeiShabbatNightfall.setMinutes(shkia.getMinutes() + 50);
-    
+
     const jewishCal = new JewishCalendar(motzeiShabbatNightfall);
-    
+
     // Get the molad for the current Jewish month
     // getMoladAsDate returns a Luxon DateTime object, not a Date
     const moladDateTime = jewishCal.getMoladAsDate();
     const moladDate = new Date(moladDateTime.toMillis());
-    
+
     // Calculate hours since molad
     const timeSinceMolad = motzeiShabbatNightfall.getTime() - moladDate.getTime();
     const hoursSinceMolad = timeSinceMolad / (1000 * 60 * 60);
-    
+
     // Kiddush Levana window: 3 days (72 hours) to 14 days 18 hours (354 hours)
     // Ideal: after 7 days (168 hours)
     const MIN_HOURS = 72;
@@ -439,55 +439,55 @@ export async function load({ url }) {
     const MAX_HOURS = 14 * 24 + 18; // 354 hours
 
     const lastTimeToSay = new Date(moladDate.getTime() + MAX_HOURS * 60 * 60 * 1000);
-    
+
     // Check if we're in the valid window
     if (hoursSinceMolad < MIN_HOURS) {
       return { canSayTonight: false, reason: 'Too early (before 3 days after molad)' };
     }
-    
+
     if (hoursSinceMolad > MAX_HOURS) {
       return { canSayTonight: false, reason: 'Too late (after 14 days 18 hours)' };
     }
-    
+
     // Check for exceptions where we don't say Kiddush Levana
-    
+
     // Check if it's during the Nine Days (1-9 Av)
     const jewishMonth = jewishCal.getJewishMonth();
     const jewishDay = jewishCal.getJewishDayOfMonth();
-    
+
     if (jewishMonth === 5 && jewishDay <= 9) {
       return { canSayTonight: false, reason: 'During the Nine Days' };
     }
-    
+
     // Check if Motzei Shabbat is the evening of a Jewish festival
     const motzeiShabbatJewishCal = new JewishCalendar(motzeiShabbatNightfall);
     if (motzeiShabbatJewishCal.isYomTov()) {
       // Can say it but only the blessing, not the full text
-      return { 
-        canSayTonight: true, 
-        reason: 'Yom Tov tonight - say blessing only (no Psalms)', 
+      return {
+        canSayTonight: true,
+        reason: 'Yom Tov tonight - say blessing only (no Psalms)',
         isIdealTime: hoursSinceMolad >= IDEAL_HOURS,
         lastTimeToSay: lastTimeToSay
       };
     }
-    
+
     // Check if it's during first 10 days of Tishrei (many have this custom)
     if (jewishMonth === 7 && jewishDay <= 10) {
       // Calculate when the next Motzei Shabbos will be (7 days from now)
       const nextMotzeiShabbos = new Date(motzeiShabbatNightfall);
       nextMotzeiShabbos.setDate(nextMotzeiShabbos.getDate() + 7);
-      
+
       // If this is the last Motzei Shabbos before the window closes, mention it
       const isLastMotzeiShabbos = nextMotzeiShabbos.getTime() > lastTimeToSay.getTime();
-      
+
       // Check if tonight is actually the very last night (deadline is before tomorrow night)
       const tomorrowNight = new Date(motzeiShabbatNightfall);
       tomorrowNight.setDate(tomorrowNight.getDate() + 1);
       const isLastNight = tomorrowNight.getTime() > lastTimeToSay.getTime();
-      
+
       if (isLastMotzeiShabbos || isLastNight) {
-        return { 
-          canSayTonight: true, 
+        return {
+          canSayTonight: true,
           reason: 'During first 10 days of Tishrei (many wait, but say it if this is your last chance)',
           lastChance: isLastNight,
           lastMotzeiShabbos: isLastMotzeiShabbos && !isLastNight,
@@ -495,41 +495,41 @@ export async function load({ url }) {
           lastTimeToSay: lastTimeToSay
         };
       }
-      
-      return { 
-        canSayTonight: false, 
-        reason: 'During first 10 days of Tishrei (many have custom not to say)' 
+
+      return {
+        canSayTonight: false,
+        reason: 'During first 10 days of Tishrei (many have custom not to say)'
       };
     }
-    
+
     // Check if this is the last Motzei Shabbos before the window closes
     // Calculate when the next Motzei Shabbos will be (7 days from now)
     const nextMotzeiShabbos = new Date(motzeiShabbatNightfall);
     nextMotzeiShabbos.setDate(nextMotzeiShabbos.getDate() + 7);
-    
+
     // Check if the next Motzei Shabbos is after the last time to say Kiddush Levana
     const isLastMotzeiShabbos = nextMotzeiShabbos.getTime() > lastTimeToSay.getTime();
-    
+
     // Check if tonight is actually the very last night (deadline is before tomorrow night)
     const tomorrowNight = new Date(motzeiShabbatNightfall);
     tomorrowNight.setDate(tomorrowNight.getDate() + 1);
     const isLastNight = tomorrowNight.getTime() > lastTimeToSay.getTime();
-    
+
     // We're in the valid window!
     const isIdeal = hoursSinceMolad >= IDEAL_HOURS;
-    
-    return { 
-      canSayTonight: true, 
+
+    return {
+      canSayTonight: true,
       isIdealTime: isIdeal,
       lastChance: isLastNight,
       lastMotzeiShabbos: isLastMotzeiShabbos && !isLastNight,
       lastTimeToSay: lastTimeToSay
     };
   }
-  
+
   // Check if Kiddush Levana can be said on Motzei Shabbat
   const kiddushLevanaInfo = getKiddushLevanaInfo(shabbat);
-  
+
   // El Maleh Rachamim is omitted on special days (same as Tzidkatcha generally)
   // We'll check if next Shabbat has a special day that would cause omission
   function getElMalehRachamimInfo(shabbatDate: Date) {
@@ -541,7 +541,7 @@ export async function load({ url }) {
         reason: thisSpecialDay.reason
       };
     }
-    
+
     // Now check next Shabbat
     let isLastShabbosBeforeOmission = false;
     let nextShabbatWithElMaleh = new Date(shabbatDate);
@@ -559,7 +559,7 @@ export async function load({ url }) {
 
     const reasons = Array.from(elMalehReasonSet).join(', ');
 
-    
+
     return {
       shouldSay: true,
       isLastShabbosBeforeOmission: isLastShabbosBeforeOmission,
@@ -567,7 +567,7 @@ export async function load({ url }) {
       nextAllowedDateString: nextShabbatWithElMaleh.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
     };
   }
-  
+
   const elMalehRachamimInfo = getElMalehRachamimInfo(shabbat);
 
 
@@ -587,13 +587,16 @@ export async function load({ url }) {
     '2026-01-23': [
       'Mazel Tov to the Schabes family on the birth of a baby girl this past week!'
     ],
-'2026-02-06': [
-      'Mazel Tov to Commons alums Zev & Becca Newman and Jacob & Gavriella Kelin on the births baby boys! Double Shalom Zachar at the Balkin home, 8-09 Manor Ave',
+    '2026-02-06': [
+      'Mazel Tov to Commons alums Zev & Becca Newman and Jacob & Gavriella Kelin on the births baby boys! Double Shalom Zachar 8PM at the Balkin home, 8-09 Manor Ave. Walking group leaving from the corner of Hastings at 7:45pm.',
 
-"Mazal tov to Ariel and Racheli Schabes on Orly Batya. May they be zoche to raise her l’Torah, l’chuappah, u’l’maasim tovim",
-"Mazal tov to Jay and Heather Berman on the upcoming upsherin of their son, Asher"
+      "Mazal tov to Ariel and Racheli Schabes on Orly Batya! May they be zoche to raise her l’Torah, l’chuappah, u’l’maasim tovim",
+      "Mazal tov to Jay and Heather Berman on the upcoming upsherin of their son, Asher!"
 
-    ]
+    ],
+    '2026-02-20': [
+      "Tzeischem l'shalom to the Goldsteins as they move to a house! Dessert at 2 Hastings Ct at 4pm to say goodbye and wish them well in their new home.",
+    ],
   };
 
   // Format Friday and Shabbat dates as YYYY-MM-DD
@@ -611,16 +614,16 @@ export async function load({ url }) {
   const generalAnnouncements: string[] = announcementsByDate[fridayKey] || announcementsByDate[shabbatKey] || [];
 
   return {
-    friday: { 
-      ...fridayZmanim, 
+    friday: {
+      ...fridayZmanim,
       parsha: weeklyParsha,
       englishDate: fridayEnglishDate,
       mincha: fridayMincha || "No data available for this date",
       minchaNotices: fridayMinchaNotices,
       maarivNotices: fridayMaarivNotices
     },
-    shabbat: { 
-      ...shabbatZmanim, 
+    shabbat: {
+      ...shabbatZmanim,
       parsha: weeklyParsha,
       englishDate: shabbatEnglishDate,
       mincha: shabbatMincha || "No data available for this date",
