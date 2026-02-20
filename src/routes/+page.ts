@@ -595,6 +595,7 @@ export async function load({ url }) {
 
     ],
     '2026-02-20': [
+      "We're sorry to announce the passing of Shaindy Lefkowitz, the mother of Rafi Lefkowitz. Shiva will be Motzei Shabbat in Teaneck and Sunday morning in Brooklyn",
       "Tzeischem l'shalom to the Goldsteins as they move to a house! Dessert at 2 Hastings Ct at 4pm to say goodbye and wish them well in their new home.",
     ],
   };
