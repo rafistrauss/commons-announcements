@@ -1,4 +1,4 @@
-import { getZmanimJson, JewishCalendar } from 'kosher-zmanim';
+import { getZmanimJson, JewishCalendar, Parsha } from 'kosher-zmanim';
 import minyanTimesData from '$lib/minyan-times.json';
 
 type MinyanTimesJson = {
@@ -331,6 +331,28 @@ export async function load({ url }) {
 
   let weeklyParsha = parshaNum >= 0 && parshaNum < parshaNames.length ? parshaNames[parshaNum] : 'לא ידוע';
 
+  let specialParsha: Parsha | string | null = shabbatJewishCal.getSpecialShabbos();
+
+  if (specialParsha === Parsha.NONE) {
+    specialParsha = null;
+  } else {
+    // Map the special Parsha enum to a Hebrew name
+    // @ts-expect-error
+    const specialParshaNames: Record<Parsha, string> = {
+      [Parsha.ZACHOR]: 'זכור',
+      [Parsha.PARA]: 'פרה',
+      [Parsha.HACHODESH]: 'החדש',
+      [Parsha.SHKALIM]: 'שקלים',
+      [Parsha.HAGADOL]: 'הגדול',
+      [Parsha.SHUVA]: 'שובה',
+      [Parsha.SHIRA]: 'שירה',
+      [Parsha.NACHAMU]: 'נחמו',
+    };
+    specialParsha = specialParshaNames[specialParsha] || null;
+
+  }
+
+
   // Calculate next week's parsha for Mincha reading
   const nextShabbat = new Date(shabbat);
   nextShabbat.setDate(shabbat.getDate() + 7);
@@ -618,6 +640,7 @@ export async function load({ url }) {
     friday: {
       ...fridayZmanim,
       parsha: weeklyParsha,
+      specialParsha,
       englishDate: fridayEnglishDate,
       mincha: fridayMincha || "No data available for this date",
       minchaNotices: fridayMinchaNotices,
@@ -626,6 +649,7 @@ export async function load({ url }) {
     shabbat: {
       ...shabbatZmanim,
       parsha: weeklyParsha,
+      specialParsha,
       englishDate: shabbatEnglishDate,
       mincha: shabbatMincha || "No data available for this date",
       minchaNotices: shabbatMinchaNotices,

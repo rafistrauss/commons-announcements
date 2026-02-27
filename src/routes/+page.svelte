@@ -566,7 +566,14 @@
 
 
 	<div class="parsha-section">
-		<h2 class="parsha-title">{data.friday.parsha}</h2>
+		<h2 class="parsha-title">{data.friday.parsha}
+
+			{#if data.friday.specialParsha}
+				<br>	
+				שבת {data.friday.specialParsha}
+			{/if}
+
+		</h2>
 	</div>
 
 	{#if data.minyanAlert && data.minyanAlert.show}
