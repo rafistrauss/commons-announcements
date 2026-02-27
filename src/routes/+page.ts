@@ -401,6 +401,7 @@ export async function load({ url }) {
   const fridayMaarivNotices = getLiturgicalNotices(friday, 'maariv');
   const shabbatMinchaNotices = getLiturgicalNotices(shabbat, 'mincha');
   const shabbatMaarivNotices = getLiturgicalNotices(shabbat, 'maariv');
+  
 
   // Check for Yom Tov in upcoming week (excluding next Shabbat) and add Veyhi Noam notice if needed
   if (hasYomTovInUpcomingWeekExcludingNextShabbat(shabbat)) {
@@ -621,6 +622,7 @@ export async function load({ url }) {
       "Tzeischem l'shalom to the Goldsteins as they move to a house! Dessert at 2 Hastings Ct at 4pm to say goodbye and wish them well in their new home.",
     ],
     '2026-02-27': [
+      "We will be leining Zachor before Mincha",
       "There will be Seudat shlishit with Rabbi Mandelstam this shabbos between Mincha and Maariv at the Lefkowitzes' apartment. Everyone is welcome!"
     ]
   };
