@@ -704,7 +704,7 @@
 			</div>
 			{/if}
 			<div class="time-item">
-				<span class="time-label">Mincha:</span>
+				<span class="time-label" contenteditable="true">Mincha:</span>
 				<span class="time-value" contenteditable="true">{data.shabbat.mincha}</span>
 			</div>
 			<div class="mincha-reading">
