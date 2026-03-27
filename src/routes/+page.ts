@@ -358,7 +358,16 @@ export async function load({ url }) {
   nextShabbat.setDate(shabbat.getDate() + 7);
   const nextShabbatJewishCal = new JewishCalendar(nextShabbat);
   const nextParshaNum = nextShabbatJewishCal.getParsha();
-  let nextWeekParsha = nextParshaNum >= 0 && nextParshaNum < parshaNames.length ? parshaNames[nextParshaNum] : 'לא ידוע';
+  console.info("🔥 ~ load ~ nextParshaNum:", nextParshaNum)
+  // If next Shabbat has no regular parsha (e.g., Shabbat Chol Hamoed Pesach),
+  // look ahead to find the next Shabbat that has a regular weekly parsha.
+  let resolvedParshaNum = nextParshaNum;
+  let futureShabbat = new Date(nextShabbat);
+  while (resolvedParshaNum === 0) {
+    futureShabbat.setDate(futureShabbat.getDate() + 7);
+    resolvedParshaNum = new JewishCalendar(futureShabbat).getParsha();
+  }
+  let nextWeekParsha = resolvedParshaNum >= 0 && resolvedParshaNum < parshaNames.length ? parshaNames[resolvedParshaNum] : 'לא ידוע';
 
   // Special cases for V'zos Habracha at Mincha
   // On Shabbat Haazinu (parsha 53) and Shabbat Chol Hamoed Sukkot, we read V'zos Habracha
