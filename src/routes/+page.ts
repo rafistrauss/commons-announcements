@@ -1,4 +1,4 @@
-import { getZmanimJson, JewishCalendar, Parsha } from 'kosher-zmanim';
+import { getZmanimJson, JewishCalendar, Parsha } from '@rafistrauss/kosher-zmanim';
 import minyanTimesData from '$lib/minyan-times.json';
 
 type MinyanTimesJson = {
@@ -352,13 +352,15 @@ export async function load({ url }) {
 
   }
 
+  const minchaParshaNum = shabbatJewishCal.getUpcomingParsha();
+  // console.info("🔥 ~ load ~ minchaParsha:", minchaParsha);
+
 
   // Calculate next week's parsha for Mincha reading
   const nextShabbat = new Date(shabbat);
   nextShabbat.setDate(shabbat.getDate() + 7);
   const nextShabbatJewishCal = new JewishCalendar(nextShabbat);
   const nextParshaNum = nextShabbatJewishCal.getParsha();
-  console.info("🔥 ~ load ~ nextParshaNum:", nextParshaNum)
   // If next Shabbat has no regular parsha (e.g., Shabbat Chol Hamoed Pesach),
   // look ahead to find the next Shabbat that has a regular weekly parsha.
   let resolvedParshaNum = nextParshaNum;
@@ -367,6 +369,8 @@ export async function load({ url }) {
     futureShabbat.setDate(futureShabbat.getDate() + 7);
     resolvedParshaNum = new JewishCalendar(futureShabbat).getParsha();
   }
+  // console.info("🔥 ~ load ~ resolvedParshaNum:", resolvedParshaNum)
+  
   let nextWeekParsha = resolvedParshaNum >= 0 && resolvedParshaNum < parshaNames.length ? parshaNames[resolvedParshaNum] : 'לא ידוע';
 
   // Special cases for V'zos Habracha at Mincha
@@ -377,6 +381,14 @@ export async function load({ url }) {
       shabbatJewishCal.getJewishDayOfMonth() <= 21 &&
       shabbat.getDay() === 6)) { // Shabbat during Sukkot (15-21 Tishrei)
     nextWeekParsha = 'וזאת הברכה';
+  }
+
+  let minchaParsha = parshaNames[minchaParshaNum] || 'לא ידוע';
+
+  if (minchaParsha === nextWeekParsha) {
+    console.info('Mincha parsha matches next week\'s parsha:', minchaParsha);
+  } else {
+    console.error(`Mincha parsha (${minchaParsha}) does not match next week's parsha (${nextWeekParsha}). This may be due to a special reading or an issue with the kosher-zmanim library's parsha calculation.`);
   }
 
   // Check if it's a holiday and modify the parsha display

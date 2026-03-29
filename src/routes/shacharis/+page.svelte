@@ -1,5 +1,5 @@
 <script lang="ts">
-import { JewishCalendar } from 'kosher-zmanim';
+import { JewishCalendar } from '@rafistrauss/kosher-zmanim';
 import { getShachrisShabbatInfo } from '$lib/shabbat-info';
 
 // Example data structure for aliyot and leiners

@@ -1,4 +1,4 @@
-import { JewishCalendar } from 'kosher-zmanim';
+import { JewishCalendar } from '@rafistrauss/kosher-zmanim';
 import minyanTimes from '$lib/minyan-times.json';
 
 export function getShachrisShabbatInfo(date: Date) {
