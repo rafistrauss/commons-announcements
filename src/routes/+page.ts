@@ -1,4 +1,4 @@
-import { getZmanimJson, JewishCalendar, Parsha } from 'kosher-zmanim';
+import { getZmanimJson, JewishCalendar, HebrewDateFormatter, Parsha } from 'kosher-zmanim';
 import minyanTimesData from '$lib/minyan-times.json';
 
 type MinyanTimesJson = {
@@ -222,6 +222,82 @@ function getHolidayName(date: Date): string | null {
 
 
 
+
+// Sefirat HaOmer: compute the omer count for Friday night and Motzei Shabbat
+function getSefiraInfo(fridayDate: Date, shabbatDate: Date): {
+  fridayNight: { day: number; hebrewText: string; nusach: string } | null;
+  motzeiShabbat: { day: number; hebrewText: string; nusach: string } | null;
+} | null {
+  const fmt = new HebrewDateFormatter();
+  fmt.setHebrewFormat(true);
+
+  // Friday night = start of Shabbat's Jewish day
+  const shabbatCal = new JewishCalendar(shabbatDate);
+  const fridayNightCount = shabbatCal.getDayOfOmer();
+
+  // Saturday night = start of Sunday's Jewish day
+  const sunday = new Date(shabbatDate);
+  sunday.setDate(shabbatDate.getDate() + 1);
+  const sundayCal = new JewishCalendar(sunday);
+  const motzeiShabbatCount = sundayCal.getDayOfOmer();
+
+  if (fridayNightCount < 1 && motzeiShabbatCount < 1) return null;
+
+  function buildOmerEntry(cal: JewishCalendar, dayNum: number) {
+    if (dayNum < 1) return null;
+    return {
+      day: dayNum,
+      hebrewText: fmt.formatOmer(cal),
+      nusach: formatOmerNusach(dayNum),
+    };
+  }
+
+  return {
+    fridayNight: buildOmerEntry(shabbatCal, fridayNightCount),
+    motzeiShabbat: buildOmerEntry(sundayCal, motzeiShabbatCount),
+  };
+}
+
+// Generate the full Hebrew nusach text for counting the Omer
+function formatOmerNusach(day: number): string {
+  if (day < 1 || day > 49) return '';
+
+  const ones = ['', 'אחד', 'שני', 'שלשה', 'ארבעה', 'חמשה', 'ששה', 'שבעה', 'שמונה', 'תשעה'];
+  const teens = ['עשרה', 'אחד עשר', 'שנים עשר', 'שלשה עשר', 'ארבעה עשר', 'חמשה עשר', 'ששה עשר', 'שבעה עשר', 'שמונה עשר', 'תשעה עשר'];
+  const tensNames = ['', '', 'עשרים', 'שלשים', 'ארבעים'];
+
+  let daysText: string;
+  if (day === 1) {
+    daysText = 'יום אחד';
+  } else if (day <= 9) {
+    daysText = `${ones[day]} ימים`;
+  } else if (day <= 19) {
+    daysText = `${teens[day - 10]} יום`;
+  } else {
+    const t = Math.floor(day / 10);
+    const u = day % 10;
+    if (u === 0) {
+      daysText = `${tensNames[t]} יום`;
+    } else {
+      daysText = `${ones[u]} ו${tensNames[t]} יום`;
+    }
+  }
+
+  // Weeks breakdown (only when day >= 7)
+  let weeksText = '';
+  const weeks = Math.floor(day / 7);
+  const rem = day % 7;
+  if (weeks > 0) {
+    const weekNames = ['', 'שבוע אחד', 'שני שבועות', 'שלשה שבועות', 'ארבעה שבועות', 'חמשה שבועות', 'ששה שבועות', 'שבעה שבועות'];
+    const remNames = ['', 'ויום אחד', 'ושני ימים', 'ושלשה ימים', 'וארבעה ימים', 'וחמשה ימים', 'וששה ימים'];
+    weeksText = ` שהם ${weekNames[weeks]}`;
+    if (rem > 0) {
+      weeksText += ` ${remNames[rem]}`;
+    }
+  }
+
+  return `היום ${daysText}${weeksText} לעומר`;
+}
 
 function getZmanim(date: Date) {
   // Fair Lawn, NJ coordinates and timezone
@@ -602,6 +678,8 @@ export async function load({ url }) {
 
   const elMalehRachamimInfo = getElMalehRachamimInfo(shabbat);
 
+  // Sefirat HaOmer info
+  const sefiraInfo = getSefiraInfo(friday, shabbat);
 
   // General announcements by Friday or Shabbat date (YYYY-MM-DD)
   // Add entries as needed. Example:
@@ -681,6 +759,7 @@ export async function load({ url }) {
     generalAnnouncements,
     kiddushLevanaInfo,
     elMalehRachamimInfo,
+    sefiraInfo,
     aseretYemeiTeshuvaActive: false, // TODO: Implement if needed
     minyanAlert,
   };

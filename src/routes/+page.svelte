@@ -403,6 +403,11 @@
 			padding: 20px;
 			max-width: none;
 		}
+
+		* {
+			background: transparent !important;
+			border-radius: 0 !important;
+		}
 	}
 
 	.announcements-section {
@@ -503,6 +508,29 @@
 		font-size: 18px;
 		text-align: center;
 		color: #333;
+	}
+
+	.sefira-notice {
+		background: #f3e5f5;
+		border: 1px solid #9c27b0;
+		padding: 8px;
+		margin: 8px 0;
+		border-radius: 4px;
+	}
+
+	.sefira-title {
+		font-size: 18px;
+		font-weight: 700;
+		margin-bottom: 4px;
+		color: #7b1fa2;
+		text-align: center;
+		direction: rtl;
+	}
+
+	.sefira-nusach {
+		font-size: 17px;
+		text-align: center;
+		display: block;
 	}
 
 	/* This style sets the correct print dimensions for some reason */
@@ -686,6 +714,12 @@
 						</div>
 					{/if}
 				{/if}
+				{#if data.sefiraInfo?.fridayNight}
+					<div class="sefira-notice">
+						<div class="sefira-title">ספירת העומר</div>
+						<div class="sefira-nusach" dir="rtl">{data.sefiraInfo.fridayNight.nusach}</div>
+					</div>
+				{/if}
 				<div class="shkia-section">
 					<div class="shkia-title">Shkia</div>
 					<div>{data.friday.shkia?.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' }) || 'N/A'}</div>
@@ -761,6 +795,12 @@
 					</div>
 				{/if}
 			{/if}
+				{#if data.sefiraInfo?.motzeiShabbat}
+					<div class="sefira-notice">
+						<div class="sefira-title">ספירת העומר</div>
+						<div class="sefira-nusach" dir="rtl">{data.sefiraInfo.motzeiShabbat.nusach}</div>
+					</div>
+				{/if}
 			<div class="bottom-section">
 				<div class="shkia-section">
 					<div class="shkia-title">Shkia</div>
