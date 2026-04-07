@@ -103,7 +103,7 @@
   </div>
 
   <header class="header">
-    <h1 class="title">Pesach Announcements</h1>
+    <h1 class="title">Pesach {data.currentDateKey.slice(0, 4)}</h1>
     <p class="subtitle">Commons Minyan</p>
   </header>
 
@@ -461,15 +461,25 @@
       page-break-inside: avoid;
     }
 
+    .days-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
     * {
       background: transparent !important;
       border-radius: 0 !important;
     }
   }
 
-  @media (max-width: 768px) {
+  @media screen and (max-width: 768px) {
     .days-grid {
       grid-template-columns: 1fr;
+    }
+  }
+
+  @media print {
+    .days-grid {
+      grid-template-columns: 1fr 1fr;
     }
   }
 </style>
