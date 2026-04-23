@@ -713,6 +713,10 @@ export async function load({ url }) {
     ],
     '2026-03-06': [
       "Mazel Tov to Yael and Yoni Friedman on the birth of a baby girl! May they be zoche to raise her l’Torah, l’chuappah, u’l’maasim tovim!"
+    ],
+    '2026-04-24': [
+      'Rabbi Markowitz will be giving a women\'s-only shiur at 6:30 in the Lefkowitzes\' apartment.',
+      'There will be a Seudat Shlishit with Rabbi Markowitz between Mincha and Maariv.'
     ]
   };
 
