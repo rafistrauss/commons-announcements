@@ -1,0 +1,1 @@
+import{G as n,C as t,Z as l,D as o,a as i}from"./BRjjmTjk.js";function c(a){const e=new n(a.locationName||null,a.latitude,a.longitude,a.elevation||0,a.timeZoneId),m=a.complexZmanim?new t(e):new l(e);return m.setDate(a.date||o.local()),i.toJSON(m)}export{c as g};
