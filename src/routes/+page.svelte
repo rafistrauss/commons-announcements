@@ -533,6 +533,19 @@
 		display: block;
 	}
 
+	.sefira-last-night {
+		font-size: 14px;
+		font-weight: 700;
+		text-align: center;
+		margin: 0 auto 6px auto;
+		padding: 4px 8px;
+		background: #ffffff;
+		border: 1px solid #d8b4e2;
+		border-radius: 999px;
+		color: #5b1a75;
+		width: fit-content;
+	}
+
 	/* This style sets the correct print dimensions for some reason */
 	#print-area-display {
 		position: absolute;
@@ -717,6 +730,7 @@
 				{#if data.sefiraInfo?.fridayNight}
 					<div class="sefira-notice">
 						<div class="sefira-title">ספירת העומר</div>
+						<div class="sefira-last-night">Last night was {data.sefiraInfo.fridayNight.day - 1}</div>
 						<div class="sefira-nusach" dir="rtl">{data.sefiraInfo.fridayNight.nusach}</div>
 					</div>
 				{/if}
@@ -798,6 +812,7 @@
 				{#if data.sefiraInfo?.motzeiShabbat}
 					<div class="sefira-notice">
 						<div class="sefira-title">ספירת העומר</div>
+						<div class="sefira-last-night">Last night was {data.sefiraInfo.motzeiShabbat.day - 1}</div>
 						<div class="sefira-nusach" dir="rtl">{data.sefiraInfo.motzeiShabbat.nusach}</div>
 					</div>
 				{/if}

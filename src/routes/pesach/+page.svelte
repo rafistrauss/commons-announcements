@@ -155,6 +155,7 @@
             {#if day.omer}
               <div class="sefira-notice">
                 <div class="sefira-title">ספירת העומר</div>
+                <div class="sefira-last-night">Last night was {day.omer.day - 1}</div>
                 <div class="sefira-nusach" dir="rtl">{day.omer.nusach}</div>
               </div>
             {/if}
@@ -166,6 +167,7 @@
             {#if day.omer}
               <div class="sefira-notice">
                 <div class="sefira-title">ספירת העומר</div>
+                <div class="sefira-last-night">Last night was {day.omer.day - 1}</div>
                 <div class="sefira-nusach" dir="rtl">{day.omer.nusach}</div>
               </div>
             {/if}
@@ -222,6 +224,7 @@
               {#if day.omer}
                 <div class="sefira-notice">
                   <div class="sefira-title">ספירת העומר</div>
+                  <div class="sefira-last-night">Last night was {day.omer.day - 1}</div>
                   <div class="sefira-nusach" dir="rtl">{day.omer.nusach}</div>
                 </div>
               {/if}
@@ -233,6 +236,7 @@
               {#if day.omer}
                 <div class="sefira-notice">
                   <div class="sefira-title">ספירת העומר</div>
+                  <div class="sefira-last-night">Last night was {day.omer.day - 1}</div>
                   <div class="sefira-nusach" dir="rtl">{day.omer.nusach}</div>
                 </div>
               {/if}
@@ -442,6 +446,19 @@
     font-size: 17px;
     text-align: center;
     display: block;
+  }
+
+  .sefira-last-night {
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    margin: 0 auto 6px auto;
+    padding: 4px 8px;
+    background: #ffffff;
+    border: 1px solid #d8b4e2;
+    border-radius: 999px;
+    color: #5b1a75;
+    width: fit-content;
   }
 
   .nav-button {
