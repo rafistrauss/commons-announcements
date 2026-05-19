@@ -2,7 +2,7 @@ import { JewishCalendar, getZmanimJson } from 'kosher-zmanim';
 import { getShavuotDayNumber, getShavuotDayName, getShavuotLiturgicalNotices } from '$lib/shavuot-details';
 import { getYomTovTimes, formatDateKey, getYomTovAnnouncements, getYomTovDateRange, getParshaForShabbat, getMinchaTorahReading } from '$lib/yomtov-info';
 
-export const prerender = false;
+export const prerender = true;
 export const ssr = true;
 
 function getZmanim(date: Date) {
