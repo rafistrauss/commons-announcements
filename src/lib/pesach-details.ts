@@ -56,30 +56,28 @@ export function getPesachLiturgicalNotices(
 
   const additionsSet = new Set<string>();
   const omissions: string[] = [];
+  const isShabbat = date.getDay() === 6;
 
-  // Pesach-specific additions/omissions
-
-  // Hallel status:
-  // Full Hallel: 1st day (16 Nisan for 2nd day in diaspora, or 21 Nisan for 7th day outside Israel)
-  // Half Hallel: intermediate days (2-6)
-  // Full Hallel: last day (22 Nisan = 8th day diaspora)
+  // יעלה ויבא in all Yom Tov Amidot
+  additionsSet.add('יעלה ויבא');
 
   if (service === 'shacharit') {
+    // Hallel: full on days 1 and 8 (last day), half on Chol HaMoed days 2–7
     if (dayNumber === 1 || dayNumber === 8) {
-      additionsSet.add('Full Hallel (Pesukei Dezimra)');
+      additionsSet.add('הלל שלם');
     } else if (dayNumber >= 2 && dayNumber <= 7) {
-      additionsSet.add('Half Hallel (Pesukei Dezimra)');
+      additionsSet.add('חצי הלל');
+    }
+    // Yizkor on Acharon Shel Pesach (day 8)
+    if (dayNumber === 8) {
+      additionsSet.add('יזכור');
     }
   }
 
-  // Yizkor is said on the 7th day of Pesach (21 Nisan)
-  if (dayNumber === 7 && service === 'shacharit') {
-    additionsSet.add('Yizkor recited');
-  }
-
-  // For 7th day (Shvi'i Shel Pesach) there may be special insertions
-  if (dayNumber === 7 && service === 'shacharit') {
-    additionsSet.add('Shvi\'i Shel Pesach special prayers');
+  // On Shabbat Mincha: Tzidkatcha and El Malei Rachamim are omitted on Yom Tov
+  if (service === 'mincha' && isShabbat) {
+    omissions.push('No צדקתך (Yom Tov)');
+    omissions.push('No א-ל מלא רחמים (Yom Tov)');
   }
 
   return { additions: Array.from(additionsSet), omissions };

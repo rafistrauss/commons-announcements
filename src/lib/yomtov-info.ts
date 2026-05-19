@@ -1,6 +1,59 @@
 import { JewishCalendar } from 'kosher-zmanim';
 import yomtovTimesData from '$lib/yomtov-times.json';
 
+const PARSHA_NAMES = [
+  'אין', 'בראשית', 'נח', 'לך לך', 'וירא', 'חיי שרה', 'תולדות', 'ויצא', 'וישלח', 'וישב', 'מקץ', 'ויגש', 'ויחי',
+  'שמות', 'וארא', 'בא', 'בשלח', 'יתרו', 'משפטים', 'תרומה', 'תצוה', 'כי תשא', 'ויקהל', 'פקודי', 'ויקרא', 'צו', 'שמני',
+  'תזריע', 'מצרע', 'אחרי מות', 'קדושים', 'אמור', 'בהר', 'בחקתי', 'במדבר', 'נשא', 'בהעלתך', 'שלח', 'קרח', 'חקת',
+  'בלק', 'פנחס', 'מטות', 'מסעי', 'דברים', 'ואתחנן', 'עקב', 'ראה', 'שפטים', 'כי תצא', 'כי תבוא', 'נצבים', 'וילך', 'האזינו', 'וזאת הברכה',
+  'ויקהל-פקודי', 'תזריע-מצרע', 'אחרי מות-קדושים', 'בהר-בחקתי', 'חקת-בלק', 'מטות-מסעי', 'נצבים-וילך',
+];
+
+/**
+ * Get the weekly parsha name for a given Shabbat.
+ * Returns null if not Shabbat or if there is no regular parsha (e.g. Shabbat Yom Tov / Chol HaMoed).
+ */
+export function getParshaForShabbat(date: Date): string | null {
+  if (date.getDay() !== 6) return null;
+  const jewishCal = new JewishCalendar(date);
+  const parshaNum = jewishCal.getParsha();
+  if (parshaNum <= 0 || parshaNum >= PARSHA_NAMES.length) return null;
+  return PARSHA_NAMES[parshaNum];
+}
+
+/**
+ * Get all civil dates for a Yom Tov period (including Erev), finding the nearest
+ * upcoming (or currently ongoing) occurrence using the Jewish calendar.
+ *
+ * @param month   - Jewish month number (1 = Nisan, 3 = Sivan, …)
+ * @param erevDay - Jewish day of month for Erev (e.g. 14 for Erev Pesach, 5 for Erev Shavuot)
+ * @param lastDay - Jewish day of month for the last day (e.g. 22 for Pesach, 7 for Shavuot)
+ */
+export function getYomTovDateRange(month: number, erevDay: number, lastDay: number): Date[] {
+  const today = new Date();
+  today.setHours(12, 0, 0, 0);
+
+  // Scan back up to 25 days so we catch a holiday that is currently in progress.
+  const scan = new Date(today);
+  scan.setDate(scan.getDate() - 25);
+  scan.setHours(12, 0, 0, 0);
+
+  for (let i = 0; i < 420; i++) {
+    const cal = new JewishCalendar(scan);
+    if (cal.getJewishMonth() === month && cal.getJewishDayOfMonth() === erevDay) {
+      const numDays = lastDay - erevDay + 1;
+      return Array.from({ length: numDays }, (_, d) => {
+        const date = new Date(scan);
+        date.setDate(scan.getDate() + d);
+        return date;
+      });
+    }
+    scan.setDate(scan.getDate() + 1);
+  }
+
+  return [];
+}
+
 type YomTovTimesJson = {
   lastUpdated: string;
   [year: string]: {
@@ -37,6 +90,7 @@ export function getYomTovTimes(
   mincha: string | null;
   maariv: string | null;
   minchaAndMaariv: string | null;
+  notes: string | null;
 } {
   const dateKey = formatDateKey(date);
   const yearKey = String(date.getFullYear());
@@ -45,13 +99,13 @@ export function getYomTovTimes(
 
   if (!holidayData) {
     console.warn(`No YomTov data found for holiday: ${holidayKey}`);
-    return { shacharit: null, mincha: null, maariv: null, minchaAndMaariv: null };
+    return { shacharit: null, mincha: null, maariv: null, minchaAndMaariv: null, notes: null };
   }
 
   const times = holidayData[dateKey];
   if (!times) {
     console.warn(`No YomTov times found for ${holidayKey} on ${dateKey}`);
-    return { shacharit: null, mincha: null, maariv: null, minchaAndMaariv: null };
+    return { shacharit: null, mincha: null, maariv: null, minchaAndMaariv: null, notes: null };
   }
 
   return {
@@ -59,6 +113,7 @@ export function getYomTovTimes(
     mincha: times.mincha || null,
     maariv: times.maariv || null,
     minchaAndMaariv: times.mincha_maariv || null,
+    notes: times.notes || null,
   };
 }
 

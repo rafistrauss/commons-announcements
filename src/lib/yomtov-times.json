@@ -1,7 +1,27 @@
 {
   "lastUpdated": "2026-04-07T00:00:00.000Z",
   "2026": {
+    "shavuot": {
+      "2026-05-21": {
+        "mincha": "8:00pm",
+        "maariv": "8:40pm",
+        "notes": "Kiddush not before 8:56pm"
+      },
+      "2026-05-22": {
+        "mincha_maariv": "8:00pm",
+        "notes": "Candle Lighting at 7:56pm"
+      },
+      "2026-05-23": {
+        "mincha": "7:30pm",
+        "maariv": "8:55pm",
+        "notes": "Havdalah at 9:04pm"
+      }
+    },
     "pesach": {
+      "2026-04-01": {
+        "mincha": "TBD",
+        "notes": "Erev Pesach"
+      },
       "2026-04-07": {
         "mincha_maariv": "7:12pm"
       },
