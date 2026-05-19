@@ -1,6 +1,6 @@
 import { JewishCalendar, getZmanimJson } from 'kosher-zmanim';
 import { getShavuotDayNumber, getShavuotDayName, getShavuotLiturgicalNotices } from '$lib/shavuot-details';
-import { getYomTovTimes, formatDateKey, getYomTovAnnouncements, getYomTovDateRange, getParshaForShabbat } from '$lib/yomtov-info';
+import { getYomTovTimes, formatDateKey, getYomTovAnnouncements, getYomTovDateRange, getParshaForShabbat, getMinchaTorahReading } from '$lib/yomtov-info';
 
 export const prerender = false;
 export const ssr = true;
@@ -62,6 +62,7 @@ export async function load({ url }: { url: URL }) {
     const isShabbat = dayOfWeek === 6;
     const isErevShabbat = dayOfWeek === 5; // Friday
     const parsha = getParshaForShabbat(date);
+    const minchaTorahReading = getMinchaTorahReading(date);
 
     const jewishCal = new JewishCalendar(date);
     const jewishDay = jewishCal.getJewishDayOfMonth();
@@ -101,6 +102,7 @@ export async function load({ url }: { url: URL }) {
       isErevShabbat,
       isShabbatYomTov: isShabbat && !isErev,
       parsha,
+      minchaTorahReading,
       shacharit,
       mincha,
       maariv,

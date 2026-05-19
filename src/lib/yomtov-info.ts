@@ -22,6 +22,17 @@ export function getParshaForShabbat(date: Date): string | null {
 }
 
 /**
+ * Get the parsha read at Shabbat Mincha (= the upcoming week's parsha).
+ * Returns null if the date is not Shabbat.
+ */
+export function getMinchaTorahReading(date: Date): string | null {
+  if (date.getDay() !== 6) return null;
+  const nextShabbat = new Date(date);
+  nextShabbat.setDate(date.getDate() + 7);
+  return getParshaForShabbat(nextShabbat);
+}
+
+/**
  * Get all civil dates for a Yom Tov period (including Erev), finding the nearest
  * upcoming (or currently ongoing) occurrence using the Jewish calendar.
  *

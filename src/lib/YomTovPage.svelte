@@ -118,12 +118,12 @@
 
         <!-- Day header -->
         <div class="parsha-section" class:erev-header={day.isErev} class:shabbat-header={day.isShabbat}>
-          {#if day.isShabbat}
+          <!-- {#if day.isShabbat}
             <div class="shabbat-badge">שבת קודש</div>
           {/if}
           {#if day.isErevShabbat && !day.isErev}
             <div class="erev-shabbat-badge">ערב שבת</div>
-          {/if}
+          {/if} -->
           <h2 class="parsha-title">{day.name}</h2>
           <div class="hebrew-date">{day.hebrewDate}</div>
           <div class="english-date">{day.englishDate}</div>
@@ -216,6 +216,9 @@
                   <span class="time-label">Mincha:</span>
                   <span class="time-value" contenteditable="true">{day.mincha}</span>
                 </div>
+                {#if day.minchaTorahReading}
+                  <div class="torah-reading">קריאת התורה: {day.minchaTorahReading}</div>
+                {/if}
                 {#if !day.isErev && day.minchaNotices.additions.length > 0}
                   <div class="liturgical-notice additions">
                     {#each day.minchaNotices.additions as addition}
@@ -344,16 +347,17 @@
   }
 
   .day-block {
-    border: 1px dashed #bbb;
-    padding: 8px;
+    border: 1px solid #ccc;
+    padding: 0;
+    border-radius: 4px;
+    overflow: hidden;
     height: stretch;
   }
 
   /* Erev days: slightly muted style */
   .day-block.erev-block {
-    border-style: dotted;
+    border-color: #bbb;
     background: #fafafa;
-    opacity: 0.9;
   }
 
   /* Shabbat days: gold/warm highlight */
@@ -363,20 +367,20 @@
 
   .parsha-section {
     text-align: center;
-    margin: 8px 0;
-    padding: 8px;
+    margin: 0;
+    padding: 10px 8px 8px;
     background: #f9f9f9;
-    border: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
   }
 
   .parsha-section.erev-header {
     background: #f0f0f0;
-    border-color: #ccc;
+    border-bottom-color: #ccc;
   }
 
   .parsha-section.shabbat-header {
     background: #fffbea;
-    border-color: #d4a017;
+    border-bottom-color: #d4a017;
   }
 
   .shabbat-badge {
@@ -431,15 +435,15 @@
   .times-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 10px;
-    margin: 10px 0;
+    gap: 0;
+    margin: 0;
     align-items: stretch;
   }
 
   .day-section {
-    border: 1px solid #ccc;
-    padding: 10px;
-    background: #fafafa;
+    border: none;
+    padding: 10px 10px 4px;
+    background: transparent;
     display: flex;
     flex-direction: column;
   }
@@ -461,6 +465,18 @@
 
   [contenteditable] {
     cursor: pointer;
+  }
+
+  .torah-reading {
+    font-size: 15px;
+    font-style: italic;
+    color: #444;
+    margin: 3px 0 6px;
+    padding: 4px 8px;
+    background: #f4f0e8;
+    border-left: 3px solid #8b6914;
+    border-radius: 3px;
+    direction: rtl;
   }
 
   .liturgical-notice {
@@ -567,7 +583,7 @@
     font-size: 14px;
     font-style: italic;
     color: #555;
-    margin-top: 8px;
+    margin: 0 10px 8px;
     padding: 6px 10px;
     background: #f0f4ff;
     border-left: 3px solid #5c7cfa;
@@ -575,17 +591,19 @@
   }
 
   .announcements-section {
-    margin-top: 12px;
-    padding: 10px;
+    margin: 0;
+    padding: 8px 10px;
+    border-top: 1px solid #e8e8e8;
+    background: #fafafa;
   }
 
   .announcement-item {
     font-size: 15px;
     margin-bottom: 6px;
-    padding: 7px;
-    background: #f5f5f5;
-    border-left: 4px solid #d32f2f;
-    border-radius: 4px;
+    padding: 6px 10px;
+    background: transparent;
+    border-left: 3px solid #d32f2f;
+    border-radius: 0;
   }
 
   @media print {

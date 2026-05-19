@@ -1,6 +1,6 @@
 import { HebrewDateFormatter, JewishCalendar, getZmanimJson } from 'kosher-zmanim';
 import { getPesachDayNumber, getPesachLiturgicalNotices, getPesachDayName } from '$lib/pesach-details';
-import { getYomTovTimes, formatDateKey, getYomTovAnnouncements, getYomTovDateRange, getParshaForShabbat } from '$lib/yomtov-info';
+import { getYomTovTimes, formatDateKey, getYomTovAnnouncements, getYomTovDateRange, getParshaForShabbat, getMinchaTorahReading } from '$lib/yomtov-info';
 
 function formatOmerNusach(day: number): string {
   if (day < 1 || day > 49) return '';
@@ -105,6 +105,7 @@ export async function load({ url }: { url: URL }) {
     const isShabbat = dayOfWeek === 6;
     const isErevShabbat = dayOfWeek === 5; // Friday
     const parsha = getParshaForShabbat(date); // null for Shabbat Yom Tov / Chol HaMoed
+    const minchaTorahReading = getMinchaTorahReading(date);
 
     const jewishCal = new JewishCalendar(date);
     const jewishDay = jewishCal.getJewishDayOfMonth();
@@ -160,6 +161,7 @@ export async function load({ url }: { url: URL }) {
       isErevShabbat,
       isShabbatYomTov: isShabbat && !isErev,
       parsha,
+      minchaTorahReading,
       shacharit,
       mincha,
       maariv,
