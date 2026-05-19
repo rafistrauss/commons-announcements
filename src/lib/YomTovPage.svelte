@@ -372,7 +372,7 @@
   }
 
   .parsha-section.erev-header {
-    background: #f0f0f0;
+    background: #f9f9f9;
     border-bottom-color: #ccc;
   }
 
