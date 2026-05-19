@@ -53,8 +53,10 @@ export function getShavuotLiturgicalNotices(
   const omissions: string[] = [];
   const isShabbat = date.getDay() === 6;
 
-  // יעלה ויבא in all Yom Tov Amidot
-  additions.push('יעלה ויבא');
+  // יעלה ויבא in all Yom Tov Amidot — but NOT at Maariv on the last night (Motzei Yom Tov)
+  if (!(service === 'maariv' && dayNumber === 2)) {
+    additions.push('יעלה ויבא');
+  }
 
   if (service === 'shacharit') {
     additions.push('הלל שלם');

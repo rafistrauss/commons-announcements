@@ -87,8 +87,9 @@ export async function load({ url }: { url: URL }) {
     const minchaNotices = isErev
       ? { additions: [], omissions: [] }
       : getShavuotLiturgicalNotices(date, 'mincha');
+    // Erev Maariv is the first night of Yom Tov — יעלה ויבא is said
     const maarivNotices = isErev
-      ? { additions: [], omissions: [] }
+      ? { additions: ['יעלה ויבא'], omissions: [] }
       : getShavuotLiturgicalNotices(date, 'maariv');
 
     return {

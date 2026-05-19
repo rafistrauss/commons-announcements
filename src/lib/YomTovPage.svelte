@@ -263,21 +263,19 @@
                     <div class="sefira-nusach" dir="rtl">{day.omer.nusach}</div>
                   </div>
                 {/if}
-                {#if !day.isErev}
-                  {#if day.maarivNotices.additions.length > 0}
-                    <div class="liturgical-notice additions">
-                      {#each day.maarivNotices.additions as addition}
-                        <div>{addition}</div>
-                      {/each}
-                    </div>
-                  {/if}
-                  {#if day.maarivNotices.omissions.length > 0}
-                    <div class="liturgical-notice omissions">
-                      {#each day.maarivNotices.omissions as omission}
-                        <div>{omission}</div>
-                      {/each}
-                    </div>
-                  {/if}
+                {#if day.maarivNotices.additions.length > 0}
+                  <div class="liturgical-notice additions">
+                    {#each day.maarivNotices.additions as addition}
+                      <div>{addition}</div>
+                    {/each}
+                  </div>
+                {/if}
+                {#if day.maarivNotices.omissions.length > 0}
+                  <div class="liturgical-notice omissions">
+                    {#each day.maarivNotices.omissions as omission}
+                      <div>{omission}</div>
+                    {/each}
+                  </div>
                 {/if}
               {/if}
             {/if}
