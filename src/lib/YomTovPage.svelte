@@ -190,7 +190,6 @@
               {#if !day.isErev}
                 {#if day.maarivNotices.additions.length > 0}
                   <div class="liturgical-notice additions">
-                    <div class="liturgical-title">Maariv Additions:</div>
                     {#each day.maarivNotices.additions as addition}
                       <div>{addition}</div>
                     {/each}
@@ -497,11 +496,6 @@
     color: black;
     font-weight: 600;
     border-radius: 4px;
-  }
-
-  .liturgical-title {
-    font-weight: 600;
-    margin-bottom: 4px;
   }
 
   .no-minyan-message {
