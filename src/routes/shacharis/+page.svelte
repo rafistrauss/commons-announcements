@@ -4,12 +4,12 @@ import { getShachrisShabbatInfo } from '$lib/shabbat-info';
 
 // Example data structure for aliyot and leiners
 let aliyot = [
-  { aliyah: 'כהן', leiner: 'Doni Goldstein' },
-  { aliyah: 'לוי', leiner: 'Daniel Blau' },
-  { aliyah: 'שלישי', leiner: 'Rafe' },
-  { aliyah: 'רביעי', leiner: 'Adam Ramos' },
-  { aliyah: 'חמישי', leiner: 'Adam Blank' },
-  { aliyah: 'שישי', leiner: 'Rafi Strauss' },
+  { aliyah: 'כהן', leiner: 'Rafi Strauss' },
+  { aliyah: 'לוי', leiner: 'Rafi Strauss' },
+  { aliyah: 'שלישי', leiner: 'Yoni Friedman' },
+  { aliyah: 'רביעי', leiner: 'Daniel Blau' },
+  { aliyah: 'חמישי', leiner: 'Daniel Blau' },
+  { aliyah: 'שישי', leiner: 'Rafi Lefkowitz' },
   { aliyah: 'שביעי', leiner: 'Rafi Lefkowitz' },
   { aliyah: 'הפטרה', leiner: 'Rafi Lefkowitz' },
 ];
