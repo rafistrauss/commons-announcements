@@ -717,6 +717,9 @@ export async function load({ url }) {
     '2026-06-26': [
 'Women\'s schmooze with Rabbi Markowitz and Sara at 6:45 PM at the Lefkowitz home',
       'There will be a Seudat Shlishit with Rabbi Markowitz between Mincha and Maariv.'
+    ],
+    '2026-07-11': [
+      "This Shabbos is the Friedmans' last Shabbos in the Commons. Tzeischem l'shalom to Yoni, Yael, and family as they make their move to Cleveland — we will miss you and wish you all the best!"
     ]
   };
 
