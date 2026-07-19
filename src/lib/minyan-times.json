@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-07-12T10:25:41.247Z",
+  "lastUpdated": "2026-07-19T10:25:44.455Z",
   "times": {
     "2025-10-03": {
       "fridayMincha": "6:20pm",
@@ -230,6 +230,11 @@
       "fridayMincha": "7:50pm",
       "shabbatMincha": "7:35pm",
       "shabbatMaariv": "8:45pm"
+    },
+    "2026-08-14": {
+      "fridayMincha": "7:41pm",
+      "shabbatMincha": "7:30pm",
+      "shabbatMaariv": "8:35pm"
     }
   }
 }
