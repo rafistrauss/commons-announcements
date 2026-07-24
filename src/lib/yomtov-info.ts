@@ -1,5 +1,42 @@
-import { JewishCalendar } from 'kosher-zmanim';
+import { JewishCalendar, getZmanimJson } from 'kosher-zmanim';
 import yomtovTimesData from '$lib/yomtov-times.json';
+
+export function getZmanim(date: Date) {
+  const options = {
+    date,
+    locationName: 'Fair Lawn, NJ',
+    latitude: 40.940866,
+    longitude: -74.126082,
+    timeZoneId: 'America/New_York',
+  };
+  const zmanim = getZmanimJson(options);
+  const jewishCal = new JewishCalendar(date);
+
+  let shkia;
+  const basicZmanim = zmanim.BasicZmanim as any;
+  if (basicZmanim?.Sunset) {
+    shkia = new Date(basicZmanim.Sunset);
+  } else if (basicZmanim?.sunset) {
+    shkia = new Date(basicZmanim.sunset);
+  } else {
+    shkia = new Date(date);
+    shkia.setHours(19, 30, 0, 0);
+  }
+
+  const day = jewishCal.getJewishDayOfMonth();
+  const jewishMonthNames = [
+    '', 'ניסן', 'אייר', 'סיון', 'תמוז', 'אב', 'אלול',
+    'תשרי', 'חשון', 'כסלו', 'טבת', 'שבט', 'אדר', 'אדר ב\'', 'אדר א\'',
+  ];
+  const month = jewishMonthNames[jewishCal.getJewishMonth()];
+  const year = jewishCal.getJewishYear();
+  const hebrewNumerals = [
+    '', 'א\'', 'ב\'', 'ג\'', 'ד\'', 'ה\'', 'ו\'', 'ז\'', 'ח\'', 'ט\'', 'י\'',
+    'י"א', 'י"ב', 'י"ג', 'י"ד', 'ט"ו', 'ט"ז', 'י"ז', 'י"ח', 'י"ט', 'כ\'',
+    'כ"א', 'כ"ב', 'כ"ג', 'כ"ד', 'כ"ה', 'כ"ו', 'כ"ז', 'כ"ח', 'כ"ט', 'ל\'',
+  ];
+  return { shkia, hebrewDate: `${hebrewNumerals[day] || day} ${month} ${year}` };
+}
 
 const PARSHA_NAMES = [
   'אין', 'בראשית', 'נח', 'לך לך', 'וירא', 'חיי שרה', 'תולדות', 'ויצא', 'וישלח', 'וישב', 'מקץ', 'ויגש', 'ויחי',

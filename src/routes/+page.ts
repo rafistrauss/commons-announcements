@@ -720,6 +720,9 @@ export async function load({ url }) {
     ],
     '2026-07-11': [
       "This Shabbos is the Friedmans' last Shabbos in the Commons. Tzeischem l'shalom to Yoni, Yael, and family as they make their move to Cleveland — we will miss you and wish you all the best!"
+    ],
+    '2026-07-18': [
+      "This Shabbos is Rafe & Elisheva's last Shabbos in the Commons. They are abandoning us and heading down to...Florida <i>shudders</i>. We wish them all the best in their vacation home until they return!"
     ]
   };
 

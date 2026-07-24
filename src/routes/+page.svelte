@@ -1,6 +1,7 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
+	import KiddushLevana from '$lib/KiddushLevana.svelte';
 
 	export let data;
 
@@ -433,45 +434,6 @@
 		border-radius: 4px;
 	}
 
-	.kiddush-levana-notice {
-		background: #e3f2fd;
-		border: 2px solid #2196f3;
-		padding: 15px;
-		margin: 20px 0;
-		border-radius: 6px;
-	}
-
-	.kiddush-levana-notice.last-chance {
-		background: #fff3e0;
-		border-color: #ff9800;
-	}
-
-	.kiddush-levana-notice.last-motzei-shabbos {
-		background: #fff9c4;
-		border-color: #fbc02d;
-	}
-
-	.kiddush-levana-title {
-		font-size: 22px;
-		font-weight: 700;
-		margin-bottom: 8px;
-		color: #1976d2;
-		text-align: center;
-	}
-
-	.kiddush-levana-notice.last-chance .kiddush-levana-title {
-		color: #f57c00;
-	}
-
-	.kiddush-levana-notice.last-motzei-shabbos .kiddush-levana-title {
-		color: #f9a825;
-	}
-
-	.kiddush-levana-details {
-		font-size: 18px;
-		text-align: center;
-	}
-
 	.el-maleh-rachamim-notice {
 		padding: 15px;
 		margin: 20px 0;
@@ -827,27 +789,8 @@
 
 	<!-- Kiddush Levana Notice -->
 	{#if data.kiddushLevanaInfo && data.kiddushLevanaInfo.canSayTonight}
-		<div class="kiddush-levana-notice" class:last-chance={data.kiddushLevanaInfo.lastChance} class:last-motzei-shabbos={data.kiddushLevanaInfo.lastMotzeiShabbos}>
-			<div class="kiddush-levana-title">
-				{#if data.kiddushLevanaInfo.lastChance}
-					⚠️ Kiddush Levana - Last Chance! ⚠️
-				{:else if data.kiddushLevanaInfo.lastMotzeiShabbos}
-					🌙 Kiddush Levana - Last Motzei Shabbos 🌙
-				{:else if data.kiddushLevanaInfo.isIdealTime}
-					🌙 Kiddush Levana - Ideal Time (7 days after molad) 🌙
-				{:else}
-					🌙 Kiddush Levana 🌙
-				{/if}
-			</div>
-			<div class="kiddush-levana-details">
-				{#if data.kiddushLevanaInfo.reason}
-					{data.kiddushLevanaInfo.reason}
-				{/if}
-				{#if data.kiddushLevanaInfo.lastTimeToSay}
-					Last time to say: {data.kiddushLevanaInfo.lastTimeToSay.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York', timeZoneName: 'short' })}
-				{/if}
-			</div>
-		</div>
+		<KiddushLevana kiddushLevanaInfo={data.kiddushLevanaInfo} />
+
 	{/if}
 
 	<!-- General Announcements Section -->
@@ -855,7 +798,7 @@
 		<div class="announcements-section">
 			<h3 class="announcements-title">Announcements</h3>
 			{#each data.generalAnnouncements as announcement}
-				<div class="announcement-item">{announcement}</div>
+				<div class="announcement-item">{@html announcement}</div>
 			{/each}
 		</div>
 	{/if}

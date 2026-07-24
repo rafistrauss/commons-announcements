@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount } from "svelte";
+  import { getKiddushLevanaInfo } from "$lib/yomtov-utils";
+  import KiddushLevana from '$lib/KiddushLevana.svelte';
 
   export let data: {
     days: any[];
@@ -10,38 +12,54 @@
   };
 
   let html2canvas: any = null;
+  let kiddushLevanaInfo: {
+    canSayTonight: boolean;
+    reason?: string;
+    isIdealTime?: boolean;
+    lastChance?: boolean;
+    lastMotzeiShabbos?: boolean;
+    lastTimeToSay?: Date;
+  } | null = null;
 
   onMount(async () => {
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+    const script = document.createElement("script");
+    script.src =
+      "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js";
     script.onload = () => {
       html2canvas = (window as any).html2canvas;
     };
     document.head.appendChild(script);
+
+    const today = new Date();
+    kiddushLevanaInfo = getKiddushLevanaInfo(today);
   });
 
   async function saveAsImage() {
     if (!html2canvas) {
-      alert('Image capture library is still loading. Please try again in a moment.');
+      alert(
+        "Image capture library is still loading. Please try again in a moment.",
+      );
       return;
     }
 
-    const element = document.querySelector('.announcement-sheet') as HTMLElement;
+    const element = document.querySelector(
+      ".announcement-sheet",
+    ) as HTMLElement;
     if (!element) {
-      alert('Could not find announcement sheet to capture.');
+      alert("Could not find announcement sheet to capture.");
       return;
     }
 
     try {
       const originalCursor = document.body.style.cursor;
-      document.body.style.cursor = 'wait';
+      document.body.style.cursor = "wait";
 
-      const controls = document.querySelectorAll('.jump-to-today');
+      const controls = document.querySelectorAll(".jump-to-today");
       const originalDisplayStyles: string[] = [];
       controls.forEach((el, index) => {
         const htmlEl = el as HTMLElement;
         originalDisplayStyles[index] = htmlEl.style.display;
-        htmlEl.style.display = 'none';
+        htmlEl.style.display = "none";
       });
 
       const originalPadding = element.style.padding;
@@ -50,11 +68,11 @@
       const originalWidth = element.style.width;
       const originalBoxSizing = element.style.boxSizing;
 
-      element.style.padding = '20px';
-      element.style.border = 'none';
-      element.style.maxWidth = 'none';
-      element.style.width = '816px';
-      element.style.boxSizing = 'border-box';
+      element.style.padding = "20px";
+      element.style.border = "none";
+      element.style.maxWidth = "none";
+      element.style.width = "816px";
+      element.style.boxSizing = "border-box";
 
       await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -62,7 +80,7 @@
         scale: 2,
         useCORS: true,
         logging: false,
-        backgroundColor: '#ffffff',
+        backgroundColor: "#ffffff",
         windowWidth: 816,
         windowHeight: element.scrollHeight,
       });
@@ -76,24 +94,28 @@
         (el as HTMLElement).style.display = originalDisplayStyles[index];
       });
 
-      canvas.toBlob((blob: Blob | null) => {
-        if (!blob) {
-          alert('Failed to create image.');
+      canvas.toBlob(
+        (blob: Blob | null) => {
+          if (!blob) {
+            alert("Failed to create image.");
+            document.body.style.cursor = originalCursor;
+            return;
+          }
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.download = `${data.holidayKey}-announcements-all-${data.currentDateKey}.jpg`;
+          link.href = url;
+          link.click();
+          URL.revokeObjectURL(url);
           document.body.style.cursor = originalCursor;
-          return;
-        }
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.download = `${data.holidayKey}-announcements-all-${data.currentDateKey}.jpg`;
-        link.href = url;
-        link.click();
-        URL.revokeObjectURL(url);
-        document.body.style.cursor = originalCursor;
-      }, 'image/jpeg', 0.95);
+        },
+        "image/jpeg",
+        0.95,
+      );
     } catch (error) {
-      console.error('Error capturing image:', error);
-      alert('Failed to save image. Please try again.');
-      document.body.style.cursor = 'default';
+      console.error("Error capturing image:", error);
+      alert("Failed to save image. Please try again.");
+      document.body.style.cursor = "default";
     }
   }
 </script>
@@ -103,8 +125,13 @@
 </svelte:head>
 
 <div class="announcement-sheet">
-  <div class="jump-to-today" style="display: flex; justify-content: center; gap: 10px; margin-bottom: 10px;">
-    <button onclick={saveAsImage} class="nav-button save-image">Save as Image</button>
+  <div
+    class="jump-to-today"
+    style="display: flex; justify-content: center; gap: 10px; margin-bottom: 10px;"
+  >
+    <button onclick={saveAsImage} class="nav-button save-image"
+      >Save as Image</button
+    >
   </div>
 
   <header class="header">
@@ -113,11 +140,18 @@
   </header>
 
   <div class="days-grid">
-    {#each data.days as day}
-      <section class="day-block" class:erev-block={day.isErev} class:shabbat-block={day.isShabbat}>
-
+    {#each data.days as day, index}
+      <section
+        class="day-block"
+        class:erev-block={day.isErev}
+        class:shabbat-block={day.isShabbat}
+      >
         <!-- Day header -->
-        <div class="parsha-section" class:erev-header={day.isErev} class:shabbat-header={day.isShabbat}>
+        <div
+          class="parsha-section"
+          class:erev-header={day.isErev}
+          class:shabbat-header={day.isShabbat}
+        >
           <!-- {#if day.isShabbat}
             <div class="shabbat-badge">שבת קודש</div>
           {/if}
@@ -132,7 +166,6 @@
         <!-- Times section -->
         <div class="times-grid">
           <section class="day-section">
-
             <!-- Shacharit — omitted on Erev Yom Tov (regular weekday morning, not a YomTov service) -->
             {#if !day.isErev}
               {#if day.noShacharit}
@@ -143,7 +176,9 @@
               {:else if day.shacharit}
                 <div class="time-item">
                   <span class="time-label">Shacharit:</span>
-                  <span class="time-value" contenteditable="true">{day.shacharit}</span>
+                  <span class="time-value" contenteditable="true"
+                    >{day.shacharit}</span
+                  >
                 </div>
                 {#if day.shacharitNotices.additions.length > 0}
                   <div class="liturgical-notice additions">
@@ -171,19 +206,29 @@
               {#if day.omer}
                 <div class="sefira-notice">
                   <div class="sefira-title">ספירת העומר</div>
-                  <div class="sefira-last-night">Last night was {day.omer.day - 1}</div>
+                  <div class="sefira-last-night">
+                    Last night was {day.omer.day - 1}
+                  </div>
                   <div class="sefira-nusach" dir="rtl">{day.omer.nusach}</div>
                 </div>
               {/if}
             {:else if day.minchaAndMaariv}
               <div class="time-item">
-                <span class="time-label">{day.isErev ? 'Mincha / Yom Tov begins:' : 'Mincha/Maariv:'}</span>
-                <span class="time-value" contenteditable="true">{day.minchaAndMaariv}</span>
+                <span class="time-label"
+                  >{day.isErev
+                    ? "Mincha / Yom Tov begins:"
+                    : "Mincha/Maariv:"}</span
+                >
+                <span class="time-value" contenteditable="true"
+                  >{day.minchaAndMaariv}</span
+                >
               </div>
               {#if day.omer}
                 <div class="sefira-notice">
                   <div class="sefira-title">ספירת העומר</div>
-                  <div class="sefira-last-night">Last night was {day.omer.day - 1}</div>
+                  <div class="sefira-last-night">
+                    Last night was {day.omer.day - 1}
+                  </div>
                   <div class="sefira-nusach" dir="rtl">{day.omer.nusach}</div>
                 </div>
               {/if}
@@ -213,10 +258,14 @@
               {:else if day.mincha}
                 <div class="time-item">
                   <span class="time-label">Mincha:</span>
-                  <span class="time-value" contenteditable="true">{day.mincha}</span>
+                  <span class="time-value" contenteditable="true"
+                    >{day.mincha}</span
+                  >
                 </div>
                 {#if day.minchaTorahReading}
-                  <div class="torah-reading">קריאת התורה: {day.minchaTorahReading}</div>
+                  <div class="torah-reading">
+                    קריאת התורה: {day.minchaTorahReading}
+                  </div>
                 {/if}
                 {#if !day.isErev && day.minchaNotices.additions.length > 0}
                   <div class="liturgical-notice additions">
@@ -235,7 +284,9 @@
               {/if}
 
               {#if day.isErevShabbat && !day.isErev}
-                <div class="erev-shabbat-notice">Shabbat begins tonight after Maariv</div>
+                <div class="erev-shabbat-notice">
+                  Shabbat begins tonight after Maariv
+                </div>
               {/if}
 
               {#if day.noMaariv}
@@ -246,19 +297,25 @@
                 {#if day.omer}
                   <div class="sefira-notice">
                     <div class="sefira-title">ספירת העומר</div>
-                    <div class="sefira-last-night">Last night was {day.omer.day - 1}</div>
+                    <div class="sefira-last-night">
+                      Last night was {day.omer.day - 1}
+                    </div>
                     <div class="sefira-nusach" dir="rtl">{day.omer.nusach}</div>
                   </div>
                 {/if}
               {:else if day.maariv}
                 <div class="time-item">
                   <span class="time-label">Maariv:</span>
-                  <span class="time-value" contenteditable="true">{day.maariv}</span>
+                  <span class="time-value" contenteditable="true"
+                    >{day.maariv}</span
+                  >
                 </div>
                 {#if day.omer}
                   <div class="sefira-notice">
                     <div class="sefira-title">ספירת העומר</div>
-                    <div class="sefira-last-night">Last night was {day.omer.day - 1}</div>
+                    <div class="sefira-last-night">
+                      Last night was {day.omer.day - 1}
+                    </div>
                     <div class="sefira-nusach" dir="rtl">{day.omer.nusach}</div>
                   </div>
                 {/if}
@@ -279,7 +336,7 @@
               {/if}
             {/if}
           </section>
-        </div> 
+        </div>
 
         {#if day.notes}
           <div class="day-notes">{day.notes}</div>
@@ -292,16 +349,19 @@
             {/each}
           </div>
         {/if}
+        {#if index === data.days.length - 1 && kiddushLevanaInfo && kiddushLevanaInfo.canSayTonight}
+          <KiddushLevana {kiddushLevanaInfo} />
+        {/if}
       </section>
     {/each}
   </div>
 </div>
 
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700&display=swap');
+  @import url("https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700&display=swap");
 
   :global(body) {
-    font-family: 'Frank Ruhl Libre', serif;
+    font-family: "Frank Ruhl Libre", serif;
     margin: 0;
     padding: 15px;
     background: white;
