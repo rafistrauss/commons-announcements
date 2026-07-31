@@ -723,6 +723,9 @@ export async function load({ url }) {
     ],
     '2026-07-18': [
       "This Shabbos is Rafe & Elisheva's last Shabbos in the Commons. They are abandoning us and heading down to...Florida <i>shudders</i>. We wish them all the best in their vacation home until they return!"
+    ],
+    '2026-07-31': [
+      "Mazel Tov to Chaya Bracha and Eli Markowitz on the birth of a baby girl! Mazel Tov as well to their family who is visiting!"
     ]
   };
 
