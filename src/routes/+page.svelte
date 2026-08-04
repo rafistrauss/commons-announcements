@@ -124,7 +124,7 @@
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700&display=swap');
 	
-	:global(body) {
+	body {
 		font-family: 'Frank Ruhl Libre', serif;
 		margin: 0;
 		padding: 15px;
@@ -414,7 +414,7 @@
 	}
 	
 	@media print {
-		:global(body) {
+		body {
 			padding: 0;
 		}
 		

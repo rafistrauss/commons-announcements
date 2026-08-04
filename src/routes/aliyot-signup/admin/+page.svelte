@@ -95,8 +95,15 @@
 			return adminRecord.exists();
 		} catch (error) {
 			console.error('Failed to check admin allowlist:', error);
-			statusMessage = 'Could not check admin access. Verify Firestore rules for admin-users.';
-			return false;
+			statusMessage = 'Could not read admin allowlist. Falling back to allowed signup records.';
+			try {
+				const adminSignupRecord = await getDoc(doc(db, 'aliyot-signups', normalized));
+				return adminSignupRecord.exists();
+			} catch (fallbackError) {
+				console.error('Fallback admin check also failed:', fallbackError);
+				statusMessage = 'Could not check admin access. Verify Firestore rules for admin-users and aliyot-signups.';
+				return false;
+			}
 		}
 	}
 
