@@ -388,6 +388,17 @@
 	.nav-button.aliyot-btn:hover {
 		background: #6a1b9a;
 	}
+
+	.subtle-admin-link {
+		color: #666;
+		font-size: 13px;
+		text-decoration: none;
+	}
+
+	.subtle-admin-link:hover {
+		color: #333;
+		text-decoration: underline;
+	}
 	
 	.current-week {
 		font-weight: 600;
@@ -550,6 +561,9 @@
 		<a href={resolve('/')} class="nav-button">Jump to Today</a>
 		<button onclick={saveAsImage} class="nav-button save-image">Save as Image</button>
 		<a href={resolve('/aliyot-signup')} class="nav-button aliyot-btn">Aliyot & Minyan Signup</a>
+	</div>
+	<div style="text-align: center; margin-bottom: 10px;">
+		<a href={resolve('/aliyot-signup/admin')} class="subtle-admin-link">Admin sign-in</a>
 	</div>
 
 	<div class="week-navigation">

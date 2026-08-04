@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+	import { addDoc, collection, doc, getDocs, limit, query, serverTimestamp, updateDoc, where } from 'firebase/firestore';
 	import { db } from '$lib/firebase';
-	import { base } from '$app/paths';
+	import { base, resolve } from '$app/paths';
 
 	const PARSHIOT = [
 		'בראשית', 'נח', 'לך לך', 'וירא', 'חיי שרה', 'תולדות', 'ויצא', 'וישלח', 'וישב', 'מקץ',
@@ -13,23 +13,31 @@
 		'כי תבוא', 'נצבים', 'וילך', 'האזינו', 'וזאת הברכה'
 	];
 
-	const DAVENING_PORTIONS = [
-		'Kabbalat Shabbat & Maariv',
-		'Shabbat Shacharit',
-		'Shabbat Mussaf',
-		'Shabbat Mincha',
-		'Yom Tov Shacharit',
-		'Yom Tov Mussaf',
-		'Yom Tov Mincha',
-		'Yom Tov Maariv',
-		'Maariv (weeknight)'
-	];
+	const DAVENING_PORTION_GROUPS = {
+		Shabbat: [
+			{ label: 'Kabbalat Shabbat & Maariv', value: 'Kabbalat Shabbat & Maariv' },
+			{ label: 'Shacharit', value: 'Shabbat Shacharit' },
+			{ label: 'Mussaf', value: 'Shabbat Mussaf' },
+			{ label: 'Mincha', value: 'Shabbat Mincha' },
+			{ label: 'Maariv (Motzei Shabbat/Yom Tov)', value: 'Maariv (Motzei Shabbat/Yom Tov)' }
+		],
+		'Yom Tov': [
+			{ label: 'Shacharit', value: 'Yom Tov Shacharit' },
+			{ label: 'Mussaf', value: 'Yom Tov Mussaf' },
+			{ label: 'Mincha', value: 'Yom Tov Mincha' }
+		]
+	} as const;
+	const DAVENING_PORTIONS = Object.values(DAVENING_PORTION_GROUPS).flat().map((option) => option.value);
 
 	type SubmitStatus = 'idle' | 'submitting' | 'success' | 'error';
 
 	let englishName = '';
-	let hebrewName = '';
+	let email = '';
+	let hebrewGivenName = '';
+	let hebrewFatherName = '';
 	let tribe: 'Kohen' | 'Levi' | 'Yisrael' | '' = '';
+	let showHebrewKeyboard = false;
+	let activeHebrewField: 'given' | 'father' = 'given';
 
 	let canlDaven = false;
 	let daveningPortions: Record<string, boolean> = {};
@@ -39,17 +47,55 @@
 	let barMitzvahParasha = '';
 	let canLeinParshiot: Record<string, boolean> = {};
 	for (const p of PARSHIOT) canLeinParshiot[p] = false;
+	let lastAutoSelectedBarMitzvahParasha = '';
 
 	let status: SubmitStatus = 'idle';
 	let errorMessage = '';
+	let wasUpdate = false;
+	const HEBREW_KEYS = [
+		'א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י', 'כ', 'ל', 'מ',
+		'נ', 'ס', 'ע', 'פ', 'צ', 'ק', 'ר', 'ש', 'ת', 'ך', 'ם', 'ן', 'ף', 'ץ'
+	];
 
 	$: showLeiiningDetails = leiiningAbility !== 'none';
 	$: showParshiotPicker = leiiningAbility === 'can_help' || leiiningAbility === 'comfortable';
+	$: hebrewName = `${hebrewGivenName.trim()} בן ${hebrewFatherName.trim()}`.trim();
+	$: if (!barMitzvahParasha) {
+		lastAutoSelectedBarMitzvahParasha = '';
+	}
+	$: if (barMitzvahParasha && barMitzvahParasha !== lastAutoSelectedBarMitzvahParasha) {
+		canLeinParshiot[barMitzvahParasha] = true;
+		lastAutoSelectedBarMitzvahParasha = barMitzvahParasha;
+	}
+
+	function appendHebrewCharacter(char: string) {
+		if (activeHebrewField === 'given') {
+			hebrewGivenName += char;
+			return;
+		}
+		hebrewFatherName += char;
+	}
+
+	function backspaceHebrewCharacter() {
+		if (activeHebrewField === 'given') {
+			hebrewGivenName = hebrewGivenName.slice(0, -1);
+			return;
+		}
+		hebrewFatherName = hebrewFatherName.slice(0, -1);
+	}
 
 	async function handleSubmit(e: SubmitEvent) {
 		e.preventDefault();
 		if (!englishName.trim()) {
 			errorMessage = 'Please enter your English name.';
+			return;
+		}
+		if (!email.trim()) {
+			errorMessage = 'Please enter an email address so you can update your information later.';
+			return;
+		}
+		if (!hebrewGivenName.trim() || !hebrewFatherName.trim()) {
+			errorMessage = 'Please enter your Hebrew name and your father\'s Hebrew name.';
 			return;
 		}
 		if (!tribe) {
@@ -62,10 +108,13 @@
 		try {
 			const selectedDaveningPortions = DAVENING_PORTIONS.filter(p => daveningPortions[p]);
 			const selectedParshiot = PARSHIOT.filter(p => canLeinParshiot[p]);
-
-			await addDoc(collection(db, 'aliyot-signups'), {
+			const normalizedEmail = email.trim().toLowerCase();
+			const payload = {
 				englishName: englishName.trim(),
-				hebrewName: hebrewName.trim(),
+				email: normalizedEmail,
+				hebrewName,
+				hebrewGivenName: hebrewGivenName.trim(),
+				hebrewFatherName: hebrewFatherName.trim(),
 				tribe,
 				davening: {
 					canDaven: canlDaven,
@@ -76,8 +125,27 @@
 					barMitzvahParasha: leiiningAbility !== 'none' ? barMitzvahParasha : '',
 					parshiot: showParshiotPicker ? selectedParshiot : []
 				},
-				submittedAt: serverTimestamp()
-			});
+				updatedAt: serverTimestamp()
+			};
+
+			const existingSignupQuery = query(
+				collection(db, 'aliyot-signups'),
+				where('email', '==', normalizedEmail),
+				limit(1)
+			);
+			const existingSignupSnapshot = await getDocs(existingSignupQuery);
+
+			if (existingSignupSnapshot.empty) {
+				wasUpdate = false;
+				await addDoc(collection(db, 'aliyot-signups'), {
+					...payload,
+					submittedAt: serverTimestamp()
+				});
+			} else {
+				wasUpdate = true;
+				const existingDoc = existingSignupSnapshot.docs[0];
+				await updateDoc(doc(db, 'aliyot-signups', existingDoc.id), payload);
+			}
 			status = 'success';
 		} catch (err) {
 			console.error('Error saving to Firebase:', err);
@@ -88,15 +156,19 @@
 
 	function resetForm() {
 		englishName = '';
-		hebrewName = '';
+		email = '';
+		hebrewGivenName = '';
+		hebrewFatherName = '';
 		tribe = '';
 		canlDaven = false;
 		for (const p of DAVENING_PORTIONS) daveningPortions[p] = false;
 		leiiningAbility = 'none';
 		barMitzvahParasha = '';
+		lastAutoSelectedBarMitzvahParasha = '';
 		for (const p of PARSHIOT) canLeinParshiot[p] = false;
 		status = 'idle';
 		errorMessage = '';
+		wasUpdate = false;
 	}
 </script>
 
@@ -107,8 +179,12 @@
 
 <div class="page">
 	<header class="page-header">
-		<a href="{base}/" class="back-link">← Announcements</a>
-		<h1>Aliyot & Minyan Participation</h1>
+		<div class="header-links">
+			<a href="{base}/" class="back-link">← Announcements</a>
+			<a href={resolve('/aliyot-signup/admin')} class="admin-link">Admin sign-in</a>
+		</div>
+		<h1>Fair Lawn Commons Minyan</h1>
+		<h2>Aliyot & Minyan Participation</h2>
 		<p class="tagline">
 			Our Minyan thrives because of <em>you</em>. By sharing your information, you help us plan
 			meaningful davening, ensure Torah readings, and build a community where everyone can
@@ -121,7 +197,14 @@
 		<div class="success-card">
 			<div class="success-icon">✅</div>
 			<h2>Thank you, {englishName}!</h2>
-			<p>Your information has been saved. We'll be in touch when there's an opportunity for you to participate.</p>
+			<p>
+				{#if wasUpdate}
+					Your information has been updated.
+				{:else}
+					Your information has been saved.
+				{/if}
+				We'll be in touch when there's an opportunity for you to participate.
+			</p>
 			<button class="btn btn-primary" onclick={resetForm}>Submit Another Response</button>
 		</div>
 	{:else}
@@ -143,15 +226,63 @@
 				</div>
 
 				<div class="field">
-					<label for="hebrew-name">Hebrew Name</label>
+					<label for="email">Email <span class="required">*</span></label>
 					<input
-						id="hebrew-name"
-						type="text"
-						bind:value={hebrewName}
-						placeholder="e.g. דוד בן אברהם"
-						dir="rtl"
+						id="email"
+						type="email"
+						bind:value={email}
+						placeholder="e.g. name@example.com"
+						autocomplete="email"
+						required
 					/>
-					<p class="field-hint">Used for Aliyot blessings</p>
+					<p class="field-hint">Use this email later to update your submission.</p>
+				</div>
+
+				<div class="field">
+					<p class="field-label">Hebrew Name <span class="required">*</span></p>
+					<div class="hebrew-name-row" dir="rtl">
+						<div class="field hebrew-name-field">
+							<label for="hebrew-given-name">Hebrew Name</label>
+							<input
+								id="hebrew-given-name"
+								type="text"
+								bind:value={hebrewGivenName}
+								placeholder="e.g. דוד"
+								dir="rtl"
+								onfocus={() => (activeHebrewField = 'given')}
+								required
+							/>
+						</div>
+						<div class="hebrew-ben-separator" aria-hidden="true">בן</div>
+						<div class="field hebrew-name-field">
+							<label for="hebrew-father-name">Father's Hebrew Name</label>
+							<input
+								id="hebrew-father-name"
+								type="text"
+								bind:value={hebrewFatherName}
+								placeholder="e.g. אברהם"
+								dir="rtl"
+								onfocus={() => (activeHebrewField = 'father')}
+								required
+							/>
+						</div>
+					</div>
+					<div class="hebrew-name-preview">
+						<div class="hebrew-name-preview-label">Final Hebrew Name (for Aliyot)</div>
+						<div class="hebrew-name-preview-value" dir="rtl">{hebrewName || '—'}</div>
+					</div>
+					<button type="button" class="hebrew-kb-toggle" onclick={() => (showHebrewKeyboard = !showHebrewKeyboard)}>
+						{showHebrewKeyboard ? 'Hide Hebrew keyboard' : 'Show Hebrew keyboard (optional)'}
+					</button>
+					{#if showHebrewKeyboard}
+						<div class="hebrew-keyboard" dir="rtl">
+							{#each HEBREW_KEYS as key}
+								<button type="button" class="hebrew-key" onclick={() => appendHebrewCharacter(key)}>{key}</button>
+							{/each}
+							<button type="button" class="hebrew-key wide" onclick={() => appendHebrewCharacter(' ')}>Space</button>
+							<button type="button" class="hebrew-key wide" onclick={backspaceHebrewCharacter}>⌫</button>
+						</div>
+					{/if}
 				</div>
 
 				<div class="field">
@@ -172,7 +303,8 @@
 				<h2 class="section-title">🎶 Davening / Leading Tefillah</h2>
 				<p class="section-desc">
 					Leading davening is one of the most meaningful ways to contribute to the Minyan.
-					Even if you only know part of a service, we'd love your help!
+					Even if you only know part of a service, we'd love your help. Morning minyanim are
+					only occasional, so Shacharit opportunities are relatively rare.
 				</p>
 
 				<label class="checkbox-main">
@@ -183,11 +315,16 @@
 				{#if canlDaven}
 					<div class="sub-options">
 						<p class="sub-label">Which portions can you lead?</p>
-						{#each DAVENING_PORTIONS as portion}
-							<label class="checkbox-option">
-								<input type="checkbox" bind:checked={daveningPortions[portion]} />
-								{portion}
-							</label>
+						{#each Object.entries(DAVENING_PORTION_GROUPS) as [groupName, portions]}
+							<div class="davening-group">
+								<p class="davening-group-title">{groupName}</p>
+								{#each portions as portion}
+									<label class="checkbox-option">
+										<input type="checkbox" bind:checked={daveningPortions[portion.value]} />
+										{portion.label}
+									</label>
+								{/each}
+							</div>
 						{/each}
 					</div>
 				{/if}
@@ -198,7 +335,8 @@
 				<h2 class="section-title">📜 Torah Reading (Leining)</h2>
 				<p class="section-desc">
 					Every Shabbat and Yom Tov, we need someone to read from the Torah. Even reading a
-					single aliyah makes a huge difference. Don't be shy—let us know what you can do!
+					single aliyah makes a huge difference. In most cases, saying you can lein means
+					committing to lein the <strong>1st aliyah</strong> unless arranged otherwise.
 				</p>
 
 				<div class="field">
@@ -214,7 +352,7 @@
 						</label>
 						<label class="radio-option">
 							<input type="radio" name="leining" value="can_help" bind:group={leiiningAbility} />
-							I can help when asked (specific parshiot)
+							I can lein specific parshiot
 						</label>
 						<label class="radio-option">
 							<input type="radio" name="leining" value="comfortable" bind:group={leiiningAbility} />
@@ -287,12 +425,31 @@
 
 	.back-link {
 		display: inline-block;
-		margin-bottom: 12px;
 		color: #2196f3;
 		text-decoration: none;
 		font-size: 16px;
 	}
 	.back-link:hover { text-decoration: underline; }
+
+	.header-links {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: 14px;
+		margin-bottom: 12px;
+	}
+
+	.admin-link {
+		color: #666;
+		font-size: 13px;
+		text-decoration: none;
+		font-weight: 500;
+	}
+
+	.admin-link:hover {
+		color: #333;
+		text-decoration: underline;
+	}
 
 	h1 {
 		font-size: 32px;
@@ -355,6 +512,47 @@
 		font-size: 13px;
 		color: #777;
 		margin: 2px 0 0;
+	}
+
+	.hebrew-name-row {
+		display: flex;
+		align-items: flex-end;
+		gap: 10px;
+	}
+
+	.hebrew-name-field {
+		flex: 1 1 0;
+		min-width: 0;
+	}
+
+	.hebrew-ben-separator {
+		font-size: 24px;
+		font-weight: 700;
+		line-height: 1;
+		padding-bottom: 9px;
+		color: #333;
+	}
+
+	.hebrew-name-preview {
+		background: #f7f2e9;
+		border: 1px solid #d8c6a3;
+		border-radius: 6px;
+		padding: 10px 12px;
+	}
+
+	.hebrew-name-preview-label {
+		font-size: 13px;
+		color: #6b5d42;
+		margin-bottom: 6px;
+		font-weight: 700;
+	}
+
+	.hebrew-name-preview-value {
+		font-size: 24px;
+		font-weight: 700;
+		color: #2b2b2b;
+		min-height: 30px;
+		text-align: center;
 	}
 
 	input[type="text"],
@@ -422,6 +620,70 @@
 		gap: 8px;
 	}
 
+	.hebrew-kb-toggle {
+		align-self: flex-start;
+		border: 1px solid #bdbdbd;
+		background: #f4f4f4;
+		color: #333;
+		border-radius: 4px;
+		padding: 6px 10px;
+		font-size: 13px;
+		font-family: inherit;
+		cursor: pointer;
+	}
+
+	.hebrew-kb-toggle:hover {
+		background: #ececec;
+	}
+
+	.hebrew-keyboard {
+		display: grid;
+		grid-template-columns: repeat(9, minmax(0, 1fr));
+		gap: 6px;
+		background: #f9f9f9;
+		border: 1px solid #ddd;
+		padding: 10px;
+		border-radius: 6px;
+	}
+
+	.hebrew-key {
+		font-family: 'Frank Ruhl Libre', serif;
+		font-size: 18px;
+		padding: 8px 0;
+		border: 1px solid #ccc;
+		border-radius: 4px;
+		background: white;
+		cursor: pointer;
+	}
+
+	.hebrew-key:hover {
+		background: #f2f2f2;
+	}
+
+	.hebrew-key.wide {
+		grid-column: span 2;
+		font-size: 14px;
+		font-family: inherit;
+	}
+
+	.davening-group {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		padding: 8px 0;
+	}
+
+	.davening-group + .davening-group {
+		border-top: 1px solid #e1e1e1;
+	}
+
+	.davening-group-title {
+		margin: 0;
+		font-size: 15px;
+		font-weight: 700;
+		color: #333;
+	}
+
 	.btn {
 		font-family: inherit;
 		font-size: 18px;
@@ -476,5 +738,15 @@
 		color: #444;
 		max-width: 400px;
 		margin: 0;
+	}
+
+	@media (max-width: 700px) {
+		.hebrew-ben-separator {
+			padding-bottom: 0;
+		}
+
+		.hebrew-keyboard {
+			grid-template-columns: repeat(6, minmax(0, 1fr));
+		}
 	}
 </style>
