@@ -412,15 +412,11 @@
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700&display=swap');
 
-	:global(body) {
+	.page {
 		font-family: 'Frank Ruhl Libre', serif;
-		margin: 0;
-		padding: 0;
 		background: #f5f5f0;
 		color: #222;
-	}
-
-	.page {
+		min-height: 100vh;
 		max-width: 720px;
 		margin: 0 auto;
 		padding: 20px 16px 60px;
