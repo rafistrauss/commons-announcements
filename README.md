@@ -66,7 +66,7 @@ This allows you to preview changes before merging to production!
 - **Location**: Fair Lawn, NJ (zip code 07410)
 - **Firebase (required for signup + admin)**: web app config is hardcoded in `src/lib/firebase.ts`
 - **Admin access control**:
-  - `rafikis75@gmail.com` is always allowed.
+  - Optional: set `VITE_DEFAULT_ADMIN_EMAIL` for one default admin email.
   - Additional admins are managed dynamically in Firestore: create documents in collection `admin-users` where the **document ID is the lowercase email address** (for example `someone@example.com`).
 
 ### Admin page

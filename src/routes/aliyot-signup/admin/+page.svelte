@@ -79,7 +79,7 @@
 	let selectedId = '';
 	let draft: EditDraft | null = null;
 	let selectedParsha = '';
-	const defaultAdminEmail = 'rafikis75@gmail.com';
+	const defaultAdminEmail = (import.meta.env.VITE_DEFAULT_ADMIN_EMAIL || '').trim().toLowerCase();
 	const googleProvider = new GoogleAuthProvider();
 
 	function normalizeEmail(email: string): string {
@@ -89,7 +89,7 @@
 	async function hasAdminAccess(candidate: string | null | undefined): Promise<boolean> {
 		if (!candidate) return false;
 		const normalized = normalizeEmail(candidate);
-		if (normalized === defaultAdminEmail) return true;
+		if (defaultAdminEmail && normalized === defaultAdminEmail) return true;
 		try {
 			const adminRecord = await getDoc(doc(db, 'admin-users', normalized));
 			return adminRecord.exists();

@@ -52,6 +52,9 @@
 	let status: SubmitStatus = 'idle';
 	let errorMessage = '';
 	let wasUpdate = false;
+	let showLeiiningDetails = false;
+	let showParshiotPicker = false;
+	let hebrewName = '';
 	const HEBREW_KEYS = [
 		'א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י', 'כ', 'ל', 'מ',
 		'נ', 'ס', 'ע', 'פ', 'צ', 'ק', 'ר', 'ש', 'ת', 'ך', 'ם', 'ן', 'ף', 'ץ'
