@@ -52,7 +52,7 @@
 		hebrewName: string;
 		tribe: Tribe;
 		davening: { canDaven: boolean; portions: string[] };
-		leining: { ability: LeiningAbility; barMitzvahParasha: string; parshiot: string[] };
+		leining: { ability: LeiningAbility; barMitzvahParsha: string; parshiot: string[] };
 		submittedAtLabel: string;
 	};
 
@@ -63,7 +63,7 @@
 		canDaven: boolean;
 		daveningPortions: Record<string, boolean>;
 		leiningAbility: LeiningAbility;
-		barMitzvahParasha: string;
+		barMitzvahParsha: string;
 		leiningParshiot: Record<string, boolean>;
 	};
 
@@ -107,7 +107,7 @@
 	function canLeinParsha(record: SignupDoc, parsha: string): boolean {
 		if (!parsha) return false;
 		if (record.leining.parshiot.includes(parsha)) return true;
-		return record.leining.ability !== 'none' && record.leining.barMitzvahParasha === parsha;
+		return record.leining.ability !== 'none' && record.leining.barMitzvahParsha === parsha;
 	}
 
 	function matchingLeiners(parsha: string): SignupDoc[] {
@@ -130,7 +130,7 @@
 		const davening = (raw.davening ?? {}) as { canDaven?: boolean; portions?: string[] };
 		const leining = (raw.leining ?? {}) as {
 			ability?: LeiningAbility;
-			barMitzvahParasha?: string;
+			barMitzvahParsha?: string;
 			parshiot?: string[];
 		};
 
@@ -145,7 +145,7 @@
 			},
 			leining: {
 				ability: (leining.ability as LeiningAbility) || 'none',
-				barMitzvahParasha: typeof leining.barMitzvahParasha === 'string' ? leining.barMitzvahParasha : '',
+				barMitzvahParsha: typeof leining.barMitzvahParsha === 'string' ? leining.barMitzvahParsha : '',
 				parshiot: Array.isArray(leining.parshiot) ? leining.parshiot.filter((v): v is string => typeof v === 'string') : []
 			},
 			submittedAtLabel: formatTimestamp(raw.submittedAt)
@@ -172,7 +172,7 @@
 			canDaven: record.davening.canDaven,
 			daveningPortions,
 			leiningAbility: record.leining.ability,
-			barMitzvahParasha: record.leining.barMitzvahParasha,
+			barMitzvahParsha: record.leining.barMitzvahParsha,
 			leiningParshiot
 		};
 	}
@@ -265,7 +265,7 @@
 				},
 				leining: {
 					ability: currentDraft.leiningAbility,
-					barMitzvahParasha: currentDraft.barMitzvahParasha.trim(),
+					barMitzvahParsha: currentDraft.barMitzvahParsha.trim(),
 					parshiot: leiningParshiot
 				},
 				updatedAt: serverTimestamp()
@@ -281,7 +281,7 @@
 							davening: { canDaven: currentDraft.canDaven, portions: daveningPortions },
 							leining: {
 								ability: currentDraft.leiningAbility,
-								barMitzvahParasha: currentDraft.barMitzvahParasha.trim(),
+								barMitzvahParsha: currentDraft.barMitzvahParsha.trim(),
 								parshiot: leiningParshiot
 							}
 						}
@@ -447,16 +447,16 @@
 							Leining Ability
 							<select bind:value={draft.leiningAbility}>
 								<option value="none">I don't lein</option>
-								<option value="bar_mitzvah_only">Bar Mitzvah parasha only</option>
+								<option value="bar_mitzvah_only">Bar Mitzvah parsha only</option>
 								<option value="can_help">I can lein specific parshiot</option>
 								<option value="when_asked">I can lein when asked</option>
 								<option value="comfortable">Comfortable / regular</option>
 							</select>
 						</label>
 						<label>
-							Bar/Bat Mitzvah Parasha
-							<select bind:value={draft.barMitzvahParasha}>
-								<option value="">-- Select parasha --</option>
+							Bar/Bat Mitzvah Parsha
+							<select bind:value={draft.barMitzvahParsha}>
+								<option value="">-- Select parsha --</option>
 								{#each PARSHIOT as p}
 									<option value={p}>{p}</option>
 								{/each}

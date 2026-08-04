@@ -44,10 +44,10 @@
 	for (const p of DAVENING_PORTIONS) daveningPortions[p] = false;
 
 	let leiiningAbility: 'none' | 'bar_mitzvah_only' | 'can_help' | 'when_asked' | 'comfortable' = 'none';
-	let barMitzvahParasha = '';
+	let barMitzvahParsha = '';
 	let canLeinParshiot: Record<string, boolean> = {};
 	for (const p of PARSHIOT) canLeinParshiot[p] = false;
-	let lastAutoSelectedBarMitzvahParasha = '';
+	let lastAutoSelectedBarMitzvahParsha = '';
 
 	let status: SubmitStatus = 'idle';
 	let errorMessage = '';
@@ -64,12 +64,12 @@
 	$: showParshiotPicker =
 		leiiningAbility === 'can_help' || leiiningAbility === 'when_asked' || leiiningAbility === 'comfortable';
 	$: hebrewName = `${hebrewGivenName.trim()} בן ${hebrewFatherName.trim()}`.trim();
-	$: if (!barMitzvahParasha) {
-		lastAutoSelectedBarMitzvahParasha = '';
+	$: if (!barMitzvahParsha) {
+		lastAutoSelectedBarMitzvahParsha = '';
 	}
-	$: if (barMitzvahParasha && barMitzvahParasha !== lastAutoSelectedBarMitzvahParasha) {
-		canLeinParshiot[barMitzvahParasha] = true;
-		lastAutoSelectedBarMitzvahParasha = barMitzvahParasha;
+	$: if (barMitzvahParsha && barMitzvahParsha !== lastAutoSelectedBarMitzvahParsha) {
+		canLeinParshiot[barMitzvahParsha] = true;
+		lastAutoSelectedBarMitzvahParsha = barMitzvahParsha;
 	}
 
 	function appendHebrewCharacter(char: string) {
@@ -126,7 +126,7 @@
 				},
 				leining: {
 					ability: leiiningAbility,
-					barMitzvahParasha: leiiningAbility !== 'none' ? barMitzvahParasha : '',
+					barMitzvahParsha: leiiningAbility !== 'none' ? barMitzvahParsha : '',
 					parshiot: showParshiotPicker ? selectedParshiot : []
 				},
 				updatedAt: serverTimestamp()
@@ -167,8 +167,8 @@
 		canlDaven = false;
 		for (const p of DAVENING_PORTIONS) daveningPortions[p] = false;
 		leiiningAbility = 'none';
-		barMitzvahParasha = '';
-		lastAutoSelectedBarMitzvahParasha = '';
+		barMitzvahParsha = '';
+		lastAutoSelectedBarMitzvahParsha = '';
 		for (const p of PARSHIOT) canLeinParshiot[p] = false;
 		status = 'idle';
 		errorMessage = '';
@@ -352,7 +352,7 @@
 						</label>
 						<label class="radio-option">
 							<input type="radio" name="leining" value="bar_mitzvah_only" bind:group={leiiningAbility} />
-							I know my Bar Mitzvah parasha only
+							I know my Bar Mitzvah parsha only
 						</label>
 						<label class="radio-option">
 							<input type="radio" name="leining" value="can_help" bind:group={leiiningAbility} />
@@ -372,9 +372,9 @@
 				{#if showLeiiningDetails}
 					<div class="sub-options">
 						<div class="field">
-							<label for="bm-parasha">Bar / Bat Mitzvah Parasha</label>
-							<select id="bm-parasha" bind:value={barMitzvahParasha}>
-								<option value="">-- Select parasha --</option>
+							<label for="bm-parsha">Bar / Bat Mitzvah Parsha</label>
+							<select id="bm-parsha" bind:value={barMitzvahParsha}>
+								<option value="">-- Select parsha --</option>
 								{#each PARSHIOT as p}
 									<option value={p}>{p}</option>
 								{/each}
@@ -387,10 +387,10 @@
 					<div class="sub-options">
 						<p class="sub-label">Which parshiot can you lein? (check all that apply)</p>
 						<div class="parshiot-grid">
-							{#each PARSHIOT as parasha}
+							{#each PARSHIOT as parsha}
 								<label class="checkbox-option">
-									<input type="checkbox" bind:checked={canLeinParshiot[parasha]} />
-									{parasha}
+									<input type="checkbox" bind:checked={canLeinParshiot[parsha]} />
+									{parsha}
 								</label>
 							{/each}
 						</div>
