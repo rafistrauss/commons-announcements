@@ -486,14 +486,11 @@
 </div>
 
 <style>
-	:global(body) {
-		margin: 0;
+	.page {
 		font-family: 'Frank Ruhl Libre', serif;
 		background: #f7f7f2;
 		color: #222;
-	}
-
-	.page {
+		min-height: 100vh;
 		max-width: 1200px;
 		margin: 0 auto;
 		padding: 20px 16px 32px;
