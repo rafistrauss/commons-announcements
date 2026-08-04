@@ -21,7 +21,7 @@
 	import { auth, db } from '$lib/firebase';
 
 	type Tribe = 'Kohen' | 'Levi' | 'Yisrael' | '';
-	type LeiningAbility = 'none' | 'bar_mitzvah_only' | 'can_help' | 'comfortable';
+	type LeiningAbility = 'none' | 'bar_mitzvah_only' | 'can_help' | 'when_asked' | 'comfortable';
 	const PARSHIOT = [
 		'בראשית', 'נח', 'לך לך', 'וירא', 'חיי שרה', 'תולדות', 'ויצא', 'וישלח', 'וישב', 'מקץ',
 		'ויגש', 'ויחי', 'שמות', 'וארא', 'בא', 'בשלח', 'יתרו', 'משפטים', 'תרומה', 'תצוה',
@@ -449,6 +449,7 @@
 								<option value="none">I don't lein</option>
 								<option value="bar_mitzvah_only">Bar Mitzvah parasha only</option>
 								<option value="can_help">I can lein specific parshiot</option>
+								<option value="when_asked">I can lein when asked</option>
 								<option value="comfortable">Comfortable / regular</option>
 							</select>
 						</label>
@@ -461,7 +462,7 @@
 								{/each}
 							</select>
 						</label>
-						{#if draft.leiningAbility === 'can_help' || draft.leiningAbility === 'comfortable'}
+						{#if draft.leiningAbility === 'can_help' || draft.leiningAbility === 'when_asked' || draft.leiningAbility === 'comfortable'}
 							<div class="grouped-options">
 								<p class="group-label">Leining Parshiot</p>
 								<div class="parsha-grid">

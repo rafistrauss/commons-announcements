@@ -43,7 +43,7 @@
 	let daveningPortions: Record<string, boolean> = {};
 	for (const p of DAVENING_PORTIONS) daveningPortions[p] = false;
 
-	let leiiningAbility: 'none' | 'bar_mitzvah_only' | 'can_help' | 'comfortable' = 'none';
+	let leiiningAbility: 'none' | 'bar_mitzvah_only' | 'can_help' | 'when_asked' | 'comfortable' = 'none';
 	let barMitzvahParasha = '';
 	let canLeinParshiot: Record<string, boolean> = {};
 	for (const p of PARSHIOT) canLeinParshiot[p] = false;
@@ -58,7 +58,8 @@
 	];
 
 	$: showLeiiningDetails = leiiningAbility !== 'none';
-	$: showParshiotPicker = leiiningAbility === 'can_help' || leiiningAbility === 'comfortable';
+	$: showParshiotPicker =
+		leiiningAbility === 'can_help' || leiiningAbility === 'when_asked' || leiiningAbility === 'comfortable';
 	$: hebrewName = `${hebrewGivenName.trim()} בן ${hebrewFatherName.trim()}`.trim();
 	$: if (!barMitzvahParasha) {
 		lastAutoSelectedBarMitzvahParasha = '';
@@ -353,6 +354,10 @@
 						<label class="radio-option">
 							<input type="radio" name="leining" value="can_help" bind:group={leiiningAbility} />
 							I can lein specific parshiot
+						</label>
+						<label class="radio-option">
+							<input type="radio" name="leining" value="when_asked" bind:group={leiiningAbility} />
+							I can lein when asked
 						</label>
 						<label class="radio-option">
 							<input type="radio" name="leining" value="comfortable" bind:group={leiiningAbility} />
