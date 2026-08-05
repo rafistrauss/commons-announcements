@@ -119,12 +119,11 @@
 
 <svelte:head>
   <title>Commons Minyan Announcements - {data.friday.parsha} {data.friday.hebrewDate.split(' ').pop()}</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700&display=swap" />
 </svelte:head>
 
 <style>
-	@import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700&display=swap');
-	
-	:global(body) {
+	body {
 		font-family: 'Frank Ruhl Libre', serif;
 		margin: 0;
 		padding: 15px;
@@ -380,6 +379,25 @@
 	.nav-button.save-image:hover {
 		background: #388e3c;
 	}
+
+	.nav-button.aliyot-btn {
+		background: #7b1fa2;
+	}
+
+	.nav-button.aliyot-btn:hover {
+		background: #6a1b9a;
+	}
+
+	.subtle-admin-link {
+		color: #666;
+		font-size: 13px;
+		text-decoration: none;
+	}
+
+	.subtle-admin-link:hover {
+		color: #333;
+		text-decoration: underline;
+	}
 	
 	.current-week {
 		font-weight: 600;
@@ -395,7 +413,7 @@
 	}
 	
 	@media print {
-		:global(body) {
+		body {
 			padding: 0;
 		}
 		
@@ -538,9 +556,13 @@
 </div>
 
 <div class="announcement-sheet">
-	<div class="jump-to-today" style="display: flex; justify-content: center; gap: 10px; margin-bottom: 10px;">
+	<div class="jump-to-today" style="display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
 		<a href={resolve('/')} class="nav-button">Jump to Today</a>
 		<button onclick={saveAsImage} class="nav-button save-image">Save as Image</button>
+		<a href={resolve('/aliyot-signup')} class="nav-button aliyot-btn">Aliyot & Minyan Signup</a>
+	</div>
+	<div style="text-align: center; margin-bottom: 10px;">
+		<a href={resolve('/aliyot-signup/admin')} class="subtle-admin-link">Admin sign-in</a>
 	</div>
 
 	<div class="week-navigation">

@@ -75,10 +75,11 @@ const {isThereShachris} = shabbatInfo;
 let specialInfo = getShacharisNotices(shabbatInfo.shabbat);
 </script>
 
+<svelte:head>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700&display=swap" />
+</svelte:head>
 
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700&display=swap');
-
 .announcement-sheet {
   background: #fff;
   border-radius: 12px;
