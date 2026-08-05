@@ -79,8 +79,22 @@
 	let selectedId = '';
 	let draft: EditDraft | null = null;
 	let selectedParsha = '';
+	let currentParsha = '';
 	const defaultAdminEmail = (import.meta.env.VITE_DEFAULT_ADMIN_EMAIL || '').trim().toLowerCase();
 	const googleProvider = new GoogleAuthProvider();
+
+	async function fetchCurrentParsha(): Promise<string> {
+		try {
+			const response = await fetch('/api/current-parsha');
+			if (response.ok) {
+				const data = await response.json();
+				return data.parsha || '';
+			}
+		} catch (error) {
+			console.error('Failed to fetch current parsha:', error);
+		}
+		return '';
+	}
 
 	function normalizeEmail(email: string): string {
 		return email.trim().toLowerCase();
@@ -304,10 +318,18 @@
 		}
 	}
 
-	onMount(() => {
+	onMount(async () => {
 		if (!auth) {
 			statusMessage = 'Firebase Auth is not available.';
 			return;
+		}
+
+		const parsha = await fetchCurrentParsha();
+		if (parsha && PARSHIOT.includes(parsha)) {
+			currentParsha = parsha;
+			selectedParsha = parsha;
+		} else if (PARSHIOT.length > 0) {
+			selectedParsha = PARSHIOT[0];
 		}
 
 		const unsubscribe = onAuthStateChanged(auth, async (nextUser) => {
@@ -386,7 +408,10 @@
 				{/if}
 
 				<div class="parsha-lookup">
-					<h3>Who can lein this Parsha?</h3>
+					<h3>Leiners for this Parsha</h3>
+					{#if currentParsha}
+						<p class="current-parsha">Current: <strong dir="rtl">{currentParsha}</strong></p>
+					{/if}
 					<select bind:value={selectedParsha}>
 						{#each PARSHIOT as p}
 							<option value={p}>{p}</option>
@@ -566,6 +591,16 @@
 	.parsha-lookup h3 {
 		margin: 0;
 		font-size: 18px;
+	}
+
+	.current-parsha {
+		margin: 0;
+		font-size: 15px;
+		padding: 8px;
+		background: #e8f5e9;
+		border: 1px solid #4caf50;
+		border-radius: 4px;
+		color: #2e7d32;
 	}
 
 	.leiner-list {
