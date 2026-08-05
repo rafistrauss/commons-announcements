@@ -78,23 +78,8 @@
 	let submissions: SignupDoc[] = [];
 	let selectedId = '';
 	let draft: EditDraft | null = null;
-	let selectedParsha = '';
-	let currentParsha = '';
 	const defaultAdminEmail = (import.meta.env.VITE_DEFAULT_ADMIN_EMAIL || '').trim().toLowerCase();
 	const googleProvider = new GoogleAuthProvider();
-
-	async function fetchCurrentParsha(): Promise<string> {
-		try {
-			const response = await fetch('/api/current-parsha');
-			if (response.ok) {
-				const data = await response.json();
-				return data.parsha || '';
-			}
-		} catch (error) {
-			console.error('Failed to fetch current parsha:', error);
-		}
-		return '';
-	}
 
 	function normalizeEmail(email: string): string {
 		return email.trim().toLowerCase();
@@ -119,20 +104,6 @@
 				return false;
 			}
 		}
-	}
-
-	$: if (!selectedParsha && PARSHIOT.length > 0) {
-		selectedParsha = PARSHIOT[0];
-	}
-
-	function canLeinParsha(record: SignupDoc, parsha: string): boolean {
-		if (!parsha) return false;
-		if (record.leining.parshiot.includes(parsha)) return true;
-		return record.leining.ability !== 'none' && record.leining.barMitzvahParsha === parsha;
-	}
-
-	function matchingLeiners(parsha: string): SignupDoc[] {
-		return submissions.filter((record) => canLeinParsha(record, parsha));
 	}
 
 	function formatTimestamp(value: unknown): string {
@@ -318,18 +289,10 @@
 		}
 	}
 
-	onMount(async () => {
+	onMount(() => {
 		if (!auth) {
 			statusMessage = 'Firebase Auth is not available.';
 			return;
-		}
-
-		const parsha = await fetchCurrentParsha();
-		if (parsha && PARSHIOT.includes(parsha)) {
-			currentParsha = parsha;
-			selectedParsha = parsha;
-		} else if (PARSHIOT.length > 0) {
-			selectedParsha = PARSHIOT[0];
 		}
 
 		const unsubscribe = onAuthStateChanged(auth, async (nextUser) => {
@@ -408,27 +371,9 @@
 				{/if}
 
 				<div class="parsha-lookup">
-					<h3>Leiners for this Parsha</h3>
-					{#if currentParsha}
-						<p class="current-parsha">Current: <strong dir="rtl">{currentParsha}</strong></p>
-					{/if}
-					<select bind:value={selectedParsha}>
-						{#each PARSHIOT as p}
-							<option value={p}>{p}</option>
-						{/each}
-					</select>
-					{#if matchingLeiners(selectedParsha).length === 0}
-						<p class="meta">No matching leiners found.</p>
-					{:else}
-						<ul class="leiner-list">
-							{#each matchingLeiners(selectedParsha) as person}
-								<li>
-									<strong>{person.englishName}</strong>
-									<span class="meta" dir="rtl">({person.hebrewName || '—'})</span>
-								</li>
-							{/each}
-						</ul>
-					{/if}
+					<h3>Leiners Lookup</h3>
+					<p class="info-text">View who can lein for each parsha with week-by-week navigation.</p>
+					<a href={resolve('/admin')} class="view-leiners-btn">View Leiners →</a>
 				</div>
 			</section>
 
@@ -593,14 +538,26 @@
 		font-size: 18px;
 	}
 
-	.current-parsha {
+	.info-text {
 		margin: 0;
-		font-size: 15px;
-		padding: 8px;
-		background: #e8f5e9;
-		border: 1px solid #4caf50;
-		border-radius: 4px;
-		color: #2e7d32;
+		font-size: 14px;
+		color: #555;
+	}
+
+	.view-leiners-btn {
+		display: block;
+		text-align: center;
+		padding: 12px;
+		background: #4caf50;
+		color: white;
+		text-decoration: none;
+		border-radius: 6px;
+		font-weight: 600;
+		transition: background 0.2s;
+	}
+
+	.view-leiners-btn:hover {
+		background: #388e3c;
 	}
 
 	.leiner-list {
