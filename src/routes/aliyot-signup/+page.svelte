@@ -162,7 +162,7 @@
 <div class="page">
 	<header class="page-header">
 		<div class="header-links">
-			<a href="{base}/" class="back-link">← Announcements</a>
+			<a href={base ? `${base}/` : '/'} class="back-link">← Announcements</a>
 			<a href={resolve('/aliyot-signup/admin')} class="admin-link">Admin sign-in</a>
 		</div>
 		<h1>Fair Lawn Commons Minyan</h1>

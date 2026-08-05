@@ -317,7 +317,7 @@
 
 <div class="page">
 	<header class="header">
-		<a href={resolve('/aliyot-signup')} class="back-link">← Aliyot Signup</a>
+		<a href={resolve('/aliyot-signup/')} class="back-link">← Aliyot Signup</a>
 		<h1>Aliyot Signup Admin</h1>
 		<p>Sign in to view and edit submitted signup information.</p>
 	</header>

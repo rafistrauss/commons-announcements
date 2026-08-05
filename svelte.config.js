@@ -4,7 +4,6 @@ import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 const dev = process.env.NODE_ENV === 'development';
 // Support dynamic base path for PR previews
 const base = dev ? '' : (process.env.PUBLIC_BASE_PATH || '/commons-announcements');
-
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	// Consult https://svelte.dev/docs/kit/integrations

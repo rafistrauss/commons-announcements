@@ -559,10 +559,10 @@
 	<div class="jump-to-today" style="display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
 		<a href={resolve('/')} class="nav-button">Jump to Today</a>
 		<button onclick={saveAsImage} class="nav-button save-image">Save as Image</button>
-		<a href={resolve('/aliyot-signup')} class="nav-button aliyot-btn">Aliyot & Minyan Signup</a>
+		<a href={resolve('/aliyot-signup/')} class="nav-button aliyot-btn">Aliyot & Minyan Signup</a>
 	</div>
 	<div style="text-align: center; margin-bottom: 10px;">
-		<a href={resolve('/aliyot-signup/admin')} class="subtle-admin-link">Admin sign-in</a>
+		<a href={resolve('/aliyot-signup/admin/')} class="subtle-admin-link">Admin sign-in</a>
 	</div>
 
 	<div class="week-navigation">
