@@ -64,7 +64,13 @@ This allows you to preview changes before merging to production!
 ## Configuration
 
 - **Location**: Fair Lawn, NJ (zip code 07410)
-- **Firebase (required for signup + admin)**: web app config is hardcoded in `src/lib/firebase.ts`
+- **Firebase (required for signup + admin)**: set the following environment variables before building:
+  - `VITE_FIREBASE_API_KEY`
+  - `VITE_FIREBASE_AUTH_DOMAIN`
+  - `VITE_FIREBASE_PROJECT_ID`
+  - `VITE_FIREBASE_STORAGE_BUCKET`
+  - `VITE_FIREBASE_MESSAGING_SENDER_ID`
+  - `VITE_FIREBASE_APP_ID`
 - **Admin access control**:
   - Optional: set `VITE_DEFAULT_ADMIN_EMAIL` for one default admin email.
   - Additional admins are managed dynamically in Firestore: create documents in collection `admin-users` where the **document ID is the lowercase email address** (for example `someone@example.com`).

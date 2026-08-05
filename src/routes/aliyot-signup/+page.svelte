@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { addDoc, collection, doc, getDocs, limit, query, serverTimestamp, updateDoc, where } from 'firebase/firestore';
+	import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 	import { db } from '$lib/firebase';
 	import { base, resolve } from '$app/paths';
 
@@ -51,7 +50,6 @@
 
 	let status: SubmitStatus = 'idle';
 	let errorMessage = '';
-	let wasUpdate = false;
 	let showLeiiningDetails = false;
 	let showParshiotPicker = false;
 	let hebrewName = '';
@@ -113,7 +111,7 @@
 			const selectedDaveningPortions = DAVENING_PORTIONS.filter(p => daveningPortions[p]);
 			const selectedParshiot = PARSHIOT.filter(p => canLeinParshiot[p]);
 			const normalizedEmail = email.trim().toLowerCase();
-			const payload = {
+			await addDoc(collection(db, 'aliyot-signups'), {
 				englishName: englishName.trim(),
 				email: normalizedEmail,
 				hebrewName,
@@ -129,27 +127,8 @@
 					barMitzvahParsha: leiiningAbility !== 'none' ? barMitzvahParsha : '',
 					parshiot: showParshiotPicker ? selectedParshiot : []
 				},
-				updatedAt: serverTimestamp()
-			};
-
-			const existingSignupQuery = query(
-				collection(db, 'aliyot-signups'),
-				where('email', '==', normalizedEmail),
-				limit(1)
-			);
-			const existingSignupSnapshot = await getDocs(existingSignupQuery);
-
-			if (existingSignupSnapshot.empty) {
-				wasUpdate = false;
-				await addDoc(collection(db, 'aliyot-signups'), {
-					...payload,
-					submittedAt: serverTimestamp()
-				});
-			} else {
-				wasUpdate = true;
-				const existingDoc = existingSignupSnapshot.docs[0];
-				await updateDoc(doc(db, 'aliyot-signups', existingDoc.id), payload);
-			}
+				submittedAt: serverTimestamp()
+			});
 			status = 'success';
 		} catch (err) {
 			console.error('Error saving to Firebase:', err);
@@ -172,7 +151,6 @@
 		for (const p of PARSHIOT) canLeinParshiot[p] = false;
 		status = 'idle';
 		errorMessage = '';
-		wasUpdate = false;
 	}
 </script>
 
@@ -199,15 +177,10 @@
 
 	{#if status === 'success'}
 		<div class="success-card">
-			<div class="success-icon">✅</div>
+			<div class="success-icon" aria-hidden="true">✅</div>
 			<h2>Thank you, {englishName}!</h2>
 			<p>
-				{#if wasUpdate}
-					Your information has been updated.
-				{:else}
-					Your information has been saved.
-				{/if}
-				We'll be in touch when there's an opportunity for you to participate.
+				Your information has been saved. We'll be in touch when there's an opportunity for you to participate.
 			</p>
 			<button class="btn btn-primary" onclick={resetForm}>Submit Another Response</button>
 		</div>
@@ -410,8 +383,6 @@
 </div>
 
 <style>
-	@import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700&display=swap');
-
 	.page {
 		font-family: 'Frank Ruhl Libre', serif;
 		background: #f5f5f0;

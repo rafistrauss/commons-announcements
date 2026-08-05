@@ -122,6 +122,7 @@
 
 <svelte:head>
   <title>{data.pageTitle}</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700&display=swap" />
 </svelte:head>
 
 <div class="announcement-sheet">
@@ -358,22 +359,14 @@
 </div>
 
 <style>
-  @import url("https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700&display=swap");
-
-  :global(body) {
+  .announcement-sheet {
     font-family: "Frank Ruhl Libre", serif;
-    margin: 0;
-    padding: 15px;
     background: white;
     color: black;
-  }
-
-  .announcement-sheet {
     max-width: 8.5in;
     margin: 0 auto;
     padding: 14px;
     border: 2px solid #333;
-    background: white;
   }
 
   .header {
