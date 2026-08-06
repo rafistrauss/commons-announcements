@@ -1035,6 +1035,45 @@
 
 		.aliyot-grid {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 20px;
+		}
+
+		.aliyot-tribe {
+			border: 2px solid #333;
+			border-radius: 0;
+			padding: 16px;
+			background: white;
+		}
+
+		.aliyot-tribe h3 {
+			font-size: 26px;
+			font-weight: 900;
+			text-transform: uppercase;
+			letter-spacing: 0.08em;
+			border-bottom: 3px solid #333;
+			padding-bottom: 8px;
+			margin-bottom: 14px;
+		}
+
+		.aliyot-tribe ul {
+			gap: 0;
+		}
+
+		.aliyot-tribe li {
+			padding: 10px 0;
+			border-bottom: 1px solid #ccc;
+		}
+
+		.aliyot-tribe li:last-child {
+			border-bottom: none;
+		}
+
+		.print-name {
+			font-size: 22px;
+		}
+
+		.print-hebrew {
+			font-size: 22px;
 		}
 	}
 </style>
