@@ -762,7 +762,13 @@
 	}
 
 	.aliyot-tribe.full-width ul {
-		grid-template-columns: repeat(3, minmax(0, 1fr));
+		display: block;
+		columns: 3;
+		column-gap: 24px;
+	}
+
+	.aliyot-tribe.full-width li {
+		break-inside: avoid;
 	}
 
 	.aliyot-tribe {
