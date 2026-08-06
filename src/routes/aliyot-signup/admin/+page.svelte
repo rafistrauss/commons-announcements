@@ -591,7 +591,8 @@
 							<ul>
 								{#each group.people as person}
 									<li>
-										<div class="print-name">{person.englishName}</div>
+										<div class="print-row">
+											<div class="print-name">{person.englishName}</div>
 											<div class="print-hebrew" dir="rtl">
 												<span class="hebrew-name-part">{person.hebrewGivenName || '—'}</span>
 												<span class="hebrew-ben">בן</span>
@@ -600,8 +601,9 @@
 													<span class="hebrew-suffix">{tribeSuffix(person.tribe)}</span>
 												{/if}
 											</div>
-										</li>
-									{/each}
+										</div>
+									</li>
+								{/each}
 								</ul>
 						{/if}
 					</section>
@@ -880,9 +882,17 @@
 		border-bottom: 1px dashed #e3e3e3;
 	}
 
+	.print-row {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 12px;
+	}
+
 	.print-name {
 		font-weight: 700;
 		font-size: 18px;
+		flex-shrink: 0;
 	}
 
 	.print-hebrew {
@@ -890,6 +900,7 @@
 		color: #555;
 		font-weight: 700;
 		line-height: 1.35;
+		text-align: right;
 	}
 
 	.hebrew-name-part,
