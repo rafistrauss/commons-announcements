@@ -70,6 +70,19 @@
 		lastAutoSelectedBarMitzvahParsha = barMitzvahParsha;
 	}
 
+	function tribeSuffix(value: typeof tribe): string {
+		if (value === 'Kohen') return 'הכהן';
+		if (value === 'Levi') return 'הלוי';
+		return '';
+	}
+
+	function displayHebrewName(name: string, value: typeof tribe): string {
+		const suffix = tribeSuffix(value);
+		const trimmed = name.trim();
+		if (!suffix || !trimmed) return trimmed;
+		return trimmed.endsWith(suffix) ? trimmed : `${trimmed} ${suffix}`;
+	}
+
 	function appendHebrewCharacter(char: string) {
 		if (activeHebrewField === 'given') {
 			hebrewGivenName += char;
@@ -114,10 +127,10 @@
 			await addDoc(collection(db, 'aliyot-signups'), {
 				englishName: englishName.trim(),
 				email: normalizedEmail,
-				hebrewName,
 				hebrewGivenName: hebrewGivenName.trim(),
 				hebrewFatherName: hebrewFatherName.trim(),
 				tribe,
+				alumni: false,
 				davening: {
 					canDaven: canlDaven,
 					portions: selectedDaveningPortions
@@ -246,7 +259,18 @@
 					</div>
 					<div class="hebrew-name-preview">
 						<div class="hebrew-name-preview-label">Final Hebrew Name (for Aliyot)</div>
-						<div class="hebrew-name-preview-value" dir="rtl">{hebrewName || '—'}</div>
+						<div class="hebrew-name-preview-value" dir="rtl">
+							{#if hebrewGivenName.trim() || hebrewFatherName.trim()}
+								<span class="hebrew-name-part">{hebrewGivenName.trim() || '—'}</span>
+								<span class="hebrew-ben">בן</span>
+								<span class="hebrew-name-part">{hebrewFatherName.trim() || '—'}</span>
+								{#if tribeSuffix(tribe)}
+									<span class="hebrew-suffix">{tribeSuffix(tribe)}</span>
+								{/if}
+							{:else}
+								—
+							{/if}
+						</div>
 					</div>
 					<button type="button" class="hebrew-kb-toggle" onclick={() => (showHebrewKeyboard = !showHebrewKeyboard)}>
 						{showHebrewKeyboard ? 'Hide Hebrew keyboard' : 'Show Hebrew keyboard (optional)'}
@@ -523,11 +547,23 @@
 	}
 
 	.hebrew-name-preview-value {
-		font-size: 24px;
+		font-size: 30px;
 		font-weight: 700;
 		color: #2b2b2b;
 		min-height: 30px;
 		text-align: center;
+		line-height: 1.35;
+	}
+
+	.hebrew-name-part,
+	.hebrew-suffix {
+		font-weight: 700;
+	}
+
+	.hebrew-ben {
+		font-weight: 400;
+		font-size: 0.82em;
+		padding: 0 0.15em;
 	}
 
 	input[type="text"],

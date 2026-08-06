@@ -34,6 +34,7 @@
 		englishName: string;
 		hebrewName: string;
 		tribe: Tribe;
+		alumni: boolean;
 		davening: { canDaven: boolean; portions: string[] };
 		leining: { ability: LeiningAbility; barMitzvahParsha: string; parshiot: string[] };
 	};
@@ -74,6 +75,7 @@
 
 	function canLeinParsha(record: SignupDoc, parsha: string): boolean {
 		if (!parsha) return false;
+		if (record.alumni) return false;
 		if (record.leining.parshiot.includes(parsha)) return true;
 		return record.leining.ability !== 'none' && record.leining.barMitzvahParsha === parsha;
 	}
@@ -100,6 +102,7 @@
 					englishName: typeof raw.englishName === 'string' ? raw.englishName : '',
 					hebrewName: typeof raw.hebrewName === 'string' ? raw.hebrewName : '',
 					tribe: (raw.tribe as Tribe) || '',
+					alumni: Boolean(raw.alumni),
 					davening: {
 						canDaven: Boolean(davening.canDaven),
 						portions: Array.isArray(davening.portions)
