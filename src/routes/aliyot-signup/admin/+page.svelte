@@ -542,7 +542,7 @@
 
 			<div class="aliyot-grid">
 				{#each aliyotByTribe as group}
-					<section class="aliyot-tribe">
+					<section class="aliyot-tribe" class:full-width={group.tribe === 'Yisrael'}>
 						<h3>{group.tribe}</h3>
 						{#if group.people.length === 0}
 							<p class="empty-tribe">No active names.</p>
@@ -753,8 +753,16 @@
 
 	.aliyot-grid {
 		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: 12px;
+	}
+
+	.aliyot-tribe.full-width {
+		grid-column: 1 / -1;
+	}
+
+	.aliyot-tribe.full-width ul {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}
 
 	.aliyot-tribe {
@@ -925,7 +933,7 @@
 		}
 
 		.aliyot-grid {
-			grid-template-columns: repeat(3, minmax(0, 1fr));
+			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
 	}
 </style>
