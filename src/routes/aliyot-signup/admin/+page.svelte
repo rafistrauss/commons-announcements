@@ -6,6 +6,7 @@
 		doc,
 		getDoc,
 		getDocs,
+		deleteDoc,
 		orderBy,
 		query,
 		serverTimestamp,
@@ -85,11 +86,19 @@
 	let selectedId = '';
 	let draft: EditDraft | null = null;
 	let showAlumni = false;
+	let searchQuery = '';
 	const defaultAdminEmail = (import.meta.env.VITE_DEFAULT_ADMIN_EMAIL || '').trim().toLowerCase();
 	const googleProvider = new GoogleAuthProvider();
 
 	$: activeSubmissions = submissions.filter((record) => !record.alumni);
-	$: visibleSubmissions = showAlumni ? submissions : activeSubmissions;
+	$: baseSubmissions = showAlumni ? submissions : activeSubmissions;
+	$: visibleSubmissions = searchQuery.trim()
+		? baseSubmissions.filter((r) =>
+				r.englishName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				r.hebrewGivenName.includes(searchQuery) ||
+				r.hebrewFatherName.includes(searchQuery)
+			)
+		: baseSubmissions;
 	$: aliyotByTribe = TRIBES.map((tribe) => ({
 		tribe,
 		people: activeSubmissions
@@ -342,6 +351,26 @@
 		}
 	}
 
+	async function deleteRecord(id: string) {
+		const record = submissions.find((r) => r.id === id);
+		if (!record) return;
+		const confirmed = window.confirm(`Delete "${record.englishName}"? This cannot be undone.`);
+		if (!confirmed) return;
+		try {
+			await deleteDoc(doc(db, 'aliyot-signups', id));
+			submissions = submissions.filter((r) => r.id !== id);
+			if (selectedId === id) {
+				selectedId = submissions[0]?.id ?? '';
+				const next = submissions.find((r) => r.id === selectedId);
+				draft = next ? (loadDraft(next), draft) : null;
+			}
+			statusMessage = `Deleted "${record.englishName}".`;
+		} catch (error) {
+			console.error('Failed to delete:', error);
+			statusMessage = 'Delete failed. Check Firestore permissions.';
+		}
+	}
+
 	onMount(() => {
 		if (!auth) {
 			statusMessage = 'Firebase Auth is not available.';
@@ -402,6 +431,12 @@
 		<div class="admin-grid">
 			<section class="card list-panel">
 						<h2>Submissions ({visibleSubmissions.length} shown / {submissions.length} total)</h2>
+						<input
+							class="search-input"
+							type="search"
+							placeholder="Search names…"
+							bind:value={searchQuery}
+						/>
 						<label class="checkbox-row filter-toggle">
 							<input type="checkbox" bind:checked={showAlumni} />
 							Show alumni
@@ -413,7 +448,7 @@
 						{:else}
 							<ul>
 								{#each visibleSubmissions as item}
-									<li>
+									<li class="list-item-row">
 										<button
 											class:selected={item.id === selectedId}
 											class:alumni={item.alumni}
@@ -428,6 +463,12 @@
 											</div>
 											<div class="meta">{item.tribe || 'No tribe'} • {item.submittedAtLabel}</div>
 										</button>
+										<button
+											class="delete-btn"
+											type="button"
+											title="Delete"
+											onclick={() => deleteRecord(item.id)}
+										>✕</button>
 									</li>
 								{/each}
 							</ul>
@@ -620,8 +661,24 @@
 	}
 
 	.filter-toggle {
-		margin: 10px 0 12px;
+		margin: 6px 0 12px;
 		font-weight: 600;
+	}
+
+	.search-input {
+		width: 100%;
+		box-sizing: border-box;
+		font-family: inherit;
+		font-size: 14px;
+		padding: 7px 10px;
+		border: 1px solid #ccc;
+		border-radius: 6px;
+		margin-bottom: 6px;
+	}
+
+	.search-input:focus {
+		outline: 2px solid #1976d2;
+		border-color: #1976d2;
 	}
 
 	.admin-grid {
@@ -682,6 +739,33 @@
 		border-radius: 6px;
 		background: #fafafa;
 		cursor: pointer;
+		flex: 1;
+		min-width: 0;
+	}
+
+	.list-item-row {
+		display: flex;
+		align-items: stretch;
+		gap: 6px;
+	}
+
+	.delete-btn {
+		flex-shrink: 0;
+		background: transparent;
+		border: 1px solid #e0e0e0;
+		border-radius: 6px;
+		color: #999;
+		font-size: 13px;
+		cursor: pointer;
+		padding: 0 8px;
+		line-height: 1;
+		transition: background 0.15s, color 0.15s, border-color 0.15s;
+	}
+
+	.delete-btn:hover {
+		background: #fdecea;
+		border-color: #e53935;
+		color: #e53935;
 	}
 
 	.list-item.alumni {
