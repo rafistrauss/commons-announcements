@@ -49,8 +49,10 @@
 	type SignupDoc = {
 		id: string;
 		englishName: string;
-		hebrewName: string;
+		hebrewGivenName: string;
+		hebrewFatherName: string;
 		tribe: Tribe;
+		alumni: boolean;
 		davening: { canDaven: boolean; portions: string[] };
 		leining: { ability: LeiningAbility; barMitzvahParsha: string; parshiot: string[] };
 		submittedAtLabel: string;
@@ -58,14 +60,18 @@
 
 	type EditDraft = {
 		englishName: string;
-		hebrewName: string;
+		hebrewGivenName: string;
+		hebrewFatherName: string;
 		tribe: Tribe;
+		alumni: boolean;
 		canDaven: boolean;
 		daveningPortions: Record<string, boolean>;
 		leiningAbility: LeiningAbility;
 		barMitzvahParsha: string;
 		leiningParshiot: Record<string, boolean>;
 	};
+
+	const TRIBES: Exclude<Tribe, ''>[] = ['Kohen', 'Levi', 'Yisrael'];
 
 	let loginError = '';
 	let statusMessage = '';
@@ -78,8 +84,38 @@
 	let submissions: SignupDoc[] = [];
 	let selectedId = '';
 	let draft: EditDraft | null = null;
+	let showAlumni = false;
 	const defaultAdminEmail = (import.meta.env.VITE_DEFAULT_ADMIN_EMAIL || '').trim().toLowerCase();
 	const googleProvider = new GoogleAuthProvider();
+
+	$: activeSubmissions = submissions.filter((record) => !record.alumni);
+	$: visibleSubmissions = showAlumni ? submissions : activeSubmissions;
+	$: aliyotByTribe = TRIBES.map((tribe) => ({
+		tribe,
+		people: activeSubmissions
+			.filter((record) => record.tribe === tribe)
+			.slice()
+			.sort((a, b) => a.englishName.localeCompare(b.englishName))
+	}));
+
+	function tribeSuffix(value: Tribe): string {
+		if (value === 'Kohen') return 'הכהן';
+		if (value === 'Levi') return 'הלוי';
+		return '';
+	}
+
+	function splitHebrewName(name: string): { given: string; father: string } {
+		const trimmed = name.trim();
+		if (!trimmed) return { given: '', father: '' };
+		const parts = trimmed.split(' בן ');
+		if (parts.length >= 2) {
+			return {
+				given: parts[0].trim(),
+				father: parts.slice(1).join(' בן ').trim()
+			};
+		}
+		return { given: trimmed, father: '' };
+	}
 
 	function normalizeEmail(email: string): string {
 		return email.trim().toLowerCase();
@@ -125,12 +161,19 @@
 			barMitzvahParsha?: string;
 			parshiot?: string[];
 		};
+		const legacyHebrew = splitHebrewName(typeof raw.hebrewName === 'string' ? raw.hebrewName : '');
 
 		return {
 			id,
 			englishName: typeof raw.englishName === 'string' ? raw.englishName : '',
-			hebrewName: typeof raw.hebrewName === 'string' ? raw.hebrewName : '',
+			hebrewGivenName: typeof raw.hebrewGivenName === 'string'
+				? raw.hebrewGivenName
+				: legacyHebrew.given,
+			hebrewFatherName: typeof raw.hebrewFatherName === 'string'
+				? raw.hebrewFatherName
+				: legacyHebrew.father,
 			tribe: (raw.tribe as Tribe) || '',
+			alumni: Boolean(raw.alumni),
 			davening: {
 				canDaven: Boolean(davening.canDaven),
 				portions: Array.isArray(davening.portions) ? davening.portions.filter((v): v is string => typeof v === 'string') : []
@@ -159,8 +202,10 @@
 
 		draft = {
 			englishName: record.englishName,
-			hebrewName: record.hebrewName,
+			hebrewGivenName: record.hebrewGivenName,
+			hebrewFatherName: record.hebrewFatherName,
 			tribe: record.tribe,
+			alumni: record.alumni,
 			canDaven: record.davening.canDaven,
 			daveningPortions,
 			leiningAbility: record.leining.ability,
@@ -198,6 +243,10 @@
 		selectedId = id;
 		const selected = submissions.find((item) => item.id === id);
 		if (selected) loadDraft(selected);
+	}
+
+	function printAliyotList() {
+		window.print();
 	}
 
 	async function handleGoogleLogin() {
@@ -249,8 +298,10 @@
 		try {
 			await updateDoc(doc(db, 'aliyot-signups', selectedId), {
 				englishName: currentDraft.englishName.trim(),
-				hebrewName: currentDraft.hebrewName.trim(),
+				hebrewGivenName: currentDraft.hebrewGivenName.trim(),
+				hebrewFatherName: currentDraft.hebrewFatherName.trim(),
 				tribe: currentDraft.tribe,
+				alumni: currentDraft.alumni,
 				davening: {
 					canDaven: currentDraft.canDaven,
 					portions: daveningPortions
@@ -268,8 +319,10 @@
 					? {
 							...record,
 							englishName: currentDraft.englishName.trim(),
-							hebrewName: currentDraft.hebrewName.trim(),
+							hebrewGivenName: currentDraft.hebrewGivenName.trim(),
+							hebrewFatherName: currentDraft.hebrewFatherName.trim(),
 							tribe: currentDraft.tribe,
+							alumni: currentDraft.alumni,
 							davening: { canDaven: currentDraft.canDaven, portions: daveningPortions },
 							leining: {
 								ability: currentDraft.leiningAbility,
@@ -348,27 +401,37 @@
 
 		<div class="admin-grid">
 			<section class="card list-panel">
-				<h2>Submissions ({submissions.length})</h2>
-				{#if loading}
-					<p>Loading…</p>
-				{:else if submissions.length === 0}
-					<p>No submissions found.</p>
-				{:else}
-					<ul>
-						{#each submissions as item}
-							<li>
-								<button
-									class:selected={item.id === selectedId}
-									class="list-item"
-									onclick={() => selectRecord(item.id)}
-								>
-									<div class="name">{item.englishName || '(No name)'}</div>
-									<div class="meta">{item.tribe || 'No tribe'} • {item.submittedAtLabel}</div>
-								</button>
-							</li>
-						{/each}
-					</ul>
-				{/if}
+						<h2>Submissions ({visibleSubmissions.length} shown / {submissions.length} total)</h2>
+						<label class="checkbox-row filter-toggle">
+							<input type="checkbox" bind:checked={showAlumni} />
+							Show alumni
+						</label>
+						{#if loading}
+							<p>Loading…</p>
+						{:else if visibleSubmissions.length === 0}
+							<p>No active submissions found.</p>
+						{:else}
+							<ul>
+								{#each visibleSubmissions as item}
+									<li>
+										<button
+											class:selected={item.id === selectedId}
+											class:alumni={item.alumni}
+											class="list-item"
+											onclick={() => selectRecord(item.id)}
+										>
+											<div class="name-row">
+												<div class="name">{item.englishName || '(No name)'}</div>
+												{#if item.alumni}
+													<span class="alumni-badge">Alumnus</span>
+												{/if}
+											</div>
+											<div class="meta">{item.tribe || 'No tribe'} • {item.submittedAtLabel}</div>
+										</button>
+									</li>
+								{/each}
+							</ul>
+						{/if}
 
 				<div class="parsha-lookup">
 					<h3>Leiners Lookup</h3>
@@ -389,7 +452,11 @@
 						</label>
 						<label>
 							Hebrew Name
-							<input type="text" bind:value={draft.hebrewName} />
+							<div class="hebrew-edit-row" dir="rtl">
+								<input type="text" bind:value={draft.hebrewGivenName} placeholder="Hebrew name" />
+								<span class="hebrew-ben-edit">בן</span>
+								<input type="text" bind:value={draft.hebrewFatherName} placeholder="Father's Hebrew name" />
+							</div>
 						</label>
 						<label>
 							Tribe
@@ -399,6 +466,10 @@
 								<option value="Levi">Levi</option>
 								<option value="Yisrael">Yisrael</option>
 							</select>
+						</label>
+						<label class="checkbox-row">
+							<input type="checkbox" bind:checked={draft.alumni} />
+							Mark as alumnus
 						</label>
 						<label class="checkbox-row">
 							<input type="checkbox" bind:checked={draft.canDaven} />
@@ -459,6 +530,43 @@
 				{/if}
 			</section>
 		</div>
+
+		<section class="card print-panel">
+			<div class="print-header">
+				<div>
+					<h2>Printable Aliyot List</h2>
+					<p>Active names only, grouped by tribe.</p>
+				</div>
+				<button type="button" onclick={printAliyotList}>Print list</button>
+			</div>
+
+			<div class="aliyot-grid">
+				{#each aliyotByTribe as group}
+					<section class="aliyot-tribe">
+						<h3>{group.tribe}</h3>
+						{#if group.people.length === 0}
+							<p class="empty-tribe">No active names.</p>
+						{:else}
+							<ul>
+								{#each group.people as person}
+									<li>
+										<div class="print-name">{person.englishName}</div>
+											<div class="print-hebrew" dir="rtl">
+												<span class="hebrew-name-part">{person.hebrewGivenName || '—'}</span>
+												<span class="hebrew-ben">בן</span>
+												<span class="hebrew-name-part">{person.hebrewFatherName || '—'}</span>
+												{#if tribeSuffix(person.tribe)}
+													<span class="hebrew-suffix">{tribeSuffix(person.tribe)}</span>
+												{/if}
+											</div>
+										</li>
+									{/each}
+								</ul>
+						{/if}
+					</section>
+				{/each}
+			</div>
+		</section>
 	{/if}
 </div>
 
@@ -511,6 +619,11 @@
 		gap: 8px;
 	}
 
+	.filter-toggle {
+		margin: 10px 0 12px;
+		font-weight: 600;
+	}
+
 	.admin-grid {
 		display: grid;
 		grid-template-columns: 360px 1fr;
@@ -560,14 +673,6 @@
 		background: #388e3c;
 	}
 
-	.leiner-list {
-		list-style: none;
-		padding: 0;
-		margin: 0;
-		display: grid;
-		gap: 6px;
-	}
-
 	.list-item {
 		display: block;
 		width: 100%;
@@ -579,18 +684,143 @@
 		cursor: pointer;
 	}
 
+	.list-item.alumni {
+		opacity: 0.7;
+	}
+
 	.list-item.selected {
 		border-color: #1976d2;
 		background: #e8f1fd;
+	}
+
+	.name-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
 	}
 
 	.name {
 		font-weight: 700;
 	}
 
+	.alumni-badge {
+		background: #e0e0e0;
+		color: #555;
+		font-size: 11px;
+		font-weight: 700;
+		padding: 2px 8px;
+		border-radius: 999px;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+	}
+
 	.meta {
 		font-size: 14px;
 		color: #555;
+	}
+
+	.print-panel {
+		margin-top: 16px;
+	}
+
+	.print-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 12px;
+		margin-bottom: 14px;
+	}
+
+	.print-header h2 {
+		margin: 0 0 4px;
+	}
+
+	.print-header p {
+		margin: 0;
+		color: #555;
+	}
+
+	.print-header button {
+		background: #1976d2;
+		color: white;
+		border: none;
+		padding: 10px 14px;
+		border-radius: 6px;
+		cursor: pointer;
+		font-weight: 600;
+	}
+
+	.aliyot-grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 12px;
+	}
+
+	.aliyot-tribe {
+		border: 1px solid #dcdcdc;
+		border-radius: 6px;
+		padding: 12px;
+		background: #fcfcfb;
+	}
+
+	.aliyot-tribe h3 {
+		margin: 0 0 10px;
+		font-size: 18px;
+	}
+
+	.aliyot-tribe ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: grid;
+		gap: 8px;
+	}
+
+	.aliyot-tribe li {
+		padding-bottom: 8px;
+		border-bottom: 1px dashed #e3e3e3;
+	}
+
+	.print-name {
+		font-weight: 700;
+		font-size: 18px;
+	}
+
+	.print-hebrew {
+		font-size: 18px;
+		color: #555;
+		font-weight: 700;
+		line-height: 1.35;
+	}
+
+	.hebrew-name-part,
+	.hebrew-suffix {
+		font-weight: 700;
+	}
+
+	.hebrew-ben,
+	.hebrew-ben-edit {
+		font-weight: 400;
+		font-size: 0.82em;
+		padding: 0 0.15em;
+	}
+
+	.hebrew-edit-row {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.hebrew-edit-row input {
+		flex: 1 1 0;
+		min-width: 0;
+	}
+
+	.empty-tribe {
+		margin: 0;
+		color: #777;
+		font-style: italic;
 	}
 
 	.edit-form {
@@ -663,6 +893,39 @@
 	@media (max-width: 900px) {
 		.admin-grid {
 			grid-template-columns: 1fr;
+		}
+
+		.aliyot-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	@media print {
+		.header,
+		.top-actions,
+		.admin-grid > .list-panel,
+		.admin-grid > :not(.print-panel) {
+			display: none !important;
+		}
+
+		.page {
+			max-width: none;
+			padding: 0;
+			background: white;
+		}
+
+		.print-panel {
+			border: none;
+			margin: 0;
+			padding: 0;
+		}
+
+		.print-header button {
+			display: none;
+		}
+
+		.aliyot-grid {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
 		}
 	}
 </style>
