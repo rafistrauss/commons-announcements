@@ -55,7 +55,7 @@
 		tribe: Tribe;
 		alumni: boolean;
 		davening: { canDaven: boolean; portions: string[] };
-		leining: { ability: LeiningAbility; barMitzvahParsha: string; parshiot: string[] };
+		leining: { ability: LeiningAbility; barMitzvahParsha: string; parshiot: string[]; primaryParshiot: string[] };
 		submittedAtLabel: string;
 	};
 
@@ -70,6 +70,7 @@
 		leiningAbility: LeiningAbility;
 		barMitzvahParsha: string;
 		leiningParshiot: Record<string, boolean>;
+		primaryParshiot: Record<string, boolean>;
 	};
 
 	const TRIBES: Exclude<Tribe, ''>[] = ['Kohen', 'Levi', 'Yisrael'];
@@ -169,6 +170,7 @@
 			ability?: LeiningAbility;
 			barMitzvahParsha?: string;
 			parshiot?: string[];
+			primaryParshiot?: string[];
 		};
 		const legacyHebrew = splitHebrewName(typeof raw.hebrewName === 'string' ? raw.hebrewName : '');
 
@@ -190,7 +192,8 @@
 			leining: {
 				ability: (leining.ability as LeiningAbility) || 'none',
 				barMitzvahParsha: typeof leining.barMitzvahParsha === 'string' ? leining.barMitzvahParsha : '',
-				parshiot: Array.isArray(leining.parshiot) ? leining.parshiot.filter((v): v is string => typeof v === 'string') : []
+				parshiot: Array.isArray(leining.parshiot) ? leining.parshiot.filter((v): v is string => typeof v === 'string') : [],
+				primaryParshiot: Array.isArray(leining.primaryParshiot) ? leining.primaryParshiot.filter((v): v is string => typeof v === 'string') : []
 			},
 			submittedAtLabel: formatTimestamp(raw.submittedAt)
 		};
@@ -209,6 +212,12 @@
 			if (parsha in leiningParshiot) leiningParshiot[parsha] = true;
 		}
 
+		const primaryParshiot: Record<string, boolean> = {};
+		for (const parsha of PARSHIOT) primaryParshiot[parsha] = false;
+		for (const parsha of record.leining.primaryParshiot) {
+			if (parsha in primaryParshiot) primaryParshiot[parsha] = true;
+		}
+
 		draft = {
 			englishName: record.englishName,
 			hebrewGivenName: record.hebrewGivenName,
@@ -219,7 +228,8 @@
 			daveningPortions,
 			leiningAbility: record.leining.ability,
 			barMitzvahParsha: record.leining.barMitzvahParsha,
-			leiningParshiot
+			leiningParshiot,
+			primaryParshiot
 		};
 	}
 
@@ -303,6 +313,8 @@
 		const currentDraft = draft;
 		const daveningPortions = DAVENING_PORTIONS.filter((portion) => currentDraft.daveningPortions[portion]);
 		const leiningParshiot = PARSHIOT.filter((parsha) => currentDraft.leiningParshiot[parsha]);
+		// Only keep primary flags for parshiot that are actually checked
+		const primaryParshiot = leiningParshiot.filter((parsha) => currentDraft.primaryParshiot[parsha]);
 
 		try {
 			await updateDoc(doc(db, 'aliyot-signups', selectedId), {
@@ -318,7 +330,8 @@
 				leining: {
 					ability: currentDraft.leiningAbility,
 					barMitzvahParsha: currentDraft.barMitzvahParsha.trim(),
-					parshiot: leiningParshiot
+					parshiot: leiningParshiot,
+					primaryParshiot
 				},
 				updatedAt: serverTimestamp()
 			});
@@ -336,7 +349,8 @@
 							leining: {
 								ability: currentDraft.leiningAbility,
 								barMitzvahParsha: currentDraft.barMitzvahParsha.trim(),
-								parshiot: leiningParshiot
+								parshiot: leiningParshiot,
+								primaryParshiot
 							}
 						}
 					: record
@@ -556,10 +570,22 @@
 								<p class="group-label">Leining Parshiot</p>
 								<div class="parsha-grid">
 									{#each PARSHIOT as p}
-										<label class="checkbox-row">
-											<input type="checkbox" bind:checked={draft.leiningParshiot[p]} />
-											{p}
-										</label>
+										<div class="parsha-row">
+											<label class="checkbox-row">
+												<input type="checkbox" bind:checked={draft.leiningParshiot[p]}
+													onchange={() => { if (!draft!.leiningParshiot[p]) draft!.primaryParshiot[p] = false; }} />
+												{p}
+											</label>
+											{#if draft.leiningParshiot[p]}
+												<button
+													type="button"
+													class="primary-star"
+													class:is-primary={draft.primaryParshiot[p]}
+													title={draft.primaryParshiot[p] ? 'Primary leiner' : 'Mark as primary'}
+													onclick={() => { draft!.primaryParshiot[p] = !draft!.primaryParshiot[p]; }}
+												>★</button>
+											{/if}
+										</div>
 									{/each}
 								</div>
 							</div>
@@ -986,6 +1012,37 @@
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
 		gap: 6px 12px;
+	}
+
+	.parsha-row {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+	}
+
+	.parsha-row .checkbox-row {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.primary-star {
+		background: none;
+		border: none;
+		cursor: pointer;
+		font-size: 16px;
+		color: #ccc;
+		padding: 0 2px;
+		line-height: 1;
+		flex-shrink: 0;
+		transition: color 0.15s;
+	}
+
+	.primary-star:hover {
+		color: #f59e0b;
+	}
+
+	.primary-star.is-primary {
+		color: #f59e0b;
 	}
 
 	.status {
