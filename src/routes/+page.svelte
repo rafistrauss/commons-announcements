@@ -407,7 +407,8 @@
 	
 	@media print {
 		.week-navigation,
-		.jump-to-today {
+		.jump-to-today,
+		.admin-link-row {
 			display: none !important;
 		}
 	}
@@ -561,7 +562,7 @@
 		<button onclick={saveAsImage} class="nav-button save-image">Save as Image</button>
 		<a href={resolve('/aliyot-signup/')} class="nav-button aliyot-btn">Aliyot & Minyan Signup</a>
 	</div>
-	<div style="text-align: center; margin-bottom: 10px;">
+	<div class="admin-link-row" style="text-align: center; margin-bottom: 10px;">
 		<a href={resolve('/aliyot-signup/admin/')} class="subtle-admin-link">Admin sign-in</a>
 	</div>
 
