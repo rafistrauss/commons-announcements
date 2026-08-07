@@ -48,9 +48,12 @@
 
 	let submissions: SignupDoc[] = [];
 	let selectedParsha = '';
-	let weekOffset = 0;
+	let weekOffset = 1;
 	let currentParsha = '';
 	let currentDate = '';
+
+	type View = 'parsha' | 'all-parshiot';
+	let activeView: View = 'parsha';
 
 	const defaultAdminEmail = (import.meta.env.VITE_DEFAULT_ADMIN_EMAIL || '').trim().toLowerCase();
 	const googleProvider = new GoogleAuthProvider();
@@ -84,6 +87,11 @@
 	function matchingLeiners(parsha: string): SignupDoc[] {
 		return submissions.filter((record) => canLeinParsha(record, parsha));
 	}
+
+	$: allParshiotWithLeiners = PARSHIOT.map((p) => ({
+		parsha: p,
+		leiners: matchingLeiners(p)
+	}));
 
 	async function fetchSubmissions() {
 		try {
@@ -232,47 +240,83 @@
 
 		{#if statusMessage}<p class="status">{statusMessage}</p>{/if}
 
-		<div class="parsha-selector">
-			<label>
-				Select Parsha:
-				<select bind:value={selectedParsha}>
-					<option value="">-- Select --</option>
-					{#each PARSHIOT as p}
-						<option value={p}>{p}</option>
-					{/each}
-				</select>
-			</label>
+		<div class="view-tabs">
+			<button
+				class="tab-btn"
+				class:active={activeView === 'parsha'}
+				onclick={() => (activeView = 'parsha')}
+			>
+				Parsha Lookup
+			</button>
+			<button
+				class="tab-btn"
+				class:active={activeView === 'all-parshiot'}
+				onclick={() => (activeView = 'all-parshiot')}
+			>
+				All Parshiot
+			</button>
 		</div>
 
-		<section class="card">
-			<h2 dir="rtl">{selectedParsha || 'No parsha selected'}</h2>
-			{#if !selectedParsha}
-				<p>Select a parsha to view who can lein.</p>
-			{:else if matchingLeiners(selectedParsha).length === 0}
-				<p class="no-results">No leiners found for this parsha.</p>
-			{:else}
-				<ul class="leiners-list">
-					{#each matchingLeiners(selectedParsha) as person}
-						<li class="leiner-card">
-							<div class="leiner-name">{person.englishName}</div>
-							<div class="leiner-hebrew" dir="rtl">{person.hebrewName || '—'}</div>
-							<div class="leiner-tribe">{person.tribe || 'Unknown'}</div>
-							<div class="leiner-ability">
-								{#if person.leining.ability === 'bar_mitzvah_only'}
-									Bar Mitzvah only
-								{:else if person.leining.ability === 'can_help'}
-									Can help
-								{:else if person.leining.ability === 'when_asked'}
-									When asked
-								{:else if person.leining.ability === 'comfortable'}
-									Regular leiner
-								{/if}
-							</div>
-						</li>
-					{/each}
-				</ul>
-			{/if}
-		</section>
+		{#if activeView === 'parsha'}
+			<div class="parsha-selector">
+				<label>
+					Select Parsha:
+					<select bind:value={selectedParsha}>
+						<option value="">-- Select --</option>
+						{#each PARSHIOT as p}
+							<option value={p}>{p}</option>
+						{/each}
+					</select>
+				</label>
+			</div>
+
+			<section class="card">
+				<h2 dir="rtl">{selectedParsha || 'No parsha selected'}</h2>
+				{#if !selectedParsha}
+					<p>Select a parsha to view who can lein.</p>
+				{:else if matchingLeiners(selectedParsha).length === 0}
+					<p class="no-results">No leiners found for this parsha.</p>
+				{:else}
+					<ul class="leiners-list">
+						{#each matchingLeiners(selectedParsha) as person}
+							<li class="leiner-card">
+								<div class="leiner-name">{person.englishName}</div>
+								<div class="leiner-hebrew" dir="rtl">{person.hebrewName || '—'}</div>
+								<div class="leiner-tribe">{person.tribe || 'Unknown'}</div>
+								<div class="leiner-ability">
+									{#if person.leining.ability === 'bar_mitzvah_only'}
+										Bar Mitzvah only
+									{:else if person.leining.ability === 'can_help'}
+										Can help
+									{:else if person.leining.ability === 'when_asked'}
+										When asked
+									{:else if person.leining.ability === 'comfortable'}
+										Regular leiner
+									{/if}
+								</div>
+							</li>
+						{/each}
+					</ul>
+				{/if}
+			</section>
+		{:else}
+			<section class="all-parshiot">
+				{#each allParshiotWithLeiners as { parsha, leiners }}
+					<div class="parsha-row" class:has-leiners={leiners.length > 0}>
+						<div class="parsha-row-name" dir="rtl">{parsha}</div>
+						<div class="parsha-row-leiners">
+							{#if leiners.length === 0}
+								<span class="no-leiner">—</span>
+							{:else}
+								{#each leiners as person}
+									<span class="leiner-chip">{person.englishName}</span>
+								{/each}
+							{/if}
+						</div>
+					</div>
+				{/each}
+			</section>
+		{/if}
 	{/if}
 </div>
 
@@ -459,6 +503,81 @@
 
 	button {
 		font-family: inherit;
+	}
+
+	.view-tabs {
+		display: flex;
+		gap: 8px;
+		margin-bottom: 16px;
+	}
+
+	.tab-btn {
+		background: #e0e0e0;
+		color: #444;
+		border: none;
+		padding: 10px 20px;
+		border-radius: 6px;
+		cursor: pointer;
+		font-size: 14px;
+		font-weight: 600;
+		transition: background 0.15s;
+	}
+
+	.tab-btn.active {
+		background: #1976d2;
+		color: white;
+	}
+
+	.tab-btn:hover:not(.active) {
+		background: #bdbdbd;
+	}
+
+	.all-parshiot {
+		display: grid;
+		gap: 4px;
+	}
+
+	.parsha-row {
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		padding: 10px 14px;
+		border-radius: 6px;
+		background: #fff;
+		border: 1px solid #e0e0e0;
+	}
+
+	.parsha-row.has-leiners {
+		border-color: #a5d6a7;
+		background: #f1f8e9;
+	}
+
+	.parsha-row-name {
+		font-weight: 700;
+		font-size: 17px;
+		min-width: 120px;
+		text-align: right;
+	}
+
+	.parsha-row-leiners {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+		flex: 1;
+	}
+
+	.leiner-chip {
+		background: #1976d2;
+		color: white;
+		border-radius: 12px;
+		padding: 3px 10px;
+		font-size: 13px;
+		font-weight: 600;
+	}
+
+	.no-leiner {
+		color: #bbb;
+		font-size: 14px;
 	}
 
 	@media (max-width: 600px) {
