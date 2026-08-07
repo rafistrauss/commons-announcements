@@ -88,6 +88,7 @@
 	let draft: EditDraft | null = null;
 	let showAlumni = false;
 	let searchQuery = '';
+	let lastUpdatedDate = '';
 	const defaultAdminEmail = (import.meta.env.VITE_DEFAULT_ADMIN_EMAIL || '').trim().toLowerCase();
 	const googleProvider = new GoogleAuthProvider();
 
@@ -240,6 +241,22 @@
 			const q = query(collection(db, 'aliyot-signups'), orderBy('submittedAt', 'desc'));
 			const snapshot = await getDocs(q);
 			submissions = snapshot.docs.map((entry) => buildDoc(entry.id, entry.data()));
+
+			// Find the most recent timestamp across all docs (submittedAt or updatedAt)
+			let maxMs = 0;
+			for (const entry of snapshot.docs) {
+				const data = entry.data();
+				for (const field of ['submittedAt', 'updatedAt']) {
+					const val = data[field];
+					if (val && typeof val === 'object' && 'toDate' in val) {
+						const ms = (val as { toDate: () => Date }).toDate().getTime();
+						if (ms > maxMs) maxMs = ms;
+					}
+				}
+			}
+			lastUpdatedDate = maxMs
+				? new Date(maxMs).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+				: '';
 			if (submissions.length > 0) {
 				if (!selectedId || !submissions.find((s) => s.id === selectedId)) {
 					selectedId = submissions[0].id;
@@ -601,8 +618,8 @@
 		<section class="card print-panel">
 			<div class="print-header">
 				<div>
-					<h2>Printable Aliyot List</h2>
-					<p>Active names only, grouped by tribe.</p>
+					<h2>Commons Minyan Aliyah List</h2>
+					<p>Last updated: {lastUpdatedDate || '—'}</p>
 				</div>
 				<button type="button" onclick={printAliyotList}>Print list</button>
 			</div>
@@ -1130,7 +1147,15 @@
 		}
 
 		.print-hebrew {
-			font-size: 22px;
+			font-size: 26px;
+			color: #000;
+			font-weight: 700;
+		}
+
+		.hebrew-name-part,
+		.hebrew-ben,
+		.hebrew-suffix {
+			color: #000;
 		}
 	}
 </style>
