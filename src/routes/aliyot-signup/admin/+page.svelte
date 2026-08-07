@@ -457,7 +457,7 @@
 			</div>
 		</div>
 
-		{#if statusMessage}<p class="status">{statusMessage}</p>{/if}
+		{#if statusMessage}<p class="status noprint">{statusMessage}</p>{/if}
 
 		<div class="admin-grid">
 			<section class="card list-panel">

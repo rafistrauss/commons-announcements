@@ -8,4 +8,12 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
+<style>
+	@media print {
+		:global(.noprint) {
+			display: none !important;
+		}
+	}
+</style>
+
 {@render children?.()}
