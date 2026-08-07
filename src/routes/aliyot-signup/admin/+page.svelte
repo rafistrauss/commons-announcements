@@ -1109,24 +1109,34 @@
 
 		.aliyot-grid {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
-			gap: 20px;
+			gap: 8px;
+		}
+
+		.print-header h2 {
+			font-size: 16px;
+			margin-bottom: 2px;
+		}
+
+		.print-header p {
+			font-size: 11px;
+			margin: 0;
 		}
 
 		.aliyot-tribe {
 			border: 2px solid #333;
 			border-radius: 0;
-			padding: 16px;
+			padding: 8px;
 			background: white;
 		}
 
 		.aliyot-tribe h3 {
-			font-size: 26px;
+			font-size: 13px;
 			font-weight: 900;
 			text-transform: uppercase;
 			letter-spacing: 0.08em;
-			border-bottom: 3px solid #333;
-			padding-bottom: 8px;
-			margin-bottom: 14px;
+			border-bottom: 2px solid #333;
+			padding-bottom: 4px;
+			margin-bottom: 6px;
 		}
 
 		.aliyot-tribe ul {
@@ -1134,11 +1144,11 @@
 		}
 
 		.aliyot-tribe.full-width ul {
-			column-gap: 56px;
+			column-gap: 28px;
 		}
 
 		.aliyot-tribe li {
-			padding: 10px 0;
+			padding: 4px 0;
 			border-bottom: 1px solid #ccc;
 		}
 
@@ -1147,11 +1157,11 @@
 		}
 
 		.print-name {
-			font-size: 22px;
+			font-size: 11px;
 		}
 
 		.print-hebrew {
-			font-size: 26px;
+			font-size: 13px;
 			color: #000;
 			font-weight: 700;
 		}
