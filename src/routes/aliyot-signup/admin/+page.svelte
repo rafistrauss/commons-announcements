@@ -892,8 +892,8 @@
 
 	.aliyot-tribe.full-width ul {
 		display: block;
-		columns: 3;
-		column-gap: 24px;
+		columns: 2;
+		column-gap: 38px;
 	}
 
 	.aliyot-tribe.full-width li {
@@ -1131,6 +1131,10 @@
 
 		.aliyot-tribe ul {
 			gap: 0;
+		}
+
+		.aliyot-tribe.full-width ul {
+			column-gap: 56px;
 		}
 
 		.aliyot-tribe li {
