@@ -90,8 +90,10 @@
 
 	$: allParshiotWithLeiners = PARSHIOT.map((p) => ({
 		parsha: p,
-		leiners: matchingLeiners(p)
+		leiners: submissions.filter((record) => canLeinParsha(record, p))
 	}));
+
+	$: currentParshaLeiners = submissions.filter((record) => canLeinParsha(record, selectedParsha));
 
 	async function fetchSubmissions() {
 		try {
@@ -207,7 +209,7 @@
 
 <div class="page">
 	<header class="header">
-		<a href={resolve('/')} class="back-link">← Home</a>
+		<a href={resolve('/aliyot-signup/admin/')} class="back-link">← Admin</a>
 		<h1>Leiners Lookup</h1>
 		<p>View who can lein for each parsha.</p>
 	</header>
@@ -274,11 +276,11 @@
 				<h2 dir="rtl">{selectedParsha || 'No parsha selected'}</h2>
 				{#if !selectedParsha}
 					<p>Select a parsha to view who can lein.</p>
-				{:else if matchingLeiners(selectedParsha).length === 0}
+				{:else if currentParshaLeiners.length === 0}
 					<p class="no-results">No leiners found for this parsha.</p>
 				{:else}
 					<ul class="leiners-list">
-						{#each matchingLeiners(selectedParsha) as person}
+						{#each currentParshaLeiners as person}
 							<li class="leiner-card">
 								<div class="leiner-name">{person.englishName}</div>
 								<div class="leiner-hebrew" dir="rtl">{person.hebrewName || '—'}</div>
