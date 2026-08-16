@@ -743,6 +743,11 @@ export async function load({ url }) {
   // Prefer Friday, then Shabbat, else blank
   const generalAnnouncements: string[] = announcementsByDate[fridayKey] || announcementsByDate[shabbatKey] || [];
 
+  // Repeating Friday-night reminder: leave chairs as-is
+  generalAnnouncements.push(
+    'Please leave the chairs as they are — do not fold them. Improperly folded chairs can fall and cause injury.'
+  );
+
   return {
     friday: {
       ...fridayZmanim,
