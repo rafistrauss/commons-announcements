@@ -745,7 +745,7 @@ export async function load({ url }) {
 
   // Repeating Friday-night reminder: leave chairs as-is
   generalAnnouncements.push(
-    'Please leave the chairs as they are — do not fold them. Improperly folded chairs can fall and cause injury.'
+    'On Friday nights, please leave the chairs as they are — do not fold them. Thank you!'
   );
 
   return {
