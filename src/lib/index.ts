@@ -38,53 +38,18 @@ async function fetchWithRetry(url: string, options: RequestInit = {}, maxRetries
 }
 
 /**
- * Fetches Friday Mincha and Shabbat Mincha/Maariv times from Shomrei Torah calendar for specified dates.
- * @param fridayDate - JS Date object for Friday
- * @param shabbatDate - JS Date object for Shabbat
- * Returns an object: { fridayMincha, shabbatMincha, shabbatMaariv }
+ * Parses Friday Mincha and Shabbat Mincha/Maariv times from Shomrei Torah calendar HTML.
+ * Expects HTML from a week-view calendar page (day5 = Friday, day6 = Shabbat).
  */
-export async function fetchShomreiTorahTimes(fridayDate: Date, shabbatDate: Date): Promise<{
+export function parseShomreiTorahHtml(html: string): {
   fridayMincha: string | null;
   shabbatMincha: string | null;
   shabbatMaariv: string | null;
-}> {
-  // Format dates as YYYY-MM-DD
-  function formatDate(d: Date): string {
-    return d.toISOString().slice(0, 10);
-  }
-
-  const fridayStr = formatDate(fridayDate);
-  const shabbatStr = formatDate(shabbatDate);
-
-  // Build the URL with the specified date pattern
-  const url = `https://shomreitorah.shulcloud.com/calendar?advanced=Y&calendar=&date_start=specific+date&date_start_x=0&date_start_date=${fridayStr}&has_second_date=Y&date_end=specific+date&date_end_x=0&date_end_date=${shabbatStr}&view=week&day_view_horizontal=N`;
-
-  console.debug('Fetching URL:', url);
-  
-  let res;
-  try {
-    res = await fetchWithRetry(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
-      }
-    });
-  } catch (error) {
-    throw new Error(`Failed to fetch calendar: ${error instanceof Error ? error.message : String(error)}`);
-  }
-  
-  if (!res.ok) {
-    throw new Error(`Failed to fetch calendar: HTTP ${res.status} ${res.statusText}`);
-  }
-  const html = await res.text();
-  
-  console.debug('Fetched HTML length:', html.length);
-
+} {
   // Extract day block by id (day5 for Friday, day6 for Shabbat in week view)
-  function extractDayBlock(html: string, dayId: string): string | null {
+  function extractDayBlock(h: string, dayId: string): string | null {
     const regex = new RegExp(`<div[^>]*id="${dayId}"[^>]*>([\\s\\S]*?)</div>(?=\\s*<div[^>]*class="calendar_day_view"|\\s*</div>)`, 'i');
-    const match = html.match(regex);
+    const match = h.match(regex);
     console.debug(`Extracting day block for ${dayId}:`, match ? 'found' : 'not found');
     if (match) {
       console.debug(`Day block preview (${dayId}):`, match[0].slice(0, 500) + '...');
@@ -118,8 +83,8 @@ export async function fetchShomreiTorahTimes(fridayDate: Date, shabbatDate: Date
         result[eventName] = found[eventName];
       } else {
         // Try partial match
-        const partialMatch = Object.entries(found).find(([name]) => 
-          name.toLowerCase().includes(eventName.toLowerCase()) || 
+        const partialMatch = Object.entries(found).find(([name]) =>
+          name.toLowerCase().includes(eventName.toLowerCase()) ||
           eventName.toLowerCase().includes(name.toLowerCase())
         );
         result[eventName] = partialMatch ? partialMatch[1] : null;
@@ -129,24 +94,61 @@ export async function fetchShomreiTorahTimes(fridayDate: Date, shabbatDate: Date
     return result;
   }
 
-  // Extract blocks for Friday and Shabbat
   const fridayBlock = extractDayBlock(html, 'day5');
   const shabbatBlock = extractDayBlock(html, 'day6');
 
-  // Extract times for each day
   const fridayTimes = extractTimes(fridayBlock, ['Mincha/ Kabbalat Shabbat', 'Mincha']);
   const shabbatTimes = extractTimes(shabbatBlock, ['Mincha', 'Maariv']);
 
-  // Get the best times (prefer specific over general)
   const fridayMincha = fridayTimes['Mincha/ Kabbalat Shabbat'] || fridayTimes['Mincha'];
   const shabbatMincha = shabbatTimes['Mincha'];
   const shabbatMaariv = shabbatTimes['Maariv'];
 
   console.debug('Final result:', { fridayMincha, shabbatMincha, shabbatMaariv });
 
-  return {
-    fridayMincha,
-    shabbatMincha,
-    shabbatMaariv,
-  };
+  return { fridayMincha, shabbatMincha, shabbatMaariv };
+}
+
+/**
+ * Fetches Friday Mincha and Shabbat Mincha/Maariv times from Shomrei Torah calendar for specified dates.
+ * @param fridayDate - JS Date object for Friday
+ * @param shabbatDate - JS Date object for Shabbat
+ * Returns an object: { fridayMincha, shabbatMincha, shabbatMaariv }
+ */
+export async function fetchShomreiTorahTimes(fridayDate: Date, shabbatDate: Date): Promise<{
+  fridayMincha: string | null;
+  shabbatMincha: string | null;
+  shabbatMaariv: string | null;
+}> {
+  function formatDate(d: Date): string {
+    return d.toISOString().slice(0, 10);
+  }
+
+  const fridayStr = formatDate(fridayDate);
+  const shabbatStr = formatDate(shabbatDate);
+
+  const url = `https://shomreitorah.shulcloud.com/calendar?advanced=Y&calendar=&date_start=specific+date&date_start_x=0&date_start_date=${fridayStr}&has_second_date=Y&date_end=specific+date&date_end_x=0&date_end_date=${shabbatStr}&view=week&day_view_horizontal=N`;
+
+  console.debug('Fetching URL:', url);
+
+  let res;
+  try {
+    res = await fetchWithRetry(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+      }
+    });
+  } catch (error) {
+    throw new Error(`Failed to fetch calendar: ${error instanceof Error ? error.message : String(error)}`);
+  }
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch calendar: HTTP ${res.status} ${res.statusText}`);
+  }
+  const html = await res.text();
+
+  console.debug('Fetched HTML length:', html.length);
+  return parseShomreiTorahHtml(html);
 }

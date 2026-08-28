@@ -28,6 +28,9 @@ jobs:
         
       - name: Update minyan times
         run: bun run scripts/update-minyan-times.js src/lib/minyan-times.json
+        env:
+          SHULCLOUD_PROXY_URL: ${{ secrets.SHULCLOUD_PROXY_URL }}
+          SHULCLOUD_PROXY_TOKEN: ${{ secrets.SHULCLOUD_PROXY_TOKEN }}
 
       - name: Commit & Push changes
         uses: actions-js/push@master
