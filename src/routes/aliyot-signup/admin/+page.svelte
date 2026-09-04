@@ -1084,6 +1084,10 @@
 	}
 
 	@media print {
+		@page {
+			margin: 0.5in;
+		}
+
 		.header,
 		.top-actions,
 		.admin-grid > .list-panel,
@@ -1103,40 +1107,50 @@
 			padding: 0;
 		}
 
+		.print-header {
+			margin-bottom: 18px;
+			border-bottom: 2px solid #333;
+			padding-bottom: 8px;
+		}
+
 		.print-header button {
 			display: none;
 		}
 
 		.aliyot-grid {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
-			gap: 8px;
+			gap: 14px;
 		}
 
 		.print-header h2 {
-			font-size: 16px;
-			margin-bottom: 2px;
+			font-size: 20px;
+			margin-bottom: 3px;
 		}
 
 		.print-header p {
-			font-size: 11px;
+			font-size: 12px;
 			margin: 0;
+			color: #333;
 		}
 
 		.aliyot-tribe {
 			border: 2px solid #333;
 			border-radius: 0;
-			padding: 8px;
+			padding: 10px 12px;
 			background: white;
+			-webkit-print-color-adjust: exact;
+			print-color-adjust: exact;
+			break-inside: avoid;
 		}
 
 		.aliyot-tribe h3 {
-			font-size: 13px;
+			font-size: 15px;
 			font-weight: 900;
 			text-transform: uppercase;
 			letter-spacing: 0.08em;
 			border-bottom: 2px solid #333;
-			padding-bottom: 4px;
-			margin-bottom: 6px;
+			padding-bottom: 5px;
+			margin-bottom: 8px;
 		}
 
 		.aliyot-tribe ul {
@@ -1144,32 +1158,43 @@
 		}
 
 		.aliyot-tribe.full-width ul {
-			column-gap: 28px;
+			column-gap: 32px;
 		}
 
 		.aliyot-tribe li {
-			padding: 4px 0;
-			border-bottom: 1px solid #ccc;
+			padding: 6px 0;
+			border-bottom: 1px solid #bbb;
 		}
 
 		.aliyot-tribe li:last-child {
 			border-bottom: none;
 		}
 
+		.print-row {
+			gap: 10px;
+		}
+
 		.print-name {
-			font-size: 11px;
+			font-size: 13px;
+			line-height: 1.4;
 		}
 
 		.print-hebrew {
-			font-size: 13px;
+			font-size: 15px;
 			color: #000;
 			font-weight: 700;
+			line-height: 1.4;
 		}
 
 		.hebrew-name-part,
 		.hebrew-ben,
 		.hebrew-suffix {
 			color: #000;
+		}
+
+		.empty-tribe {
+			font-size: 12px;
+			color: #333;
 		}
 	}
 </style>
