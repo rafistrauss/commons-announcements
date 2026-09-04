@@ -726,6 +726,9 @@ export async function load({ url }) {
     ],
     '2026-07-31': [
       "Mazel Tov to Chaya Bracha and Eli Markowitz on the birth of a baby girl! Mazel Tov as well to their family who is visiting!"
+    ],
+    '2026-09-04': [
+      'Mazel Tov to Ari Spivack on his marriage to Tamar Rosenfeld!'
     ]
   };
 
