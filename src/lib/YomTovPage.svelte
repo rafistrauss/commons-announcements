@@ -216,9 +216,7 @@
             {:else if day.minchaAndMaariv}
               <div class="time-item">
                 <span class="time-label"
-                  >{day.isErev
-                    ? "Mincha / Yom Tov begins:"
-                    : "Mincha/Maariv:"}</span
+                  >{"Mincha/Maariv:"}</span
                 >
                 <span class="time-value" contenteditable="true"
                   >{day.minchaAndMaariv}</span

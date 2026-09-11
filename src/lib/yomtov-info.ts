@@ -201,6 +201,16 @@ export function getYomTovDetails(date: Date): {
   const jewishMonth = jewishCal.getJewishMonth();
   const jewishDay = jewishCal.getJewishDayOfMonth();
 
+  // Rosh Hashana: 1-2 Tishrei
+  if (jewishMonth === 7 && (jewishDay === 1 || jewishDay === 2)) {
+    return {
+      isYomTov: true,
+      holidayKey: 'roshhashana',
+      holidayName: `Rosh Hashana - Day ${jewishDay}`,
+      dayNumber: jewishDay,
+    };
+  }
+
   // Pesach: 15-22 Nisan
   if (jewishMonth === 1 && jewishDay >= 15 && jewishDay <= 22) {
     const dayNumber = jewishDay - 14; // Convert to 1-8 day count
@@ -265,6 +275,10 @@ export function getYomTovDayHebrewName(holidayKey: string, dayNumber: number): s
 
   if (holidayKey === 'shavuot') {
     return dayNumber === 1 ? 'שבועות - יום ראשון' : 'שבועות - יום שני';
+  }
+
+  if (holidayKey === 'roshhashana') {
+    return dayNumber === 1 ? 'ראש השנה - יום ראשון' : 'ראש השנה - יום שני';
   }
 
   if (holidayKey === 'sukkot') {
