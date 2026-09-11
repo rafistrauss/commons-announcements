@@ -83,8 +83,10 @@ export function getRoshHashanaLiturgicalNotices(
   const omissions: string[] = [];
   const isShabbat = date.getDay() === 6;
 
-  // יעלה ויבא in all Yom Tov Amidot
-  additionsSet.add('יעלה ויבא');
+  // Note: יעלה ויבא is NOT listed here as an "addition" — on the Yom Tov days
+  // themselves, Shacharit/Mincha/Maariv all use the full Yom Tov Amidah
+  // (the same festival-style middle brachah), where יעלה ויבא is mandatory,
+  // fixed text rather than an optional insertion into a weekday Amidah.
 
   // Say "המלך הקדוש" instead of "האל הקדוש" in every Amidah during the Ten Days of Repentance
   additionsSet.add('המלך הקדוש');
@@ -97,8 +99,8 @@ export function getRoshHashanaLiturgicalNotices(
     }
   }
 
-  // Tachanun is omitted throughout, but on Rosh Hashana Avinu Malkeinu is added on weekdays
-  if (!isShabbat) {
+  // Avinu Malkeinu is said at Shacharit and Mincha (not Maariv) on weekday Rosh Hashana
+  if (!isShabbat && service !== 'maariv') {
     additionsSet.add('אבינו מלכנו');
   }
 
