@@ -54,7 +54,7 @@ export async function load({ url }: { url: URL }) {
   // Announcements keyed by date — update as needed each year
   const announcementsByDate: Record<string, string[]> = {
     // '2026-09-11': ['Candle lighting 7:00pm'],
-    // '2026-09-13': ['Havdalah 8:00pm'],
+    '2026-09-13': ['There will be Shofar blowing on Sunday, September 13, at 4pm in the Promenade Commons room, Building 4.'],
   };
 
   const days = roshHashanaDates.map((date) => {
