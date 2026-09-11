@@ -88,9 +88,11 @@ export async function load({ url }: { url: URL }) {
     const minchaNotices = isErev
       ? { additions: [], omissions: [] }
       : getRoshHashanaLiturgicalNotices(date, 'mincha');
-    // Erev Maariv is the first night of Yom Tov — יעלה ויבא and המלך הקדוש are said
+    // Erev Maariv is the first night of Yom Tov — יעלה ויבא and המלך הקדוש are said.
+    // Note: the listed time is a combined Mincha/Maariv minyan, but המלך הקדוש only
+    // applies to the Maariv Amidah (Mincha on Erev Rosh Hashana still says האל הקדוש).
     const maarivNotices = isErev
-      ? { additions: ['יעלה ויבא', 'המלך הקדוש'], omissions: [] }
+      ? { additions: ['יעלה ויבא', 'המלך הקדוש (Maariv only)'], omissions: [] }
       : getRoshHashanaLiturgicalNotices(date, 'maariv');
 
     return {
