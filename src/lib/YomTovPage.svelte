@@ -335,6 +335,13 @@
           </section>
         </div>
 
+        <div class="bottom-section">
+          <div class="shkia-section">
+            <div class="shkia-title">Shkia</div>
+            <div>{day.shkia?.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' }) || 'N/A'}</div>
+          </div>
+        </div>
+
         {#if day.notes}
           <div class="day-notes">{day.notes}</div>
         {/if}
@@ -618,6 +625,25 @@
 
   .nav-button.save-image:hover {
     background: #388e3c;
+  }
+
+  .bottom-section {
+    margin: 0 10px 8px;
+  }
+
+  .shkia-section {
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 15px;
+    color: #777;
+    text-align: center;
+  }
+
+  .shkia-title {
+    font-weight: 600;
+    margin-bottom: 4px;
   }
 
   .day-notes {

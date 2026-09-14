@@ -100,6 +100,7 @@ export async function load({ url }: { url: URL }) {
       number: roshHashanaDayNumber,
       name,
       hebrewDate: zmanim.hebrewDate,
+      shkia: zmanim.shkia,
       englishDate: date.toLocaleDateString('en-US', englishDateOptions),
       isErev,
       isShabbat,
