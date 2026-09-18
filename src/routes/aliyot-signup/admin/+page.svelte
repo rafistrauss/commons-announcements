@@ -91,7 +91,7 @@
 	let lastUpdatedDate = '';
 
 	const welcomeMessage =
-		'Welcome to the Commons Minyan! Please fill out the short form at https://rafistrauss.github.io/commons-announcements/aliyot-signup/ so that we can give out aliyot - Rafi Strauss';
+		'Welcome to the Commons Minyan! Please fill out the short form at https://rafistrauss.github.io/commons-announcements/aliyot-signup/ so that we can give out aliyot and run the minyan more effectively - Rafi Strauss';
 	let welcomeMessageCopied = false;
 	const defaultAdminEmail = (import.meta.env.VITE_DEFAULT_ADMIN_EMAIL || '').trim().toLowerCase();
 	const googleProvider = new GoogleAuthProvider();
