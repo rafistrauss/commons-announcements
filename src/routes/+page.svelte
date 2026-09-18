@@ -771,7 +771,7 @@
 				</div>
 			{:else if data.elMalehRachamimInfo && data.elMalehRachamimInfo.isLastShabbosBeforeOmission}
 				<div class="tzidkatcha-notice" style="background: #fff9c4; border-color: #fbc02d;">
-					⚠️ Last chance to say א-ל מלא רחמים until {data.elMalehRachamimInfo.nextAllowedDateString || 'TBD'} (due to {data.elMalehRachamimInfo.reason || 'special day'})
+					⚠️ Last chance to say א-ל מלא רחמים for {data.elMalehRachamimInfo.weeksAway ?? '?'} week{data.elMalehRachamimInfo.weeksAway === 1 ? '' : 's'}, until פרשת {data.elMalehRachamimInfo.nextParsha || data.elMalehRachamimInfo.nextAllowedDateString || 'TBD'} (due to {data.elMalehRachamimInfo.reason || 'special day'})
 				</div>
 			{/if}
 			<div class="time-item">

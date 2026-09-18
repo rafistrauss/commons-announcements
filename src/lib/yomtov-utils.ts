@@ -1,6 +1,34 @@
 import { JewishCalendar } from 'kosher-zmanim';
 import { getZmanim } from '$lib/yomtov-info';
 
+/**
+ * Get the hour-of-day (0-23) of a Date as it reads in America/New_York,
+ * regardless of the server's own local timezone.
+ */
+function getNYHour(date: Date): number {
+  const hourPart = new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    hour12: false,
+    timeZone: 'America/New_York'
+  }).formatToParts(date).find((p) => p.type === 'hour')?.value;
+  const hour = hourPart ? parseInt(hourPart, 10) : date.getHours();
+  return hour === 24 ? 0 : hour;
+}
+
+/**
+ * Kiddush Levana's cutoff is an exact moment in time, but it should be presented
+ * as "the last night" to say it. A calendar "night" (e.g. Friday night) spans
+ * from nightfall through the following morning, so if the cutoff moment falls
+ * in the morning/early hours (America/New_York time), the last valid night is
+ * the previous calendar date.
+ */
+function getLastNightDate(cutoff: Date): Date {
+  if (getNYHour(cutoff) < 12) {
+    return new Date(cutoff.getTime() - 24 * 60 * 60 * 1000);
+  }
+  return cutoff;
+}
+
 export function getKiddushLevanaInfo(shabbatDate: Date): {
   canSayTonight: boolean;
   reason?: string;
@@ -46,7 +74,7 @@ export function getKiddushLevanaInfo(shabbatDate: Date): {
       canSayTonight: true,
       reason: 'Yom Tov tonight - say blessing only (no Psalms)',
       isIdealTime: hoursSinceMolad >= IDEAL_HOURS,
-      lastTimeToSay: lastTimeToSay
+      lastTimeToSay: getLastNightDate(lastTimeToSay)
     };
   }
 
@@ -65,7 +93,7 @@ export function getKiddushLevanaInfo(shabbatDate: Date): {
         lastChance: isLastNight,
         lastMotzeiShabbos: isLastMotzeiShabbos && !isLastNight,
         isIdealTime: hoursSinceMolad >= IDEAL_HOURS,
-        lastTimeToSay: lastTimeToSay
+        lastTimeToSay: getLastNightDate(lastTimeToSay)
       };
     }
 
@@ -88,6 +116,6 @@ export function getKiddushLevanaInfo(shabbatDate: Date): {
     isIdealTime: isIdeal,
     lastChance: isLastNight,
     lastMotzeiShabbos: isLastMotzeiShabbos && !isLastNight,
-    lastTimeToSay: lastTimeToSay
+    lastTimeToSay: getLastNightDate(lastTimeToSay)
   };
 }

@@ -5,6 +5,7 @@
     isIdealTime?: boolean;
     lastChance?: boolean;
     lastMotzeiShabbos?: boolean;
+    isFridayNight?: boolean;
     lastTimeToSay?: Date;
   } | null;
 </script>
@@ -12,7 +13,9 @@
 {#if kiddushLevanaInfo && kiddushLevanaInfo.canSayTonight}
   <div class="kiddush-levana-notice" class:last-chance={kiddushLevanaInfo.lastChance} class:last-motzei-shabbos={kiddushLevanaInfo.lastMotzeiShabbos}>
     <div class="kiddush-levana-title">
-      {#if kiddushLevanaInfo.lastChance}
+      {#if kiddushLevanaInfo.isFridayNight}
+        ⚠️ Kiddush Levana - Last Chance Friday Night! ⚠️
+      {:else if kiddushLevanaInfo.lastChance}
         ⚠️ Kiddush Levana - Last Chance! ⚠️
       {:else if kiddushLevanaInfo.lastMotzeiShabbos}
         🌙 Kiddush Levana - Last Motzei Shabbos 🌙
@@ -27,7 +30,7 @@
         {kiddushLevanaInfo.reason}
       {/if}
       {#if kiddushLevanaInfo.lastTimeToSay}
-        Last time to say: {kiddushLevanaInfo.lastTimeToSay.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York', timeZoneName: 'short' })}
+        Last night to say: {kiddushLevanaInfo.lastTimeToSay.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'America/New_York' })}
       {/if}
     </div>
   </div>

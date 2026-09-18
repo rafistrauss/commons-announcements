@@ -298,6 +298,34 @@ function formatOmerNusach(day: number): string {
   return `היום ${daysText}${weeksText} לעומר`;
 }
 
+/**
+ * Get the hour-of-day (0-23) of a Date as it reads in America/New_York,
+ * regardless of the server's own local timezone.
+ */
+function getNYHour(date: Date): number {
+  const hourPart = new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    hour12: false,
+    timeZone: 'America/New_York'
+  }).formatToParts(date).find((p) => p.type === 'hour')?.value;
+  const hour = hourPart ? parseInt(hourPart, 10) : date.getHours();
+  return hour === 24 ? 0 : hour;
+}
+
+/**
+ * Kiddush Levana's cutoff is an exact moment in time, but it should be presented
+ * as "the last night" to say it. A calendar "night" (e.g. Friday night) spans
+ * from nightfall through the following morning, so if the cutoff moment falls
+ * in the morning/early hours (America/New_York time), the last valid night is
+ * the previous calendar date.
+ */
+function getLastNightDate(cutoff: Date): Date {
+  if (getNYHour(cutoff) < 12) {
+    return new Date(cutoff.getTime() - 24 * 60 * 60 * 1000);
+  }
+  return cutoff;
+}
+
 function getZmanim(date: Date) {
   // Fair Lawn, NJ coordinates and timezone
   const options = {
@@ -516,11 +544,12 @@ export async function load({ url }) {
     isIdealTime?: boolean;
     lastChance?: boolean;
     lastMotzeiShabbos?: boolean;
+    isFridayNight?: boolean;
     lastTimeToSay?: Date;
   } {
     // Calculate nightfall on Motzei Shabbat (Saturday night)
     // We need to get zmanim for the Shabbat day to get shkia, then calculate tzeis
-    const shabbatZmanim = getZmanim(shabbat);
+    const shabbatZmanim = getZmanim(shabbatDate);
     const shkia = shabbatZmanim.shkia;
 
     // Tzeis hakochavim (nightfall) is approximately 50 minutes after shkia
@@ -553,6 +582,30 @@ export async function load({ url }) {
     }
 
     if (hoursSinceMolad > MAX_HOURS) {
+      // Motzei Shabbat is too late, but the Friday night before this Shabbat
+      // (which precedes the too-late Motzei Shabbat chronologically) may still
+      // be within the window and could be the true last chance to say it.
+      const fridayBeforeShabbat = new Date(shabbatDate);
+      fridayBeforeShabbat.setDate(fridayBeforeShabbat.getDate() - 1);
+      const fridayShkia = getZmanim(fridayBeforeShabbat).shkia;
+      const fridayNightfall = new Date(fridayShkia);
+      fridayNightfall.setMinutes(fridayShkia.getMinutes() + 50);
+      const fridayHoursSinceMolad = (fridayNightfall.getTime() - moladDate.getTime()) / (1000 * 60 * 60);
+
+      if (fridayHoursSinceMolad >= MIN_HOURS && fridayHoursSinceMolad <= MAX_HOURS) {
+        const fridayJewishCal = new JewishCalendar(fridayNightfall);
+        if (!fridayJewishCal.isYomTov() && !(fridayJewishCal.getJewishMonth() === 5 && fridayJewishCal.getJewishDayOfMonth() <= 9)) {
+          return {
+            canSayTonight: true,
+            reason: 'Last chance - say it Friday night (Motzei Shabbat will be too late)',
+            lastChance: true,
+            isFridayNight: true,
+            isIdealTime: fridayHoursSinceMolad >= IDEAL_HOURS,
+            lastTimeToSay: getLastNightDate(lastTimeToSay)
+          };
+        }
+      }
+
       return { canSayTonight: false, reason: 'Too late (after 14 days 18 hours)' };
     }
 
@@ -574,7 +627,7 @@ export async function load({ url }) {
         canSayTonight: true,
         reason: 'Yom Tov tonight - say blessing only (no Psalms)',
         isIdealTime: hoursSinceMolad >= IDEAL_HOURS,
-        lastTimeToSay: lastTimeToSay
+        lastTimeToSay: getLastNightDate(lastTimeToSay)
       };
     }
 
@@ -599,7 +652,7 @@ export async function load({ url }) {
           lastChance: isLastNight,
           lastMotzeiShabbos: isLastMotzeiShabbos && !isLastNight,
           isIdealTime: hoursSinceMolad >= IDEAL_HOURS,
-          lastTimeToSay: lastTimeToSay
+          lastTimeToSay: getLastNightDate(lastTimeToSay)
         };
       }
 
@@ -630,7 +683,7 @@ export async function load({ url }) {
       isIdealTime: isIdeal,
       lastChance: isLastNight,
       lastMotzeiShabbos: isLastMotzeiShabbos && !isLastNight,
-      lastTimeToSay: lastTimeToSay
+      lastTimeToSay: getLastNightDate(lastTimeToSay)
     };
   }
 
@@ -666,11 +719,16 @@ export async function load({ url }) {
 
     const reasons = Array.from(elMalehReasonSet).join(', ');
 
+    const weeksAway = Math.round((nextShabbatWithElMaleh.getTime() - shabbatDate.getTime()) / (7 * 24 * 60 * 60 * 1000));
+    const nextParshaNum = new JewishCalendar(nextShabbatWithElMaleh).getParsha();
+    const nextParsha = nextParshaNum >= 0 && nextParshaNum < parshaNames.length ? parshaNames[nextParshaNum] : 'לא ידוע';
 
     return {
       shouldSay: true,
       isLastShabbosBeforeOmission: isLastShabbosBeforeOmission,
       reason: reasons,
+      weeksAway,
+      nextParsha,
       nextAllowedDateString: nextShabbatWithElMaleh.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
     };
   }
