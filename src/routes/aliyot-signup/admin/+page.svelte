@@ -89,6 +89,10 @@
 	let showAlumni = false;
 	let searchQuery = '';
 	let lastUpdatedDate = '';
+
+	const welcomeMessage =
+		'Welcome to the Commons Minyan! Please fill out the short form at https://rafistrauss.github.io/commons-announcements/aliyot-signup/ so that we can give out aliyot - Rafi Strauss';
+	let welcomeMessageCopied = false;
 	const defaultAdminEmail = (import.meta.env.VITE_DEFAULT_ADMIN_EMAIL || '').trim().toLowerCase();
 	const googleProvider = new GoogleAuthProvider();
 
@@ -312,6 +316,17 @@
 		statusMessage = '';
 	}
 
+	async function copyWelcomeMessage() {
+		try {
+			await navigator.clipboard.writeText(welcomeMessage);
+			welcomeMessageCopied = true;
+			setTimeout(() => (welcomeMessageCopied = false), 2000);
+		} catch (error) {
+			console.error('Copy failed:', error);
+			statusMessage = 'Failed to copy welcome message.';
+		}
+	}
+
 	async function saveChanges(event: SubmitEvent) {
 		event.preventDefault();
 		if (!draft || !selectedId) return;
@@ -458,6 +473,22 @@
 		</div>
 
 		{#if statusMessage}<p class="status noprint">{statusMessage}</p>{/if}
+
+		<section class="card welcome-message-card">
+			<h2>Welcome Message</h2>
+			<div class="welcome-message-row">
+				<p class="welcome-message-text">{welcomeMessage}</p>
+				<button
+					type="button"
+					class="copy-btn"
+					title="Copy welcome message"
+					aria-label="Copy welcome message"
+					onclick={copyWelcomeMessage}
+				>
+					{welcomeMessageCopied ? '✅' : '📋'}
+				</button>
+			</div>
+		</section>
 
 		<div class="admin-grid">
 			<section class="card list-panel">
@@ -698,6 +729,47 @@
 		margin-bottom: 10px;
 		gap: 10px;
 		flex-wrap: wrap;
+	}
+
+	.welcome-message-card {
+		margin-bottom: 16px;
+	}
+
+	.welcome-message-card h2 {
+		margin: 0 0 10px;
+		font-size: 18px;
+	}
+
+	.welcome-message-row {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+
+	.welcome-message-text {
+		margin: 0;
+		flex: 1;
+		font-size: 14px;
+		line-height: 1.4;
+		background: #f7f7f2;
+		border: 1px solid #ddd;
+		border-radius: 6px;
+		padding: 10px 12px;
+	}
+
+	.copy-btn {
+		flex-shrink: 0;
+		font-size: 18px;
+		line-height: 1;
+		padding: 8px 10px;
+		border: 1px solid #ccc;
+		border-radius: 6px;
+		background: #fff;
+		cursor: pointer;
+	}
+
+	.copy-btn:hover {
+		background: #f0f0f0;
 	}
 
 	.buttons {
