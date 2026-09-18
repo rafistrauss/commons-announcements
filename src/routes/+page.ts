@@ -729,6 +729,10 @@ export async function load({ url }) {
     ],
     '2026-09-04': [
       'Mazel Tov to Ari Spivack on his marriage to Tamar Rosenfeld!'
+    ],
+    '2026-09-18' : [
+      'Mazel Tov to Heather and Jay Berman on the Bar Mitzvah of their son Jakey this shabbos.',
+      'Mazel Tov to Tova and Ben Kohane on the birth of a baby boy! Everyone is invited to a Shalom Zachar at their home at 8:30 PM. Address is 12-64 Orchard Street'
     ]
   };
 
