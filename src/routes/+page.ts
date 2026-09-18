@@ -59,8 +59,7 @@ function getLiturgicalNotices(date: Date, service: 'mincha' | 'maariv' | 'shacha
   const day = calToCheck.getJewishDayOfMonth();
   const month = calToCheck.getJewishMonth();
   if (month === tishrei && day >= 3 && day <= 9) {
-    additionsSet.add('המלך הקדוש (Aseret Yemei Teshuva)');
-    additionsSet.add('Other Aseret Yemei Teshuva insertions: זכרנו לחיים, מי כמוך, וכתוב לחיים, בספר חיים');
+    additionsSet.add('המלך הקדוש (and other עי׳׳ת insertions)');
   }
 
   // Check for Rosh Chodesh
