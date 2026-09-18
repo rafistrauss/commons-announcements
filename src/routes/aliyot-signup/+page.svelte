@@ -169,6 +169,32 @@
 
 <svelte:head>
 	<title>Aliyot & Minyan Signup – Commons Minyan</title>
+	<meta
+		name="description"
+		content="Our Minyan thrives because of you! Sign up to help with Torah reading, davening, or minyan participation at the Fair Lawn Commons Minyan."
+	/>
+
+	<meta property="og:type" content="website" />
+	<meta property="og:site_name" content="Commons Minyan" />
+	<meta property="og:title" content="Aliyot & Minyan Signup – Commons Minyan" />
+	<meta
+		property="og:description"
+		content="Our Minyan thrives because of you! Sign up to help with Torah reading, davening, or minyan participation at the Fair Lawn Commons Minyan."
+	/>
+	<meta property="og:url" content="https://rafistrauss.github.io/commons-announcements/aliyot-signup/" />
+	<meta property="og:image" content="https://rafistrauss.github.io/commons-announcements/og/aliyot-signup-og.png" />
+	<meta property="og:image:width" content="1200" />
+	<meta property="og:image:height" content="630" />
+	<meta property="og:image:alt" content="Fair Lawn Commons Minyan - Aliyot & Minyan Signup" />
+
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content="Aliyot & Minyan Signup – Commons Minyan" />
+	<meta
+		name="twitter:description"
+		content="Our Minyan thrives because of you! Sign up to help with Torah reading, davening, or minyan participation at the Fair Lawn Commons Minyan."
+	/>
+	<meta name="twitter:image" content="https://rafistrauss.github.io/commons-announcements/og/aliyot-signup-og.png" />
+
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700&display=swap" />
 </svelte:head>
 
