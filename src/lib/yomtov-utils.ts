@@ -119,6 +119,17 @@ function parseMaarivTime(baseDate: Date, maarivTime?: string | null): Date | nul
   return getDateInTimeZone(year, month, day, hour, minute, NEW_YORK_TIME_ZONE);
 }
 
+function getObservationTime(anchorDate: Date, maarivTime?: string | null): Date {
+  const parsedTime = parseMaarivTime(anchorDate, maarivTime);
+  if (!parsedTime) return anchorDate;
+
+  if (parsedTime.getTime() < anchorDate.getTime() - 6 * 60 * 60 * 1000) {
+    return new Date(parsedTime.getTime() + 24 * 60 * 60 * 1000);
+  }
+
+  return parsedTime;
+}
+
 function toJulianDays(date: Date): number {
   return date.getTime() / 86400000 - 0.5 + 2440588 - 2451545;
 }
@@ -239,7 +250,7 @@ export function getKiddushLevanaInfo(shabbatDate: Date, maarivTime?: string | nu
   const IDEAL_HOURS = 168;
   const MAX_HOURS = 14 * 24 + 18;
   const lastTimeToSay = new Date(moladDate.getTime() + MAX_HOURS * 60 * 60 * 1000);
-  const motzeiShabbatObservationTime = parseMaarivTime(shabbatDate, maarivTime) ?? motzeiShabbatNightfall;
+  const motzeiShabbatObservationTime = getObservationTime(motzeiShabbatNightfall, maarivTime);
 
   if (hoursSinceMolad < MIN_HOURS) {
     return { canSayTonight: false, reason: 'Too early (before 3 days after molad)' };
