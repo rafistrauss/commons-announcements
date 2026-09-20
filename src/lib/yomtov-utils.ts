@@ -76,11 +76,25 @@ function getTimeZoneOffsetMillis(date: Date, timeZone: string): number {
   }).formatToParts(date);
 
   const values = Object.fromEntries(parts.filter((part) => part.type !== 'literal').map((part) => [part.type, part.value]));
+  let year = parseInt(values.year, 10);
+  let month = parseInt(values.month, 10);
+  let day = parseInt(values.day, 10);
+  let hour = parseInt(values.hour, 10);
+
+  if (hour === 24) {
+    hour = 0;
+    const nextDay = new Date(Date.UTC(year, month - 1, day));
+    nextDay.setUTCDate(nextDay.getUTCDate() + 1);
+    year = nextDay.getUTCFullYear();
+    month = nextDay.getUTCMonth() + 1;
+    day = nextDay.getUTCDate();
+  }
+
   const utcFromParts = Date.UTC(
-    parseInt(values.year, 10),
-    parseInt(values.month, 10) - 1,
-    parseInt(values.day, 10),
-    parseInt(values.hour, 10) % 24,
+    year,
+    month - 1,
+    day,
+    hour,
     parseInt(values.minute, 10),
     parseInt(values.second, 10)
   );
@@ -222,7 +236,7 @@ function getMoonGuidance(observationTime: Date): Pick<KiddushLevanaInfo, 'moonDi
     return {
       moonDirection,
       moonAltitudeDescription: 'at or below the horizon',
-      moonLookInstructions: `At Maariv time, look toward the ${moonDirection}; the moon will be right by the horizon.`
+      moonLookInstructions: `By Maariv time, the moon will already be at or below the ${moonDirection} horizon, so it may not be visible.`
     };
   }
 
