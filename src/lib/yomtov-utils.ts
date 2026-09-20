@@ -161,7 +161,7 @@ function getMoonPosition(date: Date): { azimuthDegrees: number; altitudeDegrees:
   const rad = Math.PI / 180;
   const obliquity = 23.4397 * rad;
   const latitude = FAIR_LAWN_LATITUDE * rad;
-  const longitudeWest = FAIR_LAWN_LONGITUDE * rad;
+  const longitude = FAIR_LAWN_LONGITUDE * rad;
 
   const meanLongitude = (218.316 + 13.176396 * dayCount) * rad;
   const meanAnomaly = (134.963 + 13.064993 * dayCount) * rad;
@@ -179,7 +179,7 @@ function getMoonPosition(date: Date): { azimuthDegrees: number; altitudeDegrees:
       Math.cos(eclipticLatitude) * Math.sin(obliquity) * Math.sin(eclipticLongitude)
   );
 
-  const siderealTime = (280.16 + 360.9856235 * dayCount) * rad - longitudeWest;
+  const siderealTime = (280.16 + 360.9856235 * dayCount) * rad + longitude;
   const hourAngle = siderealTime - rightAscension;
 
   const altitude = Math.asin(
@@ -288,7 +288,7 @@ export function getKiddushLevanaInfo(
     const fridayHoursSinceMolad = (fridayObservationTime.getTime() - moladDate.getTime()) / (1000 * 60 * 60);
 
     if (fridayHoursSinceMolad >= MIN_HOURS && fridayHoursSinceMolad <= MAX_HOURS) {
-      const fridayJewishCal = new JewishCalendar(fridayNightfall);
+      const fridayJewishCal = new JewishCalendar(fridayObservationTime);
       if (
         !fridayJewishCal.isYomTov() &&
         !(fridayJewishCal.getJewishMonth() === 5 && fridayJewishCal.getJewishDayOfMonth() <= 9)
