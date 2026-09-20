@@ -4,6 +4,7 @@ import { getZmanim } from '$lib/yomtov-info';
 const FAIR_LAWN_LATITUDE = 40.940866;
 const FAIR_LAWN_LONGITUDE = -74.126082;
 const NEW_YORK_TIME_ZONE = 'America/New_York';
+const NEXT_CIVIL_DAY_THRESHOLD_HOURS = 6;
 
 export type KiddushLevanaInfo = {
   canSayTonight: boolean;
@@ -137,7 +138,10 @@ function getObservationTime(anchorDate: Date, maarivTime?: string | null): Date 
   const parsedTime = parseMaarivTime(anchorDate, maarivTime);
   if (!parsedTime) return anchorDate;
 
-  if (parsedTime.getTime() < anchorDate.getTime() - 6 * 60 * 60 * 1000) {
+  if (
+    parsedTime.getTime() <
+    anchorDate.getTime() - NEXT_CIVIL_DAY_THRESHOLD_HOURS * 60 * 60 * 1000
+  ) {
     return new Date(parsedTime.getTime() + 24 * 60 * 60 * 1000);
   }
 
