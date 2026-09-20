@@ -234,7 +234,11 @@ function getMoonGuidance(observationTime: Date): Pick<KiddushLevanaInfo, 'moonDi
   };
 }
 
-export function getKiddushLevanaInfo(shabbatDate: Date, maarivTime?: string | null): KiddushLevanaInfo {
+export function getKiddushLevanaInfo(
+  shabbatDate: Date,
+  maarivTime?: string | null,
+  fridayNightServiceTime?: string | null
+): KiddushLevanaInfo {
   const shabbatZmanim = getZmanim(shabbatDate);
   const shkia = shabbatZmanim.shkia;
   const motzeiShabbatNightfall = new Date(shkia);
@@ -262,7 +266,8 @@ export function getKiddushLevanaInfo(shabbatDate: Date, maarivTime?: string | nu
     const fridayShkia = getZmanim(fridayBeforeShabbat).shkia;
     const fridayNightfall = new Date(fridayShkia);
     fridayNightfall.setMinutes(fridayShkia.getMinutes() + 50);
-    const fridayHoursSinceMolad = (fridayNightfall.getTime() - moladDate.getTime()) / (1000 * 60 * 60);
+    const fridayObservationTime = getObservationTime(fridayNightfall, fridayNightServiceTime);
+    const fridayHoursSinceMolad = (fridayObservationTime.getTime() - moladDate.getTime()) / (1000 * 60 * 60);
 
     if (fridayHoursSinceMolad >= MIN_HOURS && fridayHoursSinceMolad <= MAX_HOURS) {
       const fridayJewishCal = new JewishCalendar(fridayNightfall);
@@ -277,7 +282,7 @@ export function getKiddushLevanaInfo(shabbatDate: Date, maarivTime?: string | nu
           isFridayNight: true,
           isIdealTime: fridayHoursSinceMolad >= IDEAL_HOURS,
           lastTimeToSay: getLastNightDate(lastTimeToSay),
-          ...getMoonGuidance(fridayNightfall)
+          ...getMoonGuidance(fridayObservationTime)
         };
       }
     }

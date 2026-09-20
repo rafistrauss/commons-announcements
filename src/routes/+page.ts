@@ -508,7 +508,7 @@ export async function load({ url }) {
   if (minyanAlert.messages.length > 0) minyanAlert.show = true;
 
   // Check if Kiddush Levana can be said on Motzei Shabbat
-  const kiddushLevanaInfo = getKiddushLevanaInfo(shabbat, shabbatMaariv);
+  const kiddushLevanaInfo = getKiddushLevanaInfo(shabbat, shabbatMaariv, fridayMincha);
 
   // El Maleh Rachamim is omitted on special days (same as Tzidkatcha generally)
   // We'll check if next Shabbat has a special day that would cause omission
