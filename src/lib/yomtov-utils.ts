@@ -239,18 +239,18 @@ export function getKiddushLevanaInfo(shabbatDate: Date, maarivTime?: string | nu
   const shkia = shabbatZmanim.shkia;
   const motzeiShabbatNightfall = new Date(shkia);
   motzeiShabbatNightfall.setMinutes(shkia.getMinutes() + 50);
+  const motzeiShabbatObservationTime = getObservationTime(motzeiShabbatNightfall, maarivTime);
 
   const jewishCal = new JewishCalendar(motzeiShabbatNightfall);
   const moladDateTime = jewishCal.getMoladAsDate();
   const moladDate = new Date(moladDateTime.toMillis());
-  const timeSinceMolad = motzeiShabbatNightfall.getTime() - moladDate.getTime();
+  const timeSinceMolad = motzeiShabbatObservationTime.getTime() - moladDate.getTime();
   const hoursSinceMolad = timeSinceMolad / (1000 * 60 * 60);
 
   const MIN_HOURS = 72;
   const IDEAL_HOURS = 168;
   const MAX_HOURS = 14 * 24 + 18;
   const lastTimeToSay = new Date(moladDate.getTime() + MAX_HOURS * 60 * 60 * 1000);
-  const motzeiShabbatObservationTime = getObservationTime(motzeiShabbatNightfall, maarivTime);
 
   if (hoursSinceMolad < MIN_HOURS) {
     return { canSayTonight: false, reason: 'Too early (before 3 days after molad)' };
@@ -304,10 +304,10 @@ export function getKiddushLevanaInfo(shabbatDate: Date, maarivTime?: string | nu
   }
 
   if (jewishMonth === 7 && jewishDay <= 10) {
-    const nextMotzeiShabbos = new Date(motzeiShabbatNightfall);
+    const nextMotzeiShabbos = new Date(motzeiShabbatObservationTime);
     nextMotzeiShabbos.setDate(nextMotzeiShabbos.getDate() + 7);
     const isLastMotzeiShabbos = nextMotzeiShabbos.getTime() > lastTimeToSay.getTime();
-    const tomorrowNight = new Date(motzeiShabbatNightfall);
+    const tomorrowNight = new Date(motzeiShabbatObservationTime);
     tomorrowNight.setDate(tomorrowNight.getDate() + 1);
     const isLastNight = tomorrowNight.getTime() > lastTimeToSay.getTime();
 
@@ -329,10 +329,10 @@ export function getKiddushLevanaInfo(shabbatDate: Date, maarivTime?: string | nu
     };
   }
 
-  const nextMotzeiShabbos = new Date(motzeiShabbatNightfall);
+  const nextMotzeiShabbos = new Date(motzeiShabbatObservationTime);
   nextMotzeiShabbos.setDate(nextMotzeiShabbos.getDate() + 7);
   const isLastMotzeiShabbos = nextMotzeiShabbos.getTime() > lastTimeToSay.getTime();
-  const tomorrowNight = new Date(motzeiShabbatNightfall);
+  const tomorrowNight = new Date(motzeiShabbatObservationTime);
   tomorrowNight.setDate(tomorrowNight.getDate() + 1);
   const isLastNight = tomorrowNight.getTime() > lastTimeToSay.getTime();
   const isIdeal = hoursSinceMolad >= IDEAL_HOURS;
