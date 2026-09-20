@@ -1,5 +1,6 @@
 import { getZmanimJson, JewishCalendar, HebrewDateFormatter, Parsha } from 'kosher-zmanim';
 import minyanTimesData from '$lib/minyan-times.json';
+import { getKiddushLevanaInfo } from '$lib/yomtov-utils';
 
 type MinyanTimesJson = {
   times: {
@@ -298,34 +299,6 @@ function formatOmerNusach(day: number): string {
   return `היום ${daysText}${weeksText} לעומר`;
 }
 
-/**
- * Get the hour-of-day (0-23) of a Date as it reads in America/New_York,
- * regardless of the server's own local timezone.
- */
-function getNYHour(date: Date): number {
-  const hourPart = new Intl.DateTimeFormat('en-US', {
-    hour: 'numeric',
-    hour12: false,
-    timeZone: 'America/New_York'
-  }).formatToParts(date).find((p) => p.type === 'hour')?.value;
-  const hour = hourPart ? parseInt(hourPart, 10) : date.getHours();
-  return hour === 24 ? 0 : hour;
-}
-
-/**
- * Kiddush Levana's cutoff is an exact moment in time, but it should be presented
- * as "the last night" to say it. A calendar "night" (e.g. Friday night) spans
- * from nightfall through the following morning, so if the cutoff moment falls
- * in the morning/early hours (America/New_York time), the last valid night is
- * the previous calendar date.
- */
-function getLastNightDate(cutoff: Date): Date {
-  if (getNYHour(cutoff) < 12) {
-    return new Date(cutoff.getTime() - 24 * 60 * 60 * 1000);
-  }
-  return cutoff;
-}
-
 function getZmanim(date: Date) {
   // Fair Lawn, NJ coordinates and timezone
   const options = {
@@ -534,161 +507,8 @@ export async function load({ url }) {
   if (!shabbatMaariv) minyanAlert.messages.push('No Shabbat Maariv minyan this week.');
   if (minyanAlert.messages.length > 0) minyanAlert.show = true;
 
-  /**
-   * Calculate if Kiddush Levana can/should be said on Motzei Shabbat
-   * Returns info about the Kiddush Levana window for this month
-   */
-  function getKiddushLevanaInfo(shabbatDate: Date): {
-    canSayTonight: boolean;
-    reason?: string;
-    isIdealTime?: boolean;
-    lastChance?: boolean;
-    lastMotzeiShabbos?: boolean;
-    isFridayNight?: boolean;
-    lastTimeToSay?: Date;
-  } {
-    // Calculate nightfall on Motzei Shabbat (Saturday night)
-    // We need to get zmanim for the Shabbat day to get shkia, then calculate tzeis
-    const shabbatZmanim = getZmanim(shabbatDate);
-    const shkia = shabbatZmanim.shkia;
-
-    // Tzeis hakochavim (nightfall) is approximately 50 minutes after shkia
-    // This is when Motzei Shabbat begins and when we can say Kiddush Levana
-    const motzeiShabbatNightfall = new Date(shkia);
-    motzeiShabbatNightfall.setMinutes(shkia.getMinutes() + 50);
-
-    const jewishCal = new JewishCalendar(motzeiShabbatNightfall);
-
-    // Get the molad for the current Jewish month
-    // getMoladAsDate returns a Luxon DateTime object, not a Date
-    const moladDateTime = jewishCal.getMoladAsDate();
-    const moladDate = new Date(moladDateTime.toMillis());
-
-    // Calculate hours since molad
-    const timeSinceMolad = motzeiShabbatNightfall.getTime() - moladDate.getTime();
-    const hoursSinceMolad = timeSinceMolad / (1000 * 60 * 60);
-
-    // Kiddush Levana window: 3 days (72 hours) to 14 days 18 hours (354 hours)
-    // Ideal: after 7 days (168 hours)
-    const MIN_HOURS = 72;
-    const IDEAL_HOURS = 168;
-    const MAX_HOURS = 14 * 24 + 18; // 354 hours
-
-    const lastTimeToSay = new Date(moladDate.getTime() + MAX_HOURS * 60 * 60 * 1000);
-
-    // Check if we're in the valid window
-    if (hoursSinceMolad < MIN_HOURS) {
-      return { canSayTonight: false, reason: 'Too early (before 3 days after molad)' };
-    }
-
-    if (hoursSinceMolad > MAX_HOURS) {
-      // Motzei Shabbat is too late, but the Friday night before this Shabbat
-      // (which precedes the too-late Motzei Shabbat chronologically) may still
-      // be within the window and could be the true last chance to say it.
-      const fridayBeforeShabbat = new Date(shabbatDate);
-      fridayBeforeShabbat.setDate(fridayBeforeShabbat.getDate() - 1);
-      const fridayShkia = getZmanim(fridayBeforeShabbat).shkia;
-      const fridayNightfall = new Date(fridayShkia);
-      fridayNightfall.setMinutes(fridayShkia.getMinutes() + 50);
-      const fridayHoursSinceMolad = (fridayNightfall.getTime() - moladDate.getTime()) / (1000 * 60 * 60);
-
-      if (fridayHoursSinceMolad >= MIN_HOURS && fridayHoursSinceMolad <= MAX_HOURS) {
-        const fridayJewishCal = new JewishCalendar(fridayNightfall);
-        if (!fridayJewishCal.isYomTov() && !(fridayJewishCal.getJewishMonth() === 5 && fridayJewishCal.getJewishDayOfMonth() <= 9)) {
-          return {
-            canSayTonight: true,
-            reason: 'Last chance - say it Friday night (Motzei Shabbat will be too late)',
-            lastChance: true,
-            isFridayNight: true,
-            isIdealTime: fridayHoursSinceMolad >= IDEAL_HOURS,
-            lastTimeToSay: getLastNightDate(lastTimeToSay)
-          };
-        }
-      }
-
-      return { canSayTonight: false, reason: 'Too late (after 14 days 18 hours)' };
-    }
-
-    // Check for exceptions where we don't say Kiddush Levana
-
-    // Check if it's during the Nine Days (1-9 Av)
-    const jewishMonth = jewishCal.getJewishMonth();
-    const jewishDay = jewishCal.getJewishDayOfMonth();
-
-    if (jewishMonth === 5 && jewishDay <= 9) {
-      return { canSayTonight: false, reason: 'During the Nine Days' };
-    }
-
-    // Check if Motzei Shabbat is the evening of a Jewish festival
-    const motzeiShabbatJewishCal = new JewishCalendar(motzeiShabbatNightfall);
-    if (motzeiShabbatJewishCal.isYomTov()) {
-      // Can say it but only the blessing, not the full text
-      return {
-        canSayTonight: true,
-        reason: 'Yom Tov tonight - say blessing only (no Psalms)',
-        isIdealTime: hoursSinceMolad >= IDEAL_HOURS,
-        lastTimeToSay: getLastNightDate(lastTimeToSay)
-      };
-    }
-
-    // Check if it's during first 10 days of Tishrei (many have this custom)
-    if (jewishMonth === 7 && jewishDay <= 10) {
-      // Calculate when the next Motzei Shabbos will be (7 days from now)
-      const nextMotzeiShabbos = new Date(motzeiShabbatNightfall);
-      nextMotzeiShabbos.setDate(nextMotzeiShabbos.getDate() + 7);
-
-      // If this is the last Motzei Shabbos before the window closes, mention it
-      const isLastMotzeiShabbos = nextMotzeiShabbos.getTime() > lastTimeToSay.getTime();
-
-      // Check if tonight is actually the very last night (deadline is before tomorrow night)
-      const tomorrowNight = new Date(motzeiShabbatNightfall);
-      tomorrowNight.setDate(tomorrowNight.getDate() + 1);
-      const isLastNight = tomorrowNight.getTime() > lastTimeToSay.getTime();
-
-      if (isLastMotzeiShabbos || isLastNight) {
-        return {
-          canSayTonight: true,
-          reason: 'During first 10 days of Tishrei (many wait, but say it if this is your last chance)',
-          lastChance: isLastNight,
-          lastMotzeiShabbos: isLastMotzeiShabbos && !isLastNight,
-          isIdealTime: hoursSinceMolad >= IDEAL_HOURS,
-          lastTimeToSay: getLastNightDate(lastTimeToSay)
-        };
-      }
-
-      return {
-        canSayTonight: false,
-        reason: 'During first 10 days of Tishrei (many have custom not to say)'
-      };
-    }
-
-    // Check if this is the last Motzei Shabbos before the window closes
-    // Calculate when the next Motzei Shabbos will be (7 days from now)
-    const nextMotzeiShabbos = new Date(motzeiShabbatNightfall);
-    nextMotzeiShabbos.setDate(nextMotzeiShabbos.getDate() + 7);
-
-    // Check if the next Motzei Shabbos is after the last time to say Kiddush Levana
-    const isLastMotzeiShabbos = nextMotzeiShabbos.getTime() > lastTimeToSay.getTime();
-
-    // Check if tonight is actually the very last night (deadline is before tomorrow night)
-    const tomorrowNight = new Date(motzeiShabbatNightfall);
-    tomorrowNight.setDate(tomorrowNight.getDate() + 1);
-    const isLastNight = tomorrowNight.getTime() > lastTimeToSay.getTime();
-
-    // We're in the valid window!
-    const isIdeal = hoursSinceMolad >= IDEAL_HOURS;
-
-    return {
-      canSayTonight: true,
-      isIdealTime: isIdeal,
-      lastChance: isLastNight,
-      lastMotzeiShabbos: isLastMotzeiShabbos && !isLastNight,
-      lastTimeToSay: getLastNightDate(lastTimeToSay)
-    };
-  }
-
   // Check if Kiddush Levana can be said on Motzei Shabbat
-  const kiddushLevanaInfo = getKiddushLevanaInfo(shabbat);
+  const kiddushLevanaInfo = getKiddushLevanaInfo(shabbat, shabbatMaariv, fridayMincha);
 
   // El Maleh Rachamim is omitted on special days (same as Tzidkatcha generally)
   // We'll check if next Shabbat has a special day that would cause omission

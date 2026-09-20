@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { getKiddushLevanaInfo } from "$lib/yomtov-utils";
+  import { getKiddushLevanaInfo, type KiddushLevanaInfo } from "$lib/yomtov-utils";
   import KiddushLevana from '$lib/KiddushLevana.svelte';
 
   export let data: {
@@ -12,14 +12,7 @@
   };
 
   let html2canvas: any = null;
-  let kiddushLevanaInfo: {
-    canSayTonight: boolean;
-    reason?: string;
-    isIdealTime?: boolean;
-    lastChance?: boolean;
-    lastMotzeiShabbos?: boolean;
-    lastTimeToSay?: Date;
-  } | null = null;
+  let kiddushLevanaInfo: KiddushLevanaInfo | null = null;
 
   onMount(async () => {
     const script = document.createElement("script");

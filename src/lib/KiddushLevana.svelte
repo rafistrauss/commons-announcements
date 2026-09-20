@@ -1,13 +1,7 @@
 <script lang="ts">
-  export let kiddushLevanaInfo: {
-    canSayTonight: boolean;
-    reason?: string;
-    isIdealTime?: boolean;
-    lastChance?: boolean;
-    lastMotzeiShabbos?: boolean;
-    isFridayNight?: boolean;
-    lastTimeToSay?: Date;
-  } | null;
+  import type { KiddushLevanaInfo } from '$lib/yomtov-utils';
+
+  export let kiddushLevanaInfo: KiddushLevanaInfo | null;
 </script>
 
 {#if kiddushLevanaInfo && kiddushLevanaInfo.canSayTonight}
@@ -31,6 +25,9 @@
       {/if}
       {#if kiddushLevanaInfo.lastTimeToSay}
         Last night to say: {kiddushLevanaInfo.lastTimeToSay.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'America/New_York' })}
+      {/if}
+      {#if kiddushLevanaInfo.moonLookInstructions}
+        <div class="moon-look-instructions">{kiddushLevanaInfo.moonLookInstructions}</div>
       {/if}
     </div>
   </div>
@@ -74,5 +71,9 @@
 	.kiddush-levana-details {
 		font-size: 18px;
 		text-align: center;
+	}
+
+	.moon-look-instructions {
+	  margin-top: 8px;
 	}
 </style>
