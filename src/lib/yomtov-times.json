@@ -32,18 +32,18 @@
     },
     "shminiatzeret": {
       "2026-10-02": {
-        "mincha": "TBD",
-        "notes": "Hoshana Rabah"
+        "mincha": "6:21pm",
+        "maariv": "6:55pm"
       },
       "2026-10-03": {
-        "mincha_maariv": "TBD",
-        "notes": "Shmini Atzeret"
+        "mincha": "6:10pm",
+        "maariv": "6:50pm",
+        "notes": "Hakafot 7:05"
       },
       "2026-10-04": {
-        "shacharit": "TBD",
-        "mincha": "TBD",
-        "maariv": "TBD",
-        "notes": "Simchat Torah"
+        "mincha": "6:15pm",
+        "maariv": "7:13pm"
+        
       }
     },
     "pesach": {
