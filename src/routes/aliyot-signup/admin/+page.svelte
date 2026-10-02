@@ -474,7 +474,7 @@
 
 		{#if statusMessage}<p class="status noprint">{statusMessage}</p>{/if}
 
-		<section class="card welcome-message-card">
+		<section class="card welcome-message-card noprint">
 			<h2>Welcome Message</h2>
 			<div class="welcome-message-row">
 				<p class="welcome-message-text">{welcomeMessage}</p>
