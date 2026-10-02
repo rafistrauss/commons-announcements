@@ -75,6 +75,13 @@
 
 	const TRIBES: Exclude<Tribe, ''>[] = ['Kohen', 'Levi', 'Yisrael'];
 
+	const YOM_TOV_PAGES = [
+		{ label: 'Rosh Hashana', href: '/roshhashana' },
+		{ label: 'Pesach', href: '/pesach' },
+		{ label: 'Shavuot', href: '/shavuot' },
+		{ label: 'Shmini Atzeret / Simchat Torah', href: '/shminiatzeret' }
+	] as const;
+
 	let loginError = '';
 	let statusMessage = '';
 	let loggingIn = false;
@@ -450,6 +457,13 @@
 		<p>Sign in to view and edit submitted signup information.</p>
 	</header>
 
+	<nav class="yomtov-links">
+		<span class="yomtov-links-label">Yom Tov Pages:</span>
+		{#each YOM_TOV_PAGES as ytPage}
+			<a href={resolve(ytPage.href)} class="yomtov-link">{ytPage.label}</a>
+		{/each}
+	</nav>
+
 	{#if !user}
 		<div class="card login">
 			<p>Sign in with Google to access the admin console.</p>
@@ -707,6 +721,39 @@
 		margin-bottom: 10px;
 		color: #1976d2;
 		text-decoration: none;
+	}
+
+	.yomtov-links {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 8px;
+		margin-bottom: 16px;
+		padding: 10px 14px;
+		background: #fff;
+		border: 1px solid #ddd;
+		border-radius: 8px;
+	}
+
+	.yomtov-links-label {
+		font-weight: 700;
+		font-size: 13px;
+		color: #555;
+	}
+
+	.yomtov-link {
+		background: #eef4fc;
+		color: #1976d2;
+		border: 1px solid #bcd6f2;
+		border-radius: 999px;
+		padding: 4px 12px;
+		font-size: 13px;
+		font-weight: 600;
+		text-decoration: none;
+	}
+
+	.yomtov-link:hover {
+		background: #dceafd;
 	}
 
 	.card {
@@ -1161,6 +1208,7 @@
 		}
 
 		.header,
+		.yomtov-links,
 		.top-actions,
 		.admin-grid > .list-panel,
 		.admin-grid > :not(.print-panel) {

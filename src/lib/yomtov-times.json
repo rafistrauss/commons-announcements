@@ -30,6 +30,22 @@
         "notes": "Havdalah at 9:04pm"
       }
     },
+    "shminiatzeret": {
+      "2026-10-02": {
+        "mincha": "TBD",
+        "notes": "Hoshana Rabah"
+      },
+      "2026-10-03": {
+        "mincha_maariv": "TBD",
+        "notes": "Shmini Atzeret"
+      },
+      "2026-10-04": {
+        "shacharit": "TBD",
+        "mincha": "TBD",
+        "maariv": "TBD",
+        "notes": "Simchat Torah"
+      }
+    },
     "pesach": {
       "2026-04-01": {
         "mincha": "TBD",

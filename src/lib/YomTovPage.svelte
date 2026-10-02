@@ -12,7 +12,20 @@
   };
 
   let html2canvas: any = null;
+
+  // Parse a "YYYY-MM-DD" dateKey back into a local Date (noon, to avoid
+  // timezone/DST edge cases shifting it to the wrong civil day).
+  function parseDateKey(dateKey: string): Date {
+    const [year, month, day] = dateKey.split('-').map(Number);
+    return new Date(year, month - 1, day, 12, 0, 0, 0);
+  }
+
+  // The Kiddush Levana reminder is shown on the last day of the printed
+  // range, so it must reflect whether it's relevant on *that* date —
+  // not whatever day the page happens to be viewed/built on.
   let kiddushLevanaInfo: KiddushLevanaInfo | null = null;
+  $: lastDay = data.days[data.days.length - 1];
+  $: kiddushLevanaInfo = lastDay ? getKiddushLevanaInfo(parseDateKey(lastDay.key)) : null;
 
   onMount(async () => {
     const script = document.createElement("script");
@@ -22,9 +35,6 @@
       html2canvas = (window as any).html2canvas;
     };
     document.head.appendChild(script);
-
-    const today = new Date();
-    kiddushLevanaInfo = getKiddushLevanaInfo(today);
   });
 
   async function saveAsImage() {

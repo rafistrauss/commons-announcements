@@ -1,7 +1,6 @@
 import { JewishCalendar, getZmanimJson } from 'kosher-zmanim';
 import { getShavuotDayNumber, getShavuotDayName, getShavuotLiturgicalNotices } from '$lib/shavuot-details';
 import { getYomTovTimes, formatDateKey, getYomTovAnnouncements, getYomTovDateRange, getParshaForShabbat, getMinchaTorahReading } from '$lib/yomtov-info';
-import { getKiddushLevanaInfo } from '$lib/yomtov-utils';
 
 export const prerender = true;
 export const ssr = true;
@@ -124,7 +123,6 @@ export async function load({ url }: { url: URL }) {
   });
 
   const today = new Date();
-  const kiddushLevanaInfo = getKiddushLevanaInfo(today);
   const todayKey = formatDateKey(today);
 
   const currentDateKey =
@@ -138,8 +136,5 @@ export async function load({ url }: { url: URL }) {
     title: `Shavuot ${year}`,
     pageTitle: 'Commons Minyan Shavuot Announcements',
     holidayKey: 'shavuot',
-    props: {
-      kiddushLevanaInfo,
-    },
   };
 }

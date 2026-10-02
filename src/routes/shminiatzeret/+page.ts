@@ -1,6 +1,6 @@
 import { JewishCalendar, getZmanimJson } from 'kosher-zmanim';
-import { getRoshHashanaDayNumber, getRoshHashanaDayName, getRoshHashanaDateRange, getRoshHashanaLiturgicalNotices } from '$lib/rosh-hashana-details';
-import { getYomTovTimes, formatDateKey, getYomTovAnnouncements, getParshaForShabbat, getMinchaTorahReading } from '$lib/yomtov-info';
+import { getShminiAtzeretDayNumber, getShminiAtzeretDayName, getShminiAtzeretLiturgicalNotices } from '$lib/shmini-atzeret-details';
+import { getYomTovTimes, formatDateKey, getYomTovAnnouncements, getYomTovDateRange, getParshaForShabbat, getMinchaTorahReading } from '$lib/yomtov-info';
 
 export const prerender = true;
 export const ssr = true;
@@ -43,8 +43,9 @@ function getZmanim(date: Date) {
 }
 
 export async function load({ url }: { url: URL }) {
-  // Derive dates from the calendar: Erev Rosh Hashana (29 Elul) through Day 2 (2 Tishrei)
-  const roshHashanaDates = getRoshHashanaDateRange();
+  // Derive dates from the calendar: Erev Shmini Atzeret / Hoshana Rabah (21 Tishrei)
+  // through Simchat Torah (23 Tishrei)
+  const shminiAtzeretDates = getYomTovDateRange(7, 21, 23); // Tishrei = 7
 
   const englishDateOptions: Intl.DateTimeFormatOptions = {
     year: 'numeric', month: 'long', day: 'numeric', weekday: 'long',
@@ -52,11 +53,11 @@ export async function load({ url }: { url: URL }) {
 
   // Announcements keyed by date — update as needed each year
   const announcementsByDate: Record<string, string[]> = {
-    // '2026-09-11': ['Candle lighting 7:00pm'],
-    '2026-09-13': ['There will be Shofar blowing on Sunday, September 13, at 4pm in the Promenade Commons room, Building 4.'],
+    // '2026-10-03': ['Candle lighting 6:15pm'],
+    // '2026-10-04': ['Havdalah 7:10pm'],
   };
 
-  const days = roshHashanaDates.map((date) => {
+  const days = shminiAtzeretDates.map((date) => {
     const dateKey = formatDateKey(date);
     const dayOfWeek = date.getDay(); // 0=Sun, 5=Fri, 6=Sat
     const isShabbat = dayOfWeek === 6;
@@ -65,38 +66,36 @@ export async function load({ url }: { url: URL }) {
     const minchaTorahReading = getMinchaTorahReading(date);
 
     const jewishCal = new JewishCalendar(date);
-    const jewishMonth = jewishCal.getJewishMonth();
-    const isErev = jewishMonth === 6; // 29 Elul = Erev Rosh Hashana
-    const roshHashanaDayNumber = isErev ? 0 : (getRoshHashanaDayNumber(date) ?? 0);
+    const jewishDay = jewishCal.getJewishDayOfMonth();
+    const isErev = jewishDay === 21; // 21 Tishrei = Hoshana Rabah / Erev Shmini Atzeret
+    const shminiAtzeretDayNumber = isErev ? 0 : (getShminiAtzeretDayNumber(date) ?? 0);
 
     let name: string;
     if (isErev) {
-      name = 'ערב ראש השנה';
+      name = 'הושענא רבה';
     } else {
-      const baseName = getRoshHashanaDayName(roshHashanaDayNumber);
+      const baseName = getShminiAtzeretDayName(shminiAtzeretDayNumber);
       name = isShabbat ? `שבת — ${baseName}` : baseName;
     }
 
     const zmanim = getZmanim(date);
-    const { shacharit, mincha, maariv, minchaAndMaariv, notes } = getYomTovTimes(date, 'roshhashana');
+    const { shacharit, mincha, maariv, minchaAndMaariv, notes } = getYomTovTimes(date, 'shminiatzeret');
 
     // Liturgical notices
     const shacharitNotices = isErev
       ? { additions: [], omissions: [] }
-      : getRoshHashanaLiturgicalNotices(date, 'shacharit');
+      : getShminiAtzeretLiturgicalNotices(date, 'shacharit');
     const minchaNotices = isErev
       ? { additions: [], omissions: [] }
-      : getRoshHashanaLiturgicalNotices(date, 'mincha');
-    // Erev Maariv is the first night of Yom Tov — יעלה ויבא and המלך הקדוש are said.
-    // Note: the listed time is a combined Mincha/Maariv minyan, but המלך הקדוש only
-    // applies to the Maariv Amidah (Mincha on Erev Rosh Hashana still says האל הקדוש).
+      : getShminiAtzeretLiturgicalNotices(date, 'mincha');
+    // Erev Maariv is the first night of Yom Tov — יעלה ויבא is said
     const maarivNotices = isErev
-      ? { additions: ['יעלה ויבא', 'המלך הקדוש (Maariv only)'], omissions: [] }
-      : getRoshHashanaLiturgicalNotices(date, 'maariv');
+      ? { additions: ['יעלה ויבא'], omissions: [] }
+      : getShminiAtzeretLiturgicalNotices(date, 'maariv');
 
     return {
       key: dateKey,
-      number: roshHashanaDayNumber,
+      number: shminiAtzeretDayNumber,
       name,
       hebrewDate: zmanim.hebrewDate,
       shkia: zmanim.shkia,
@@ -115,7 +114,7 @@ export async function load({ url }: { url: URL }) {
       noMincha: mincha === 'NONE',
       noMaariv: maariv === 'NONE',
       noMinchaAndMaariv: minchaAndMaariv === 'NONE',
-      omer: null, // No Omer count around Rosh Hashana
+      omer: null, // No Omer count around Shmini Atzeret
       shacharitNotices,
       minchaNotices,
       maarivNotices,
@@ -135,8 +134,8 @@ export async function load({ url }: { url: URL }) {
     days,
     totalDays: days.length,
     currentDateKey,
-    title: `Rosh Hashana ${year}`,
-    pageTitle: 'Commons Minyan Rosh Hashana Announcements',
-    holidayKey: 'roshhashana',
+    title: `Shmini Atzeret / Simchat Torah ${year}`,
+    pageTitle: 'Commons Minyan Shmini Atzeret / Simchat Torah Announcements',
+    holidayKey: 'shminiatzeret',
   };
 }

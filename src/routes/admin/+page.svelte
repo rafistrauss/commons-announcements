@@ -30,6 +30,39 @@
 		'כי תבוא', 'נצבים', 'וילך', 'האזינו', 'וזאת הברכה'
 	];
 
+	// The five Chumashim, each a contiguous slice of PARSHIOT (בראשית–ויחי, שמות–פקודי,
+	// ויקרא–בחקתי, במדבר–מסעי, דברים–וזאת הברכה) — used to print a separate leining
+	// coverage sheet per sefer.
+	const SEFARIM = [
+		{ name: 'בראשית', parshiot: PARSHIOT.slice(0, 12) },
+		{ name: 'שמות', parshiot: PARSHIOT.slice(12, 23) },
+		{ name: 'ויקרא', parshiot: PARSHIOT.slice(23, 33) },
+		{ name: 'במדבר', parshiot: PARSHIOT.slice(33, 43) },
+		{ name: 'דברים', parshiot: PARSHIOT.slice(43, 54) }
+	];
+
+	const DAVENING_PORTION_GROUPS = {
+		Shabbat: [
+			{ label: 'Kabbalat Shabbat & Maariv', value: 'Kabbalat Shabbat & Maariv' },
+			{ label: 'Shacharit', value: 'Shabbat Shacharit' },
+			{ label: 'Mussaf', value: 'Shabbat Mussaf' },
+			{ label: 'Mincha', value: 'Shabbat Mincha' },
+			{ label: 'Maariv (Motzei Shabbat/Yom Tov)', value: 'Maariv (Motzei Shabbat/Yom Tov)' }
+		],
+		'Yom Tov': [
+			{ label: 'Shacharit', value: 'Yom Tov Shacharit' },
+			{ label: 'Mussaf', value: 'Yom Tov Mussaf' },
+			{ label: 'Mincha', value: 'Yom Tov Mincha' }
+		]
+	} as const;
+
+	const YOM_TOV_PAGES = [
+		{ label: 'Rosh Hashana', href: '/roshhashana' },
+		{ label: 'Pesach', href: '/pesach' },
+		{ label: 'Shavuot', href: '/shavuot' },
+		{ label: 'Shmini Atzeret / Simchat Torah', href: '/shminiatzeret' }
+	] as const;
+
 	type SignupDoc = {
 		id: string;
 		englishName: string;
@@ -52,8 +85,12 @@
 	let currentParsha = '';
 	let currentDate = '';
 
-	type View = 'parsha' | 'all-parshiot';
+	type View = 'parsha' | 'all-parshiot' | 'leining-print' | 'davening-print';
 	let activeView: View = 'parsha';
+
+	function printCurrentView() {
+		window.print();
+	}
 
 	const defaultAdminEmail = (import.meta.env.VITE_DEFAULT_ADMIN_EMAIL || '').trim().toLowerCase();
 	const googleProvider = new GoogleAuthProvider();
@@ -91,6 +128,28 @@
 	$: allParshiotWithLeiners = PARSHIOT.map((p) => ({
 		parsha: p,
 		leiners: submissions.filter((record) => canLeinParsha(record, p))
+	}));
+
+	$: leiningBySefer = SEFARIM.map((sefer) => ({
+		name: sefer.name,
+		parshiot: sefer.parshiot.map((p) => ({
+			parsha: p,
+			leiners: submissions.filter((record) => canLeinParsha(record, p))
+		}))
+	}));
+
+	$: daveningByPortion = Object.entries(DAVENING_PORTION_GROUPS).map(([groupName, portions]) => ({
+		groupName,
+		portions: portions.map((portion) => ({
+			label: portion.label,
+			people: submissions
+				.filter(
+					(record) =>
+						!record.alumni && record.davening.canDaven && record.davening.portions.includes(portion.value)
+				)
+				.slice()
+				.sort((a, b) => a.englishName.localeCompare(b.englishName))
+		}))
 	}));
 
 	$: currentParshaLeiners = submissions.filter((record) => canLeinParsha(record, selectedParsha));
@@ -208,11 +267,18 @@
 </svelte:head>
 
 <div class="page">
-	<header class="header">
+	<header class="header noprint">
 		<a href={resolve('/aliyot-signup/admin/')} class="back-link">← Admin</a>
 		<h1>Leiners Lookup</h1>
 		<p>View who can lein for each parsha.</p>
 	</header>
+
+	<nav class="yomtov-links noprint">
+		<span class="yomtov-links-label">Yom Tov Pages:</span>
+		{#each YOM_TOV_PAGES as ytPage}
+			<a href={resolve(ytPage.href)} class="yomtov-link">{ytPage.label}</a>
+		{/each}
+	</nav>
 
 	{#if !user}
 		<div class="card login">
@@ -228,7 +294,7 @@
 			<button onclick={handleLogout}>Sign out</button>
 		</div>
 	{:else}
-		<div class="top-bar">
+		<div class="top-bar noprint">
 			<div class="current-info">
 				<p dir="rtl" class="hebrew-date">{currentParsha || '—'}</p>
 				<p class="english-date">{currentDate || 'Loading…'}</p>
@@ -240,9 +306,9 @@
 			<button onclick={handleLogout} class="logout-btn">Sign out</button>
 		</div>
 
-		{#if statusMessage}<p class="status">{statusMessage}</p>{/if}
+		{#if statusMessage}<p class="status noprint">{statusMessage}</p>{/if}
 
-		<div class="view-tabs">
+		<div class="view-tabs noprint">
 			<button
 				class="tab-btn"
 				class:active={activeView === 'parsha'}
@@ -256,6 +322,20 @@
 				onclick={() => (activeView = 'all-parshiot')}
 			>
 				All Parshiot
+			</button>
+			<button
+				class="tab-btn"
+				class:active={activeView === 'leining-print'}
+				onclick={() => (activeView = 'leining-print')}
+			>
+				Leining Sheet (Print)
+			</button>
+			<button
+				class="tab-btn"
+				class:active={activeView === 'davening-print'}
+				onclick={() => (activeView = 'davening-print')}
+			>
+				Davening Sheet (Print)
 			</button>
 		</div>
 
@@ -301,7 +381,7 @@
 					</ul>
 				{/if}
 			</section>
-		{:else}
+		{:else if activeView === 'all-parshiot'}
 			<section class="all-parshiot">
 				{#each allParshiotWithLeiners as { parsha, leiners }}
 					<div class="parsha-row" class:has-leiners={leiners.length > 0}>
@@ -315,6 +395,71 @@
 								{/each}
 							{/if}
 						</div>
+					</div>
+				{/each}
+			</section>
+		{:else if activeView === 'leining-print'}
+			<section class="card print-panel">
+				<div class="print-header">
+					<div>
+						<h2>Leining Coverage by Sefer</h2>
+						<p>Who can lein each parsha, grouped by Chumash. Blank rows need a leiner.</p>
+					</div>
+					<button type="button" class="noprint" onclick={printCurrentView}>Print list</button>
+				</div>
+				{#each leiningBySefer as sefer, si}
+					<div class="sefer-section" class:page-break={si < leiningBySefer.length - 1}>
+						<h3 dir="rtl">{sefer.name}</h3>
+						<div class="all-parshiot">
+							{#each sefer.parshiot as { parsha, leiners }}
+								<div class="parsha-row" class:has-leiners={leiners.length > 0}>
+									<div class="parsha-row-name" dir="rtl">{parsha}</div>
+									<div class="parsha-row-leiners">
+										{#if leiners.length === 0}
+											<span class="no-leiner">No leiners yet</span>
+										{:else}
+											{#each leiners as person}
+												<span class="leiner-chip">{person.englishName}</span>
+											{/each}
+										{/if}
+									</div>
+								</div>
+							{/each}
+						</div>
+					</div>
+				{/each}
+			</section>
+		{:else if activeView === 'davening-print'}
+			<section class="card print-panel">
+				<div class="print-header">
+					<div>
+						<h2>Davening Sign-ups</h2>
+						<p>Who can lead each service, by portion.</p>
+					</div>
+					<button type="button" class="noprint" onclick={printCurrentView}>Print list</button>
+				</div>
+				{#each daveningByPortion as group}
+					<div class="davening-group">
+						<h3>{group.groupName}</h3>
+						{#each group.portions as portion}
+							<div class="davening-portion">
+								<div class="davening-portion-name">{portion.label}</div>
+								{#if portion.people.length === 0}
+									<p class="no-results">No one signed up.</p>
+								{:else}
+									<ul class="davener-list">
+										{#each portion.people as person}
+											<li>
+												{person.englishName}
+												{#if person.hebrewName}
+													<span class="davener-hebrew" dir="rtl">({person.hebrewName})</span>
+												{/if}
+											</li>
+										{/each}
+									</ul>
+								{/if}
+							</div>
+						{/each}
 					</div>
 				{/each}
 			</section>
@@ -582,6 +727,129 @@
 		font-size: 14px;
 	}
 
+	.yomtov-links {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 8px;
+		margin-bottom: 16px;
+		padding: 10px 14px;
+		background: #fff;
+		border: 1px solid #ddd;
+		border-radius: 8px;
+	}
+
+	.yomtov-links-label {
+		font-weight: 700;
+		font-size: 13px;
+		color: #555;
+	}
+
+	.yomtov-link {
+		background: #eef4fc;
+		color: #1976d2;
+		border: 1px solid #bcd6f2;
+		border-radius: 999px;
+		padding: 4px 12px;
+		font-size: 13px;
+		font-weight: 600;
+		text-decoration: none;
+	}
+
+	.yomtov-link:hover {
+		background: #dceafd;
+	}
+
+	.print-panel {
+		background: #fff;
+		border: 1px solid #ddd;
+		border-radius: 8px;
+		padding: 20px;
+	}
+
+	.print-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 12px;
+		margin-bottom: 16px;
+	}
+
+	.print-header h2 {
+		margin: 0 0 4px;
+		font-size: 22px;
+	}
+
+	.print-header p {
+		margin: 0;
+		color: #555;
+		font-size: 14px;
+	}
+
+	.print-header button {
+		background: #1976d2;
+		color: white;
+		border: none;
+		padding: 10px 16px;
+		border-radius: 6px;
+		cursor: pointer;
+		font-weight: 600;
+		flex-shrink: 0;
+	}
+
+	.sefer-section {
+		margin-bottom: 24px;
+	}
+
+	.sefer-section h3 {
+		font-size: 20px;
+		margin: 0 0 10px;
+		border-bottom: 2px solid #333;
+		padding-bottom: 6px;
+	}
+
+	.davening-group {
+		margin-bottom: 20px;
+	}
+
+	.davening-group h3 {
+		font-size: 18px;
+		margin: 0 0 10px;
+		border-bottom: 2px solid #333;
+		padding-bottom: 6px;
+	}
+
+	.davening-portion {
+		margin-bottom: 12px;
+		padding: 10px 12px;
+		border: 1px solid #e0e0e0;
+		border-radius: 6px;
+		background: #fafafa;
+	}
+
+	.davening-portion-name {
+		font-weight: 700;
+		font-size: 15px;
+		margin-bottom: 6px;
+	}
+
+	.davener-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		gap: 4px;
+	}
+
+	.davener-list li {
+		font-size: 14px;
+	}
+
+	.davener-hebrew {
+		color: #555;
+		font-size: 13px;
+	}
+
 	@media (max-width: 600px) {
 		.top-bar {
 			flex-direction: column;
@@ -598,6 +866,51 @@
 
 		.parsha-selector select {
 			max-width: none;
+		}
+	}
+
+	@media print {
+		@page {
+			margin: 0.5in;
+		}
+
+		.noprint {
+			display: none !important;
+		}
+
+		.page {
+			background: white;
+			max-width: none;
+			padding: 0;
+		}
+
+		.print-panel {
+			border: none;
+			padding: 0;
+		}
+
+		.sefer-section {
+			page-break-inside: avoid;
+		}
+
+		.sefer-section.page-break {
+			page-break-after: always;
+		}
+
+		.davening-group {
+			page-break-inside: avoid;
+		}
+
+		.parsha-row,
+		.davening-portion {
+			-webkit-print-color-adjust: exact;
+			print-color-adjust: exact;
+		}
+
+		.leiner-chip {
+			background: white;
+			color: black;
+			border: 1px solid #333;
 		}
 	}
 </style>
