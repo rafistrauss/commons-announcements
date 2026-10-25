@@ -107,8 +107,8 @@ async function updateMinyanTimes() {
   }
 
   if (successCount === 0) {
-    console.error('✗ All fetches failed — no times were updated');
-    process.exit(1);
+    console.warn('⚠ All fetches failed — keeping existing minyan times unchanged');
+    return;
   }
 
   // Update timestamp

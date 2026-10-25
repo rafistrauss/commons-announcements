@@ -32,7 +32,17 @@ jobs:
           SHULCLOUD_PROXY_URL: ${{ secrets.SHULCLOUD_PROXY_URL }}
           SHULCLOUD_PROXY_TOKEN: ${{ secrets.SHULCLOUD_PROXY_TOKEN }}
 
+      - name: Check for minyan time changes
+        id: changes
+        run: |
+          if git diff --quiet -- src/lib/minyan-times.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Commit & Push changes
+        if: steps.changes.outputs.changed == 'true'
         uses: actions-js/push@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -42,6 +52,7 @@ jobs:
         run: sleep 5
       
       - name: Trigger deployment
+        if: steps.changes.outputs.changed == 'true'
         run: |
           if gh workflow run deploy.yml --ref main; then
             echo "✓ Deployment workflow triggered successfully on main branch"
