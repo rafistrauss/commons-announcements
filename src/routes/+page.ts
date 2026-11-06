@@ -356,24 +356,38 @@ function getZmanim(date: Date) {
     shkia,
     hebrewDate,
     isRoshChodesh: jewishCal.isRoshChodesh(),
-    isShabbatMevorchim: isShabbatMevorchim(jewishCal),
+    mevorchimInfo: getMevorchimInfo(jewishCal),
   };
 }
 
-// Function to check if this Shabbat is Shabbat Mevorchim
-function isShabbatMevorchim(jewishCal: JewishCalendar): boolean {
-  // Shabbat Mevorchim is the Shabbat before Rosh Chodesh, except before Tishrei
-  // (no Shabbat Mevorchim for Tishrei)
-  // JewishCalendar: 1=Nissan, ..., 7=Tishrei, 12/13=Adar/Adar II
-  if (jewishCal.getDayOfWeek() !== 7) return false; // Only Shabbat
-  const nextDay = new Date(jewishCal.getDate());
-  nextDay.setDate(nextDay.getDate() + 7); // Next Shabbat
-  const nextShabbatCal = new JewishCalendar(nextDay);
-  // If next week is Rosh Chodesh (but not Tishrei)
-  return (
-    nextShabbatCal.isRoshChodesh() &&
-    nextShabbatCal.getJewishMonth() !== 7
-  );
+// Upcoming Rosh Chodesh (the first RC falling within the 7 days after this Shabbat).
+// Returns null unless this Shabbat is Shabbat Mevorchim: the last Shabbat before a
+// new month, excluding the Shabbat before Rosh Hashana and a Shabbat that is itself RC.
+function getMevorchimInfo(jewishCal: JewishCalendar): { month: string; days: string[] } | null {
+  if (jewishCal.getDayOfWeek() !== 7 || jewishCal.isRoshChodesh()) return null;
+  const shabbatDate = jewishCal.getDate().toJSDate();
+  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Shabbat'];
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date(shabbatDate);
+    d.setDate(d.getDate() + i);
+    const cal = new JewishCalendar(d);
+    if (!cal.isRoshChodesh()) continue;
+    const dates = [d];
+    if (cal.getJewishDayOfMonth() === 30) {
+      const next = new Date(d);
+      next.setDate(next.getDate() + 1);
+      dates.push(next);
+    }
+    const lastCal = new JewishCalendar(dates[dates.length - 1]);
+    if (lastCal.getJewishMonth() === 7) return null;
+    const fmt = new HebrewDateFormatter();
+    fmt.setHebrewFormat(true);
+    return {
+      month: fmt.formatMonth(lastCal),
+      days: dates.map((x) => dayNames[x.getDay()])
+    };
+  }
+  return null;
 }
 
 export async function load({ url }) {
@@ -656,7 +670,7 @@ export async function load({ url }) {
       shouldSayTzidkatcha: !shabbatTzidkatchaStatus.isSpecial,
       tzidkatchaReason: shabbatTzidkatchaStatus.reason,
       minchaParsha: nextWeekParsha,
-      isShabbatMevorchim: shabbatZmanim.isShabbatMevorchim,
+      mevorchimInfo: shabbatZmanim.mevorchimInfo,
       shabbatShacharis: shabbatShacharis
     },
     maariv: shabbatMaariv || "No data available for this date",

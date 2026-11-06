@@ -297,6 +297,12 @@
 	.rosh-chodesh-notice-main {
 		direction: rtl;
 	}
+
+	.rosh-chodesh-days {
+		direction: ltr;
+		font-size: 20px;
+		margin-top: 6px;
+	}
 	
 	.mincha-notice {
 		background: #fff3e0;
@@ -657,9 +663,10 @@
 		</div>
 	{/if}
 
-	{#if data.shabbat.isShabbatMevorchim}
+	{#if data.shabbat.mevorchimInfo}
 		<div class="rosh-chodesh-notice-main">
-			שבת מברכים
+			שבת מברכים - ראש חודש {data.shabbat.mevorchimInfo.month}
+			<div class="rosh-chodesh-days">Rosh Chodesh: {data.shabbat.mevorchimInfo.days.join(' & ')}</div>
 		</div>
 	{/if}
 
