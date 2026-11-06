@@ -54,6 +54,7 @@
 		hebrewFatherName: string;
 		tribe: Tribe;
 		alumni: boolean;
+		hideFromSignupStatus: boolean;
 		davening: { canDaven: boolean; portions: string[] };
 		leining: { ability: LeiningAbility; barMitzvahParsha: string; parshiot: string[]; primaryParshiot: string[] };
 		submittedAtLabel: string;
@@ -65,6 +66,7 @@
 		hebrewFatherName: string;
 		tribe: Tribe;
 		alumni: boolean;
+		hideFromSignupStatus: boolean;
 		canDaven: boolean;
 		daveningPortions: Record<string, boolean>;
 		leiningAbility: LeiningAbility;
@@ -197,6 +199,7 @@
 				: legacyHebrew.father,
 			tribe: (raw.tribe as Tribe) || '',
 			alumni: Boolean(raw.alumni),
+			hideFromSignupStatus: Boolean(raw.hideFromSignupStatus),
 			davening: {
 				canDaven: Boolean(davening.canDaven),
 				portions: Array.isArray(davening.portions) ? davening.portions.filter((v): v is string => typeof v === 'string') : []
@@ -236,6 +239,7 @@
 			hebrewFatherName: record.hebrewFatherName,
 			tribe: record.tribe,
 			alumni: record.alumni,
+			hideFromSignupStatus: record.hideFromSignupStatus,
 			canDaven: record.davening.canDaven,
 			daveningPortions,
 			leiningAbility: record.leining.ability,
@@ -362,6 +366,7 @@
 				hebrewFatherName: currentDraft.hebrewFatherName.trim(),
 				tribe: currentDraft.tribe,
 				alumni: currentDraft.alumni,
+				hideFromSignupStatus: currentDraft.hideFromSignupStatus,
 				davening: {
 					canDaven: currentDraft.canDaven,
 					portions: daveningPortions
@@ -384,6 +389,7 @@
 							hebrewFatherName: currentDraft.hebrewFatherName.trim(),
 							tribe: currentDraft.tribe,
 							alumni: currentDraft.alumni,
+							hideFromSignupStatus: currentDraft.hideFromSignupStatus,
 							davening: { canDaven: currentDraft.canDaven, portions: daveningPortions },
 							leining: {
 								ability: currentDraft.leiningAbility,
@@ -555,6 +561,12 @@
 					<p class="info-text">View who can lein for each parsha with week-by-week navigation.</p>
 					<a href={resolve('/admin')} class="view-leiners-btn">View Leiners →</a>
 				</div>
+
+				<div class="parsha-lookup">
+					<h3>Minyan Signup Status</h3>
+					<p class="info-text">Track who has responded to the minyan signup.</p>
+					<a href={resolve('/minyan-signup-status')} class="view-leiners-btn">View Signup Status →</a>
+				</div>
 			</section>
 
 			<section class="card">
@@ -587,6 +599,10 @@
 						<label class="checkbox-row">
 							<input type="checkbox" bind:checked={draft.alumni} />
 							Mark as alumnus
+						</label>
+						<label class="checkbox-row">
+							<input type="checkbox" bind:checked={draft.hideFromSignupStatus} />
+							Hide from Minyan Signup Status page
 						</label>
 						<label class="checkbox-row">
 							<input type="checkbox" bind:checked={draft.canDaven} />
