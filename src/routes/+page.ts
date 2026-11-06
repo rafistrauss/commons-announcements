@@ -611,7 +611,7 @@ export async function load({ url }) {
       'Mazel Tov to Heather and Jay Berman on the Bar Mitzvah of their son Jakey this shabbos.',
       'Mazel Tov to Tova and Ben Kohane on the birth of a baby boy! Everyone is invited to a Shalom Zachar at their home at 8:30 PM. Address is 12-64 Orchard Street'
     ],
-    '2026-11-06': [
+    '2026-11-13': [
       "We bid a fond farewell to Rabbi and Shira Zell, stalwart members of the Commons Minyan, as they move from the Commons to a house! We wish them much hatzlacha in their new home and look forward to seeing them back at the minyan any time!"
     ]
   };
