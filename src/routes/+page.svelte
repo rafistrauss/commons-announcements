@@ -43,7 +43,7 @@
 			document.body.style.cursor = 'wait';
 
 			// Temporarily hide navigation elements for screenshot
-			const navigationElements = document.querySelectorAll('.week-navigation, .jump-to-today');
+			const navigationElements = document.querySelectorAll('.week-navigation, .jump-to-today, .admin-link-row');
 			const originalDisplayStyles: string[] = [];
 			navigationElements.forEach((el, index) => {
 				const htmlEl = el as HTMLElement;
