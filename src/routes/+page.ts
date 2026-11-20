@@ -627,6 +627,9 @@ export async function load({ url }) {
     ],
     '2026-11-13': [
       "We bid a fond farewell to Rabbi and Shira Zell, stalwart members of the Commons Minyan, as they move from the Commons to a house! We wish them much hatzlacha in their new home and look forward to seeing them back at the minyan any time!"
+    ],
+    '2026-11-20': [
+      "Men's tish tonight hosted by Uri Strauss at 26 Langan Ct. Homemade kugel and cholent! Come prepared to participate — bring a dvar Torah, a song, food or drink!"
     ]
   };
 
